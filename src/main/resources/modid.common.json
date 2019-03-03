@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "package": "de.siphalor.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
