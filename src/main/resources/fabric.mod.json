@@ -1,17 +1,15 @@
 {
-  "id": "modid",
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "id": "spiceoffabric",
+  "name": "Spice of Fabric",
+  "description": "A new iteration on the good ol' \"Spice of life\".",
   "version": "${version}",
   "side": "universal",
   "initializers": [
-    "de.siphalor.fabricsol.Core"
+    "de.siphalor.spiceoffabric.Core"
   ],
   "requires": {
-    "fabric": "*"
   },
   "mixins": {
-    "client": "modid.client.json",
-    "common": "modid.common.json"
+    "common": "de.siphalor.spiceoffabric.common.json"
   }
 }

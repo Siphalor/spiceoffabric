@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "de.siphalor.spiceoffabric.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"MixinHungerManager",
+		"MixinServerPlayerEntity"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
