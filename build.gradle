@@ -31,7 +31,8 @@ dependencies {
 	// exp4j
 	shadow 'net.objecthunter:exp4j:0.4.8'
 	// tweed
-	modCompile 'com.github.Siphalor:tweed-api:master-SNAPSHOT'
+	modCompile "com.github.Siphalor:tweed-api:${project.tweed_version}"
+	modCompile "net.fabricmc:fabric:${project.fabric_version}"
 	// Cloth
 	//modCompile "cloth:Cloth:0.1.3.12"
 }

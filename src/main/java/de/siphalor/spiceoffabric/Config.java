@@ -15,8 +15,8 @@ public class Config {
 	public static IntConfig historyLength = file.register("history-length", new IntConfig(20));
 
 	public static ConfigCategory expressionCategory = file.category("expression");
-	public static StringConfig hungerConfig = expressionCategory.register("hunger-expression", new StringConfig("ceil(hungerValue * (1 - timesEaten / 3))"));
-	public static StringConfig saturationConfig = expressionCategory.register("saturation-expression", new StringConfig("saturationValue * (1 - timesEaten / 3)"));
+	public static StringConfig hungerConfig = expressionCategory.register("hunger-expression", new StringConfig("hungerValue * pow(0.7, timesEaten)"));
+	public static StringConfig saturationConfig = expressionCategory.register("saturation-expression", new StringConfig("saturationValue"));
 
 	private static final HashSet<String> variables = new HashSet<>(Arrays.asList("timesEaten", "hungerValue", "saturationValue"));
 	public static Expression hungerExpression = new ExpressionBuilder(hungerConfig.value).variables(variables).build();
