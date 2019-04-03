@@ -103,11 +103,7 @@ public class FoodHistory {
     	return stats.getOrDefault(dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack)), 0);
 	}
 
-	public float getFoodSaturationPercentage(ItemStack stack) {
-		return 1F - (float) stats.getOrDefault(dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack)), 0) / 3F;
-	}
-
-    public void addFood(ItemStack stack) {
+	public void addFood(ItemStack stack) {
     	FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
         Integer id = dictionary.inverse().get(entry);
         if(id == null) {
@@ -123,6 +119,7 @@ public class FoodHistory {
 
     public void removeLastFood() {
     	int id = history.remove();
-    	stats.put(id, stats.get(id) - 1);
+    	if(stats.containsKey(id))
+			stats.put(id, stats.get(id) - 1);
     }
 }

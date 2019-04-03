@@ -25,6 +25,8 @@ public class Config {
 	public static void initialize() {}
 
 	public static void reload(ConfigEnvironment environment, ConfigDefinitionScope scope) {
+		hungerExpression = new ExpressionBuilder(hungerConfig.value).variables(variables).build();
+		saturationExpression = new ExpressionBuilder(saturationConfig.value).variables(variables).build();
 	}
 
 	public static void setExpressionValues(int timesEaten, int hungerValue, float saturationValue) {
