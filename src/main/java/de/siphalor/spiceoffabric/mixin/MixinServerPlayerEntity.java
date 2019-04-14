@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.mixin;
 
 import com.mojang.authlib.GameProfile;
+import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -23,5 +24,16 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, ServerPlayerInteractionManager interactionManager, CallbackInfo callbackInfo) {
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity)(Object) this);
+	}
+
+	@Inject(method = "copyFrom", at = @At("RETURN"))
+	public void onPlayerCopied(ServerPlayerEntity reference, boolean exact, CallbackInfo callbackInfo) {
+		if(!exact) {
+			Config.setAfterDeathExpressionValues(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
+			hungerManager.setFoodLevel((int) Math.max(Config.hungerAfterDeathExpression.evaluate(), reference.getHungerManager().getFoodLevel()));
+			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) Config.saturationAfterDeathExpression.evaluate());
+			if(Config.resetHistoryAtDeath.value)
+				((IHungerManager) hungerManager).spiceOfFabric_clearHistory();
+		}
 	}
 }

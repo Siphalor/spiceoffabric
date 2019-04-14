@@ -2,7 +2,7 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.siphalor.spiceoffabric.Config;
+import de.siphalor.spiceoffabric.config.Config;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -31,6 +31,13 @@ public class FoodHistory {
     	history = new ConcurrentLinkedQueue<>();
     	stats = new Int2IntArrayMap();
     }
+
+    public void reset() {
+    	dictionary.clear();
+    	nextId = 0;
+    	history.clear();
+    	stats.clear();
+	}
 
 	public CompoundTag write(CompoundTag compoundTag) {
 		defragmentDictionary();

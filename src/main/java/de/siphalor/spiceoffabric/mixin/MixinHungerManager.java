@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.mixin;
 
-import de.siphalor.spiceoffabric.Config;
 import de.siphalor.spiceoffabric.Core;
+import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import net.minecraft.client.network.packet.HealthUpdateS2CPacket;
@@ -22,9 +22,10 @@ public abstract class MixinHungerManager implements IHungerManager {
 	protected ServerPlayerEntity spiceOfFabric_player = null;
 
 	@Shadow public abstract void add(int int_1, float float_1);
-
 	@Shadow public abstract float getSaturationLevel();
 	@Shadow public abstract int getFoodLevel();
+
+	@Shadow private float foodSaturationLevel;
 
 	protected FoodHistory spiceOfFabric_foodHistory = new FoodHistory();
 
@@ -33,9 +34,19 @@ public abstract class MixinHungerManager implements IHungerManager {
 		spiceOfFabric_player = serverPlayerEntity;
 	}
 
+	@Override
+	public void spiceOfFabric_clearHistory() {
+		spiceOfFabric_foodHistory.reset();
+	}
+
+	@Override
+	public void spiceOfFabric_setSaturationLevel(float level) {
+		foodSaturationLevel = level;
+	}
+
 	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/item/Item.getFoodSetting()Lnet/minecraft/item/FoodItemSetting;"), cancellable = true)
     public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
-		Config.setExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), item.getFoodSetting().getHunger(), item.getFoodSetting().getSaturationModifier());
+		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), item.getFoodSetting().getHunger(), item.getFoodSetting().getSaturationModifier());
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);

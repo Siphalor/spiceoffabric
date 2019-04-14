@@ -1,5 +1,6 @@
 package de.siphalor.spiceoffabric;
 
+import de.siphalor.spiceoffabric.config.Config;
 import net.fabricmc.api.ModInitializer;
 
 public class Core implements ModInitializer {
