@@ -26,7 +26,16 @@
 	},
 	"mixins": [
 		{
-			"config": "de.siphalor.spiceoffabric.common.json"
+			"config": "de.siphalor.spiceoffabric.common.json",
+			"environment": "*"
+		},
+		{
+			"config": "de.siphalor.spiceoffabric.client.json",
+			"environment": "client"
+		},
+		{
+			"config": "de.siphalor.spiceoffabric.appleskin.json",
+			"environment": "client"
 		}
 	],
 

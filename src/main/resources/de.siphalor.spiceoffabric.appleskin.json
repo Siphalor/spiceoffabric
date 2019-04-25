@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "de.siphalor.spiceoffabric.client.appleskin.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"MixinFoodHelper"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

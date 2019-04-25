@@ -1,0 +1,12 @@
+{
+	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
+	"tweed.cloth.spiceoffabric.main": "Main",
+	"tweed.cloth.spiceoffabric.main.history-length": "History length",
+	"tweed.cloth.spiceoffabric.main.respawn": "Respawn",
+	"tweed.cloth.spiceoffabric.main.respawn.saturation": "Saturation",
+	"tweed.cloth.spiceoffabric.main.respawn.hunger": "Hunger",
+	"tweed.cloth.spiceoffabric.main.respawn.reset-history": "Reset food history",
+	"tweed.cloth.spiceoffabric.main.food": "Food",
+	"tweed.cloth.spiceoffabric.main.food.saturation": "Saturation",
+	"tweed.cloth.spiceoffabric.main.food.hunger": "Hunger"
+}

@@ -3,6 +3,7 @@ package de.siphalor.spiceoffabric.mixin;
 import com.mojang.authlib.GameProfile;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,10 +16,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class MixinServerPlayerEntity extends PlayerEntity {
+public abstract class MixinServerPlayerEntity extends PlayerEntity implements IServerPlayerEntity {
+	protected boolean spiceOfFabric_clientModPresent = false;
 
 	public MixinServerPlayerEntity(World world_1, GameProfile gameProfile_1) {
 		super(world_1, gameProfile_1);
+	}
+
+	@Override
+	public boolean spiceOfFabric_hasClientMod() {
+		return spiceOfFabric_clientModPresent;
+	}
+
+	@Override
+	public void spiceOfFabric_setClientMod(boolean presence) {
+		spiceOfFabric_clientModPresent = presence;
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))

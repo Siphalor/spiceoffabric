@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 public class FoodHistoryEntry {
@@ -13,6 +14,16 @@ public class FoodHistoryEntry {
 	public FoodHistoryEntry() {
 		itemId = 0;
 		data = new CompoundTag();
+	}
+
+	public void write(PacketByteBuf buffer) {
+		buffer.writeVarInt(itemId);
+	}
+
+	public static FoodHistoryEntry from(PacketByteBuf buffer) {
+		FoodHistoryEntry entry = new FoodHistoryEntry();
+		entry.itemId = buffer.readVarInt();
+		return entry;
 	}
 
 	public CompoundTag write(CompoundTag compoundTag) {

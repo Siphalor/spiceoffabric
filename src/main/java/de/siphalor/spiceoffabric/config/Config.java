@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.config;
 
 import de.siphalor.spiceoffabric.Core;
+import de.siphalor.tweed.client.TweedClothBridge;
 import de.siphalor.tweed.config.*;
 import de.siphalor.tweed.config.constraints.IntRangeConstraint;
 import de.siphalor.tweed.config.entry.BooleanEntry;
@@ -36,11 +37,6 @@ public class Config {
 
 	private static ConfigFile file = TweedRegistry.registerConfigFile(Core.MODID).setReloadListener(Config::reload);
 
-	public static IntEntry historyLength =
-		file.register("history-length", new IntEntry(20))
-			.addConstraint(new IntRangeConstraint(1, Integer.MAX_VALUE))
-			.setComment("Sets the amount of eaten foods to keep in the history");
-
 	public static ConfigCategory respawnCategory =
 		file.register("respawn", new ConfigCategory())
 			.setComment("Here can you edit the used expressions used for calculating the player stats after respawning." + System.lineSeparator() +
@@ -61,7 +57,7 @@ public class Config {
 		respawnCategory.register("reset-history", new BooleanEntry(false))
 			.setComment("Sets whether the food history should be cleaned at death");
 
-	public static ConfigCategory expressionCategory =
+	public static ConfigCategory foodCategory =
 		file.register("food", new ConfigCategory())
 			.setComment("Here can you edit the used expressions used for calculating the food stats." + System.lineSeparator() +
 				"Expressions are simple mathematical terms with the following variables:" + System.lineSeparator() +
@@ -70,14 +66,19 @@ public class Config {
 				"\tsaturationValue is the saturation modifier defined for the current item"
 			);
 	public static StringEntry hungerConfig =
-		expressionCategory.register("hunger", new StringEntry("hungerValue * 0.7 ^ timesEaten"))
+		foodCategory.register("hunger", new StringEntry("hungerValue * 0.7 ^ timesEaten"))
 			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
 			.setComment("Calculates the food level bonus to earn from eating a food item");
 	public static StringEntry saturationConfig =
-		expressionCategory.register("saturation", new StringEntry("saturationValue"))
+		foodCategory.register("saturation", new StringEntry("saturationValue"))
 			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
 			.setComment("Calculates the saturation modifier for a food item");
+	public static IntEntry historyLength =
+		foodCategory.register("history-length", new IntEntry(20))
+			.addConstraint(new IntRangeConstraint(1, Integer.MAX_VALUE))
+			.setComment("Sets the amount of eaten foods to keep in the history");
 
+	public static TweedClothBridge tweedClothBridge = new TweedClothBridge(file, Core.MODID);
 
 	public static void initialize() {
 		reload(ConfigEnvironment.UNIVERSAL, ConfigScope.GAME);

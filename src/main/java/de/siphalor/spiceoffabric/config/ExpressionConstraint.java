@@ -3,9 +3,9 @@ package de.siphalor.spiceoffabric.config;
 import de.siphalor.tweed.config.constraints.Constraint;
 import de.siphalor.tweed.config.constraints.ConstraintException;
 import de.siphalor.tweed.config.entry.AbstractValueEntry;
+import de.siphalor.tweed.shadow.org.hjson.JsonValue;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
-import org.hjson.JsonValue;
 
 public class ExpressionConstraint implements Constraint<String> {
 	private String[] variables;

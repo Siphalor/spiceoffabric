@@ -44,13 +44,18 @@ public abstract class MixinHungerManager implements IHungerManager {
 		foodSaturationLevel = level;
 	}
 
+	@Override
+	public FoodHistory spiceOfFabric_getFoodHistory() {
+		return spiceOfFabric_foodHistory;
+	}
+
 	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/item/Item.getFoodSetting()Lnet/minecraft/item/FoodItemSetting;"), cancellable = true)
     public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
 		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), item.getFoodSetting().getHunger(), item.getFoodSetting().getSaturationModifier());
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);
-		spiceOfFabric_foodHistory.addFood(stack);
+		spiceOfFabric_foodHistory.addFood(stack, spiceOfFabric_player);
 		if(spiceOfFabric_player != null) {
 			spiceOfFabric_player.networkHandler.sendPacket(new HealthUpdateS2CPacket(spiceOfFabric_player.getHealth(), this.getFoodLevel(), this.getSaturationLevel()));
 		}

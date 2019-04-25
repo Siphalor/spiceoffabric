@@ -5,6 +5,8 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
 }
 
+evaluationDependsOnChildren()
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -34,8 +36,14 @@ dependencies {
 	include "${project.tweed_maven}:${project.tweed_version}"
 	modCompile "${project.tweed_maven}:${project.tweed_version}"
 	modCompile "net.fabricmc:fabric:${project.fabric_version}"
-	// Cloth
-	//modCompile "cloth:Cloth:0.1.3.12"
+	// Cloth Config
+	include "cloth-config:ClothConfig:${project.clothconfig_version}"
+	modCompile "cloth-config:ClothConfig:${project.clothconfig_version}"
+	// ModMenu
+	modCompile "io.github.prospector.modmenu:ModMenu:${project.modmenu_version}"
+	// AppleSkin
+	//modCompile 'com.github.squeek502:AppleSkin:1.14-fabric-SNAPSHOT'
+	modCompile 'squeek.appleskin:AppleSkin:unspecified'
 }
 
 processResources {
@@ -75,6 +83,7 @@ shadowJar {
 	configurations = [project.configurations.shadow]
 	classifier = ""
 }
+
 remapJar {
 	dependsOn shadowJar
 	jar = shadowJar.archivePath
