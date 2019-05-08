@@ -22,6 +22,9 @@
 	"entrypoints": {
 		"main": [
 			"de.siphalor.spiceoffabric.Core"
+		],
+		"modmenu": [
+			"de.siphalor.spiceoffabric.client.ModMenuInitializer"
 		]
 	},
 	"mixins": [

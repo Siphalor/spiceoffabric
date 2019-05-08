@@ -7,6 +7,9 @@ import de.siphalor.tweed.config.constraints.IntRangeConstraint;
 import de.siphalor.tweed.config.entry.BooleanEntry;
 import de.siphalor.tweed.config.entry.IntEntry;
 import de.siphalor.tweed.config.entry.StringEntry;
+import de.siphalor.tweed.config.fixers.ConfigEntryLocationFixer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
@@ -78,10 +81,15 @@ public class Config {
 			.addConstraint(new IntRangeConstraint(1, Integer.MAX_VALUE))
 			.setComment("Sets the amount of eaten foods to keep in the history");
 
-	public static TweedClothBridge tweedClothBridge = new TweedClothBridge(file, Core.MODID);
+	public static TweedClothBridge tweedClothBridge;
 
 	public static void initialize() {
-		reload(ConfigEnvironment.UNIVERSAL, ConfigScope.GAME);
+		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
+			tweedClothBridge = new TweedClothBridge(file);
+
+		file.register("history-length", new ConfigEntryLocationFixer("history-length", "food"));
+
+		file.triggerInitialLoad();
 	}
 
 	@SuppressWarnings("unused")
