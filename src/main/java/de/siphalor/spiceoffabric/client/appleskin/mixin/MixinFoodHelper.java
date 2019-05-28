@@ -18,8 +18,8 @@ public abstract class MixinFoodHelper {
 		return null;
 	}
 
-	@Inject(method = "getModifiedFoodValues", at = @At("HEAD"), cancellable = true)
-	private static void getModifiedFoodValues(ItemStack stack, PlayerEntity playerEntity, CallbackInfoReturnable<FoodHelper.BasicFoodValues> callbackInfoReturnable) {
+	@Inject(method = "getModifiedFoodValues", at = @At(value = "RETURN", ordinal = 1), cancellable = true)
+	private static void getModifiedFoodValuesDefault(ItemStack stack, PlayerEntity playerEntity, CallbackInfoReturnable<FoodHelper.BasicFoodValues> callbackInfoReturnable) {
 		FoodHelper.BasicFoodValues foodValues = getDefaultFoodValues(stack);
 		Config.setHungerExpressionValues(((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().getTimesEaten(stack), foodValues.hunger, foodValues.saturationModifier);
         FoodHelper.BasicFoodValues result = new FoodHelper.BasicFoodValues(Config.getHungerValue(), Config.getSaturationValue());

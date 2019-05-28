@@ -3,7 +3,7 @@ package de.siphalor.spiceoffabric.client;
 import de.siphalor.spiceoffabric.Core;
 import de.siphalor.spiceoffabric.config.Config;
 import io.github.prospector.modmenu.api.ModMenuApi;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.util.Optional;
 import java.util.function.Supplier;

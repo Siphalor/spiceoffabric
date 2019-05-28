@@ -23,6 +23,9 @@ public class Config {
 	public static Expression hungerAfterDeathExpression;
 	public static Expression saturationAfterDeathExpression;
 
+	static final String[] heartUnlockVariables = new String[]{"uniqueFoodsEaten", "heartAmount"};
+	public static Expression heartUnlockExpression;
+
 	public static final Function[] customExpFunctions = new Function[]{
 		new Function("max", 2) {
 			@Override
@@ -81,6 +84,23 @@ public class Config {
 			.addConstraint(new IntRangeConstraint(1, Integer.MAX_VALUE))
 			.setComment("Sets the amount of eaten foods to keep in the history");
 
+	public static ConfigCategory carrotCategory =
+		file.register("carrot", new ConfigCategory()
+			.setComment("Here can you enable the good ol' carrot style.\n" +
+			"This means you start with a set amount of hearts and extend it by eating unique foods"));
+	public static BooleanEntry carrotEnabled =
+		carrotCategory.register("_enable", new BooleanEntry(false))
+			.setComment("Enables the carrot style module.");
+	public static IntEntry startHearts =
+		carrotCategory.register("start-hearts", new IntEntry(6))
+			.addConstraint(new IntRangeConstraint(1, 100))
+			.setComment("Sets the amount of hearts with which a new player spawns");
+	public static StringEntry heartUnlockConfig =
+		carrotCategory.register("unlock-rule", new StringEntry("2*pow(2, heartAmount - 6)"))
+			.addConstraint(new ExpressionConstraint(heartUnlockVariables, customExpFunctions))
+			.setComment("Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
+				"The result resembles the absolute amount of unique food.");
+
 	public static TweedClothBridge tweedClothBridge;
 
 	public static void initialize() {
@@ -99,6 +119,8 @@ public class Config {
 
 		hungerAfterDeathExpression = new ExpressionBuilder(hungerAfterDeathConfig.value).variables(afterDeathVariables).functions(customExpFunctions).build();
 		saturationAfterDeathExpression = new ExpressionBuilder(saturationAfterDeathConfig.value).variables(afterDeathVariables).functions(customExpFunctions).build();
+
+		heartUnlockExpression = new ExpressionBuilder(heartUnlockConfig.value).variables(heartUnlockVariables).functions(customExpFunctions).build();
 	}
 
 	public static void setHungerExpressionValues(int timesEaten, int hungerValue, float saturationValue) {
@@ -117,6 +139,11 @@ public class Config {
 
 		saturationAfterDeathExpression.setVariable("hunger", hunger);
 		saturationAfterDeathExpression.setVariable("saturation", saturation);
+	}
+
+	public static void setHeartUnlockExpressionValues(int uniqueFoods, int heartAmount) {
+		heartUnlockExpression.setVariable("uniqueFoodsEaten", uniqueFoods);
+		heartUnlockExpression.setVariable("heartAmount", heartAmount);
 	}
 
 	public static int getHungerValue() {

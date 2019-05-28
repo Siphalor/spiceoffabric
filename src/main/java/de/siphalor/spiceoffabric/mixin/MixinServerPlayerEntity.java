@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -36,6 +37,9 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, ServerPlayerInteractionManager interactionManager, CallbackInfo callbackInfo) {
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity)(Object) this);
+
+		if(Config.carrotEnabled.value)
+			getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(Config.startHearts.value * 2);
 	}
 
 	@Inject(method = "copyFrom", at = @At("RETURN"))

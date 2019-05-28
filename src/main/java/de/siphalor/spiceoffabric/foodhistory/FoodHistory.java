@@ -15,12 +15,12 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.PacketByteBuf;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class FoodHistory {
+
+	public Set<FoodHistoryEntry> carrotHistory;
 
     public BiMap<Integer, FoodHistoryEntry> dictionary;
     public int nextId = 0;
@@ -35,6 +35,8 @@ public class FoodHistory {
     	dictionary = HashBiMap.create();
     	history = new ConcurrentLinkedQueue<>();
     	stats = new Int2IntArrayMap();
+    	if(Config.carrotEnabled.value)
+    		carrotHistory = new HashSet<>();
     }
 
     public void reset() {
@@ -54,6 +56,14 @@ public class FoodHistory {
     	for(int integer : history) {
     		buffer.writeVarInt(integer);
 		}
+    	if(carrotHistory != null) {
+    		buffer.writeBoolean(true);
+    		buffer.writeVarInt(carrotHistory.size());
+    		for(FoodHistoryEntry entry : carrotHistory) {
+    			entry.write(buffer);
+			}
+		} else
+			buffer.writeBoolean(false);
 	}
 
 	public void read(PacketByteBuf buffer) {
@@ -62,6 +72,13 @@ public class FoodHistory {
 		}
     	for(int l = buffer.readVarInt(), i = 0; i < l; i++) {
     		history.offer(buffer.readVarInt());
+		}
+    	if(buffer.readBoolean()) {
+    		final int length = buffer.readVarInt();
+    		carrotHistory = new HashSet<>(length);
+    		for(int i = 0; i < length; i++) {
+    			carrotHistory.add(FoodHistoryEntry.from(buffer));
+			}
 		}
     	buildStats();
 	}
@@ -78,6 +95,13 @@ public class FoodHistory {
 			historyList.add(new IntTag(id));
 		}
 		compoundTag.put("history", historyList);
+		if(carrotHistory != null) {
+			ListTag carrotHistoryList = new ListTag();
+			for(FoodHistoryEntry entry : carrotHistory) {
+                carrotHistoryList.add(entry.write(new CompoundTag()));
+			}
+			compoundTag.put("carrotHistory", carrotHistoryList);
+		}
 		return compoundTag;
 	}
 
@@ -93,6 +117,13 @@ public class FoodHistory {
         	foodHistory.history.offer(((IntTag) tag).getInt());
         }
         foodHistory.buildStats();
+
+        if(compoundTag.containsKey("carrotHistory")) {
+        	list = (ListTag) compoundTag.getTag("carrotHistory");
+        	for(Tag tag : list) {
+        		foodHistory.carrotHistory.add(new FoodHistoryEntry().read((CompoundTag) tag));
+			}
+		}
 		return foodHistory;
 	}
 
@@ -159,6 +190,14 @@ public class FoodHistory {
 			removeLastFood();
 		}
 		stats.put(id, stats.getOrDefault(id, 0) + 1);
+
+		if(Config.carrotEnabled.value) {
+			if(carrotHistory == null) {
+				System.err.println("Carrot food history is null");
+			} else {
+				carrotHistory.add(entry);
+			}
+		}
 	}
 
     public void removeLastFood() {
