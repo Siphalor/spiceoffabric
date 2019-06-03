@@ -45,6 +45,7 @@ public class Config {
 
 	public static ConfigCategory respawnCategory =
 		file.register("respawn", new ConfigCategory())
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("Here can you edit the used expressions used for calculating the player stats after respawning." + System.lineSeparator() +
 
 					"Expressions are simple mathematical terms with the following variables:" + System.lineSeparator() +
@@ -54,17 +55,21 @@ public class Config {
 	public static StringEntry hungerAfterDeathConfig =
 		respawnCategory.register("hunger", new StringEntry("max(14, hunger)"))
 			.addConstraint(new ExpressionConstraint(afterDeathVariables, customExpFunctions))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("An expression to calculate the hunger value after a fresh respawn");
 	public static StringEntry saturationAfterDeathConfig =
 		respawnCategory.register("saturation", new StringEntry("saturation"))
 			.addConstraint(new ExpressionConstraint(afterDeathVariables, customExpFunctions))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("An expression to calculate the saturation value after a fresh respawn");
 	public static BooleanEntry resetHistoryAtDeath =
 		respawnCategory.register("reset-history", new BooleanEntry(false))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("Sets whether the food history should be cleaned at death");
 
 	public static ConfigCategory foodCategory =
 		file.register("food", new ConfigCategory())
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("Here can you edit the used expressions used for calculating the food stats." + System.lineSeparator() +
 				"Expressions are simple mathematical terms with the following variables:" + System.lineSeparator() +
 				"\ttimesEaten is the number of times the current food " + System.lineSeparator() +
@@ -73,30 +78,37 @@ public class Config {
 			);
 	public static StringEntry hungerConfig =
 		foodCategory.register("hunger", new StringEntry("hungerValue * 0.7 ^ timesEaten"))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
 			.setComment("Calculates the food level bonus to earn from eating a food item");
 	public static StringEntry saturationConfig =
 		foodCategory.register("saturation", new StringEntry("saturationValue"))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
 			.setComment("Calculates the saturation modifier for a food item");
 	public static IntEntry historyLength =
 		foodCategory.register("history-length", new IntEntry(20))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.addConstraint(new IntRangeConstraint(1, Integer.MAX_VALUE))
 			.setComment("Sets the amount of eaten foods to keep in the history");
 
 	public static ConfigCategory carrotCategory =
 		file.register("carrot", new ConfigCategory()
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("Here can you enable the good ol' carrot style.\n" +
 			"This means you start with a set amount of hearts and extend it by eating unique foods"));
 	public static BooleanEntry carrotEnabled =
 		carrotCategory.register("_enable", new BooleanEntry(false))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.setComment("Enables the carrot style module.");
 	public static IntEntry startHearts =
 		carrotCategory.register("start-hearts", new IntEntry(6))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.addConstraint(new IntRangeConstraint(1, 100))
 			.setComment("Sets the amount of hearts with which a new player spawns");
 	public static StringEntry heartUnlockConfig =
 		carrotCategory.register("unlock-rule", new StringEntry("2*pow(2, heartAmount - 6)"))
+			.setEnvironment(ConfigEnvironment.SERVER)
 			.addConstraint(new ExpressionConstraint(heartUnlockVariables, customExpFunctions))
 			.setComment("Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
 				"The result resembles the absolute amount of unique food.");

@@ -1,12 +1,15 @@
 {
 	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
-	"tweed.cloth.spiceoffabric.main": "Main",
-	"tweed.cloth.spiceoffabric.main.history-length": "History length",
-	"tweed.cloth.spiceoffabric.main.respawn": "Respawn",
-	"tweed.cloth.spiceoffabric.main.respawn.saturation": "Saturation",
-	"tweed.cloth.spiceoffabric.main.respawn.hunger": "Hunger",
-	"tweed.cloth.spiceoffabric.main.respawn.reset-history": "Reset food history",
-	"tweed.cloth.spiceoffabric.main.food": "Food",
-	"tweed.cloth.spiceoffabric.main.food.saturation": "Saturation",
-	"tweed.cloth.spiceoffabric.main.food.hunger": "Hunger"
+	"tweed.cloth.spiceoffabric.respawn": "Respawn",
+	"tweed.cloth.spiceoffabric.respawn.saturation": "Saturation",
+	"tweed.cloth.spiceoffabric.respawn.hunger": "Hunger",
+	"tweed.cloth.spiceoffabric.respawn.reset-history": "Reset food history",
+	"tweed.cloth.spiceoffabric.food": "Food",
+	"tweed.cloth.spiceoffabric.food.history-length": "History length",
+	"tweed.cloth.spiceoffabric.food.saturation": "Saturation",
+	"tweed.cloth.spiceoffabric.food.hunger": "Hunger",
+	"tweed.cloth.spiceoffabric.carrot": "Carrot Mode",
+	"tweed.cloth.spiceoffabric.carrot._enabled": "Enable Carrot Mode",
+	"tweed.cloth.spiceoffabric.carrot.start-hearts": "Amount of hearts when first joining",
+	"tweed.cloth.spiceoffabric.carrot.unlock-rule": "Unique foods to gain a heart"
 }
