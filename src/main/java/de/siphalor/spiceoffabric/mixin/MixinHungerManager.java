@@ -54,6 +54,11 @@ public abstract class MixinHungerManager implements IHungerManager {
 		return spiceOfFabric_foodHistory;
 	}
 
+	@Override
+	public void spiceOfFabric_setFoodHistory(FoodHistory foodHistory) {
+		spiceOfFabric_foodHistory = foodHistory;
+	}
+
 	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/item/Item.getFoodSetting()Lnet/minecraft/item/FoodItemSetting;"), cancellable = true)
     public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
 		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), item.getFoodSetting().getHunger(), item.getFoodSetting().getSaturationModifier());

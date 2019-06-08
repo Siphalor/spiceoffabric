@@ -48,8 +48,8 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			Config.setAfterDeathExpressionValues(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(Config.hungerAfterDeathExpression.evaluate(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) Config.saturationAfterDeathExpression.evaluate());
-			if(Config.resetHistoryAtDeath.value)
-				((IHungerManager) hungerManager).spiceOfFabric_clearHistory();
+			if(!Config.resetHistoryAtDeath.value)
+				((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(((IHungerManager) reference.getHungerManager()).spiceOfFabric_getFoodHistory());
 		}
 	}
 }

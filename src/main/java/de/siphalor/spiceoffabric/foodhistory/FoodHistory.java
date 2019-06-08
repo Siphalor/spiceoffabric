@@ -120,8 +120,11 @@ public class FoodHistory {
 
         if(compoundTag.containsKey("carrotHistory")) {
         	list = (ListTag) compoundTag.getTag("carrotHistory");
-        	for(Tag tag : list) {
-        		foodHistory.carrotHistory.add(new FoodHistoryEntry().read((CompoundTag) tag));
+        	if(Config.carrotEnabled.value) {
+        		foodHistory.carrotHistory = new HashSet<>();
+				for (Tag tag : list) {
+					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((CompoundTag) tag));
+				}
 			}
 		}
 		return foodHistory;
