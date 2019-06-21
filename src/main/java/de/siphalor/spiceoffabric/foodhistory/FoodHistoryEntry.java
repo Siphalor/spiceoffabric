@@ -1,5 +1,6 @@
 package de.siphalor.spiceoffabric.foodhistory;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,17 @@ public class FoodHistoryEntry {
 
 	public void write(PacketByteBuf buffer) {
 		buffer.writeVarInt(itemId);
+	}
+
+	public String getName() {
+		Item item = Registry.ITEM.get(itemId);
+		ItemStack stack = new ItemStack(item, 1);
+		stack.setTag(data);
+		return item.getName(stack).asFormattedString();
+	}
+
+	public String getItemStackSerialization() {
+		return "{id:\"" + Registry.ITEM.getId(Registry.ITEM.get(itemId)) + "\",tag:" + data.asString() + ",Count:1}";
 	}
 
 	public static FoodHistoryEntry from(PacketByteBuf buffer) {

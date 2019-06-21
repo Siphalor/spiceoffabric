@@ -21,10 +21,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"de.siphalor.spiceoffabric.Core"
+			"de.siphalor.spiceoffabric.SpiceOfFabric"
 		],
 		"modmenu": [
 			"de.siphalor.spiceoffabric.client.ModMenuInitializer"
+		],
+		"client": [
+			"de.siphalor.spiceoffabric.client.ClientCore"
 		]
 	},
 	"mixins": [

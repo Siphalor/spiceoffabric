@@ -1,4 +1,10 @@
 {
+	"Diet Journal": "Diet Journal",
+	"spiceoffabric.journal.inside_title": "§8§l§n\u25b6 Diet Journal \u25c0§r",
+	"spiceoffabric.journal.line": "§l%s.§r %s",
+
+	"spiceoffabric.item.tooltip.never_eaten": "§3§oThis smells mysteriously unfamiliar§r",
+
 	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
 	"tweed.cloth.spiceoffabric.respawn": "Respawn",
 	"tweed.cloth.spiceoffabric.respawn.saturation": "Saturation",

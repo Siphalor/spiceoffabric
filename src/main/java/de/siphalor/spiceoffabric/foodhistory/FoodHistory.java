@@ -2,17 +2,18 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.siphalor.spiceoffabric.Core;
+import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.PacketByteBuf;
 
 import java.util.*;
@@ -177,7 +178,7 @@ public class FoodHistory {
     	if(serverPlayerEntity != null) {
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 			entry.write(buffer);
-			ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, Core.ADD_FOOD_S2C_PACKET, buffer);
+			ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET, buffer);
 		}
     	addFood(entry);
     }
@@ -208,4 +209,38 @@ public class FoodHistory {
     	if(stats.containsKey(id))
 			stats.put(id, stats.get(id) - 1);
     }
+
+    public ListTag genJournalPages(PlayerEntity playerEntity) {
+    	boolean hasMod = ((IServerPlayerEntity) playerEntity).spiceOfFabric_hasClientMod();
+
+    	ListTag pages = new ListTag();
+
+		Text textOnPage = hasMod ? new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.inside_title") : new LiteralText("\u25b6 Diet Journal \u25c0").setStyle(new Style().setColor(Formatting.DARK_GRAY).setUnderline(true).setBold(true));
+		textOnPage.append("\n\n");
+
+		Style numberStyle = new Style().setBold(true).setUnderline(false).setColor(Formatting.BLACK);
+		Style itemStyle = new Style().setBold(false).setColor(Formatting.DARK_GRAY);
+
+		int linesOnPage = 2;
+		int number = 1;
+		for(int foodId : history) {
+			FoodHistoryEntry foodHistoryEntry = dictionary.get(foodId);
+			if(hasMod)
+				textOnPage.append(new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.line", number, foodHistoryEntry.getName()).setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))))).append("\n");
+			else
+				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle)).append(new LiteralText(foodHistoryEntry.getName()).setStyle(itemStyle.copy().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))).setBold(false))).append("\n");
+			number++; linesOnPage++;
+			if(linesOnPage > 15) {
+				pages.add(new StringTag(Text.Serializer.toJson(textOnPage)));
+				linesOnPage = 0;
+				textOnPage = new LiteralText("");
+			}
+		}
+
+		if(linesOnPage > 0) {
+			pages.add(new StringTag(Text.Serializer.toJson(textOnPage)));
+		}
+
+		return pages;
+	}
 }

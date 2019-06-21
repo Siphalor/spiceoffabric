@@ -33,21 +33,26 @@ dependencies {
 	// exp4j
 	shadow 'net.objecthunter:exp4j:0.4.8'
 	// Cloth Config
-	modCompile "cloth-config:ClothConfig2:${project.clothconfig_version}"
+	modImplementation "cloth-config:ClothConfig2:${project.clothconfig_version}"
 	include "cloth-config:ClothConfig2:${project.clothconfig_version}"
 	// Tweed
 	include "${project.tweed_maven}:${project.tweed_version}"
-	modCompile "${project.tweed_maven}:${project.tweed_version}"
+	modImplementation "${project.tweed_maven}:${project.tweed_version}"
 	// Fabric
 	modCompile "net.fabricmc.fabric-api:fabric-networking-v0:+"
 	include "net.fabricmc.fabric-api:fabric-networking-v0:+"
 	modCompile "net.fabricmc.fabric-api:fabric-api-base:+"
 	include "net.fabricmc.fabric-api:fabric-api-base:+"
+	modCompile "net.fabricmc.fabric-api:fabric-resource-loader-v0:+"
+	include "net.fabricmc.fabric-api:fabric-resource-loader-v0:+"
 	// ModMenu
 	modImplementation "io.github.prospector.modmenu:ModMenu:${project.modmenu_version}"
 	// AppleSkin
 	//modImplementation 'com.github.squeek502:AppleSkin:1.14-fabric-SNAPSHOT'
 	//modCompile 'squeek.appleskin:AppleSkin:unspecified'
+	// Nbt Crafting
+	modImplementation "com.github.siphalor:nbt-crafting:${project.nbt_crafting_version}"
+	include "com.github.siphalor:nbt-crafting:${project.nbt_crafting_version}"
 }
 
 processResources {

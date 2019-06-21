@@ -3,7 +3,8 @@
 	"package": "de.siphalor.spiceoffabric.client.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"MixinClientPlayNetworkHandler"
+		"MixinClientPlayNetworkHandler",
+		"MixinItem"
 	],
 	"injectors": {
 		"defaultRequire": 1

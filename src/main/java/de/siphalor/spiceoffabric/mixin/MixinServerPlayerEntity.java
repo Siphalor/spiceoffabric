@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayerEntity.class)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements IServerPlayerEntity {
 	protected boolean spiceOfFabric_clientModPresent = false;
+	protected boolean spiceOfFabric_foodHistorySync = false;
 
 	public MixinServerPlayerEntity(World world_1, GameProfile gameProfile_1) {
 		super(world_1, gameProfile_1);
@@ -32,6 +33,18 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	@Override
 	public void spiceOfFabric_setClientMod(boolean presence) {
 		spiceOfFabric_clientModPresent = presence;
+	}
+
+	@Override
+	public void spiceOfFabric_scheduleFoodHistorySync() {
+		spiceOfFabric_foodHistorySync = true;
+	}
+
+	@Override
+	public boolean spiceOfFabric_foodHistorySync() {
+		boolean result = spiceOfFabric_foodHistorySync;
+		spiceOfFabric_foodHistorySync = false;
+		return result;
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))

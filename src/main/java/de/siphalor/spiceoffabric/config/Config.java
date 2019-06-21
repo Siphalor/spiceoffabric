@@ -1,6 +1,6 @@
 package de.siphalor.spiceoffabric.config;
 
-import de.siphalor.spiceoffabric.Core;
+import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.tweed.client.TweedClothBridge;
 import de.siphalor.tweed.config.*;
 import de.siphalor.tweed.config.constraints.RangeConstraint;
@@ -41,7 +41,7 @@ public class Config {
 		}
 	};
 
-	private static ConfigFile file = TweedRegistry.registerConfigFile(Core.MODID).setReloadListener(Config::reload)
+	private static ConfigFile file = TweedRegistry.registerConfigFile(SpiceOfFabric.MOD_ID).setReloadListener(Config::reload)
 		.setEnvironment(ConfigEnvironment.SERVER);
 
 	public static ConfigCategory respawnCategory =

@@ -1,0 +1,13 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"spiceoffabric:food_journal"
+		]
+	},
+	"criteria": {
+		"food_eaten": {
+			"trigger": "minecraft:consume_item"
+		}
+	}
+}

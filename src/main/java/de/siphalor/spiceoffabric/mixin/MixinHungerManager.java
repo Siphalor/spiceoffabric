@@ -1,9 +1,10 @@
 package de.siphalor.spiceoffabric.mixin;
 
-import de.siphalor.spiceoffabric.Core;
+import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.client.network.packet.HealthUpdateS2CPacket;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
@@ -90,17 +91,18 @@ public abstract class MixinHungerManager implements IHungerManager {
 
 	@Inject(method = "deserialize", at = @At("RETURN"))
 	public void onDeserialize(CompoundTag compoundTag, CallbackInfo callbackInfo) {
-		if(compoundTag.containsKey(Core.FOOD_HISTORY_ID, 10)) {
-			spiceOfFabric_foodHistory = FoodHistory.read(compoundTag.getCompound(Core.FOOD_HISTORY_ID));
+		if(compoundTag.containsKey(SpiceOfFabric.FOOD_HISTORY_ID, 10)) {
+			spiceOfFabric_foodHistory = FoodHistory.read(compoundTag.getCompound(SpiceOfFabric.FOOD_HISTORY_ID));
 		}
-		if(Config.carrotEnabled.value && spiceOfFabric_foodHistory.carrotHistory == null) {
+		((IServerPlayerEntity) spiceOfFabric_player).spiceOfFabric_scheduleFoodHistorySync();
+		/*if(Config.carrotEnabled.value && spiceOfFabric_foodHistory.carrotHistory == null) {
 			spiceOfFabric_player.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(Config.startHearts.value * 2);
 			spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
-		}
+		}*/
 	}
 
 	@Inject(method = "serialize", at = @At("RETURN"))
 	public void onSerialize(CompoundTag compoundTag, CallbackInfo callbackInfo) {
-		compoundTag.put(Core.FOOD_HISTORY_ID, spiceOfFabric_foodHistory.write(new CompoundTag()));
+		compoundTag.put(SpiceOfFabric.FOOD_HISTORY_ID, spiceOfFabric_foodHistory.write(new CompoundTag()));
 	}
 }

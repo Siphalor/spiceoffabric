@@ -10,23 +10,29 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
-public class Core implements ModInitializer {
+public class SpiceOfFabric implements ModInitializer {
 
-	public static final String MODID = "spiceoffabric";
+	public static final String MOD_ID = "spiceoffabric";
 	public static final String FOOD_HISTORY_ID = "spiceOfFabric_history";
-	public static final Identifier MOD_PRESENT_C2S_PACKET = new Identifier(MODID, "client_mod_present");
-	public static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = new Identifier(MODID, "sync_food_history");
-	public static final Identifier ADD_FOOD_S2C_PACKET = new Identifier(MODID, "add_food");
+	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
+	public static final Identifier MOD_PRESENT_C2S_PACKET = new Identifier(MOD_ID, "client_mod_present");
+	public static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = new Identifier(MOD_ID, "sync_food_history");
+	public static final Identifier ADD_FOOD_S2C_PACKET = new Identifier(MOD_ID, "add_food");
 
 	@Override
 	public void onInitialize() {
 		Config.initialize();
 		ServerSidePacketRegistry.INSTANCE.register(MOD_PRESENT_C2S_PACKET, (packetContext, packetByteBuf) -> {
-			((IServerPlayerEntity) packetContext.getPlayer()).spiceOfFabric_setClientMod(true);
+			ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) packetContext.getPlayer();
+			((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_setClientMod(true);
+			if(((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_foodHistorySync()) {
+				syncFoodHistory(serverPlayerEntity);
+			}
 		});
 	}
 
-	public void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
+	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
+		if(!((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_hasClientMod()) return;
 		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 		((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
 		ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
