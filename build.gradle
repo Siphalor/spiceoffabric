@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.2-SNAPSHOT'
+	id 'fabric-loom' version '0.2.4-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
@@ -14,9 +14,6 @@ archivesBaseName = project.archives_base_name
 version = "${project.mod_version}+${minecraft_version}"
 group = project.maven_group
 
-minecraft {
-}
-
 repositories {
 	mavenLocal()
     maven { url "https://minecraft.curseforge.com/api/maven"}
@@ -24,14 +21,20 @@ repositories {
 	mavenCentral()
 }
 
+minecraft {
+}
+
 dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}"
+	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}"
 	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// exp4j
 	shadow 'net.objecthunter:exp4j:0.4.8'
+	// Cloth Config
+	modCompile "cloth-config:ClothConfig2:${project.clothconfig_version}"
+	include "cloth-config:ClothConfig2:${project.clothconfig_version}"
 	// Tweed
 	include "${project.tweed_maven}:${project.tweed_version}"
 	modCompile "${project.tweed_maven}:${project.tweed_version}"
@@ -40,13 +43,10 @@ dependencies {
 	include "net.fabricmc.fabric-api:fabric-networking-v0:+"
 	modCompile "net.fabricmc.fabric-api:fabric-api-base:+"
 	include "net.fabricmc.fabric-api:fabric-api-base:+"
-	// Cloth Config
-	include "cloth-config:ClothConfig:${project.clothconfig_version}"
-	modCompile "cloth-config:ClothConfig:${project.clothconfig_version}"
 	// ModMenu
-	modCompile "io.github.prospector.modmenu:ModMenu:${project.modmenu_version}"
+	modImplementation "io.github.prospector.modmenu:ModMenu:${project.modmenu_version}"
 	// AppleSkin
-	//modCompile 'com.github.squeek502:AppleSkin:1.14-fabric-SNAPSHOT'
+	//modImplementation 'com.github.squeek502:AppleSkin:1.14-fabric-SNAPSHOT'
 	//modCompile 'squeek.appleskin:AppleSkin:unspecified'
 }
 
@@ -88,7 +88,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
 	from "LICENSE"
-	classifier = "plain"
+	classifier = ""
 }
 
 shadowJar {
@@ -99,7 +99,8 @@ shadowJar {
 
 remapJar {
 	dependsOn shadowJar
-	jar = shadowJar.archivePath
+	input shadowJar.archivePath
+	output jar.archivePath
 }
 
 // configure the maven publication

@@ -33,7 +33,7 @@ public class FoodHistoryEntry {
 	}
 
 	public FoodHistoryEntry read(CompoundTag compoundTag) {
-		itemId = Registry.ITEM.getRawId(Registry.ITEM.getOrEmpty(Identifier.ofNullable(compoundTag.getString("item"))).orElse(Items.AIR));
+		itemId = Registry.ITEM.getRawId(Registry.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item"))).orElse(Items.AIR));
 		data = compoundTag.getCompound("data");
 		return this;
 	}

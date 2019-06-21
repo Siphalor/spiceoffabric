@@ -5,8 +5,7 @@ import de.siphalor.spiceoffabric.config.Config;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.gui.screen.Screen;
 
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class ModMenuInitializer implements ModMenuApi {
 	@Override
@@ -15,7 +14,7 @@ public class ModMenuInitializer implements ModMenuApi {
 	}
 
 	@Override
-	public Optional<Supplier<Screen>> getConfigScreen(Screen screen) {
-		return Optional.of(() -> Config.tweedClothBridge.open());
+	public Function<Screen, ? extends Screen> getConfigScreenFactory() {
+		return (parentScreen) -> Config.tweedClothBridge.buildScreen();
 	}
 }

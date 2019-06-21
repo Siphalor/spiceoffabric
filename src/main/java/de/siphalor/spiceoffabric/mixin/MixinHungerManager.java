@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 @Mixin(HungerManager.class)
 public abstract class MixinHungerManager implements IHungerManager {
@@ -59,9 +60,9 @@ public abstract class MixinHungerManager implements IHungerManager {
 		spiceOfFabric_foodHistory = foodHistory;
 	}
 
-	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "net/minecraft/item/Item.getFoodSetting()Lnet/minecraft/item/FoodItemSetting;"), cancellable = true)
+	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"), cancellable = true)
     public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
-		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), item.getFoodSetting().getHunger(), item.getFoodSetting().getSaturationModifier());
+		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), Objects.requireNonNull(item.getFoodComponent()).getHunger(), item.getFoodComponent().getSaturationModifier());
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);

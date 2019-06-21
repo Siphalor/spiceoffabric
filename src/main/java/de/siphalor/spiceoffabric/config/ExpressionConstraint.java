@@ -3,7 +3,7 @@ package de.siphalor.spiceoffabric.config;
 import de.siphalor.tweed.config.constraints.Constraint;
 import de.siphalor.tweed.config.constraints.ConstraintException;
 import de.siphalor.tweed.config.entry.AbstractValueEntry;
-import de.siphalor.tweed.shadow.org.hjson.JsonValue;
+import de.siphalor.tweed.data.DataValue;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
 
@@ -17,7 +17,7 @@ public class ExpressionConstraint implements Constraint<String> {
 	}
 
 	@Override
-	public void apply(JsonValue jsonValue, AbstractValueEntry<String, ?> configEntry) throws ConstraintException {
+	public void apply(DataValue dataValue, AbstractValueEntry<String, ?> configEntry) throws ConstraintException {
 		try {
 			if (!(new ExpressionBuilder(configEntry.value).variables(variables).functions(functions).build().validate(false).isValid())) {
 				throw new ConstraintException("The given expression is invalid!", true);

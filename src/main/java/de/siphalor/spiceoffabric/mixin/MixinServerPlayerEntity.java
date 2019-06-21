@@ -45,6 +45,8 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	@Inject(method = "copyFrom", at = @At("RETURN"))
 	public void onPlayerCopied(ServerPlayerEntity reference, boolean exact, CallbackInfo callbackInfo) {
 		if(!exact) {
+			getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(reference.getAttributeInstance(EntityAttributes.MAX_HEALTH).getBaseValue());
+
 			Config.setAfterDeathExpressionValues(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(Config.hungerAfterDeathExpression.evaluate(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) Config.saturationAfterDeathExpression.evaluate());
