@@ -45,6 +45,7 @@ public class FoodHistory {
     	nextId = 0;
     	history.clear();
     	stats.clear();
+    	if(carrotHistory != null) carrotHistory.clear();
 	}
 
 	public void write(PacketByteBuf buffer) {
@@ -190,7 +191,7 @@ public class FoodHistory {
 			dictionary.put(id, entry);
 		}
 		history.offer(id);
-		if(history.size() > Config.historyLength.value) {
+		while(history.size() > Config.historyLength.value) {
 			removeLastFood();
 		}
 		stats.put(id, stats.getOrDefault(id, 0) + 1);
@@ -230,7 +231,7 @@ public class FoodHistory {
 			else
 				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle)).append(new LiteralText(foodHistoryEntry.getName()).setStyle(itemStyle.copy().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))).setBold(false))).append("\n");
 			number++; linesOnPage++;
-			if(linesOnPage > 15) {
+			if(linesOnPage >= 14) {
 				pages.add(new StringTag(Text.Serializer.toJson(textOnPage)));
 				linesOnPage = 0;
 				textOnPage = new LiteralText("");

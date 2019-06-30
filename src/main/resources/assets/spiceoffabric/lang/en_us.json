@@ -5,6 +5,9 @@
 
 	"spiceoffabric.item.tooltip.never_eaten": "§3§oThis smells mysteriously unfamiliar§r",
 
+	"spiceoffabric.command.clearfoods.was_cleared": "Your food history has been reset",
+	"spiceoffabric.command.clearfoods.cleared_players": "Cleared food histories of %s players",
+
 	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
 	"tweed.cloth.spiceoffabric.respawn": "Respawn",
 	"tweed.cloth.spiceoffabric.respawn.saturation": "Saturation",
@@ -15,7 +18,8 @@
 	"tweed.cloth.spiceoffabric.food.saturation": "Saturation",
 	"tweed.cloth.spiceoffabric.food.hunger": "Hunger",
 	"tweed.cloth.spiceoffabric.carrot": "Carrot Mode",
-	"tweed.cloth.spiceoffabric.carrot._enabled": "Enable Carrot Mode",
+	"tweed.cloth.spiceoffabric.carrot.enable": "Enable Carrot Mode",
 	"tweed.cloth.spiceoffabric.carrot.start-hearts": "Amount of hearts when first joining",
-	"tweed.cloth.spiceoffabric.carrot.unlock-rule": "Unique foods to gain a heart"
+	"tweed.cloth.spiceoffabric.carrot.unlock-rule": "Unique foods to gain a heart",
+	"tweed.cloth.spiceoffabric.carrot.max-hearts": "Max amount of hearts"
 }

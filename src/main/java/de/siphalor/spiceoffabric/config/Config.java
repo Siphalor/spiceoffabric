@@ -90,7 +90,7 @@ public class Config {
 			.setComment("Here can you enable the good ol' carrot style.\n" +
 			"This means you start with a set amount of hearts and extend it by eating unique foods"));
 	public static BooleanEntry carrotEnabled =
-		carrotCategory.register("_enable", new BooleanEntry(false))
+		carrotCategory.register("enable", new BooleanEntry(false))
 			.setComment("Enables the carrot style module.");
 	public static IntEntry startHearts =
 		carrotCategory.register("start-hearts", new IntEntry(6))
@@ -101,6 +101,12 @@ public class Config {
 			.addConstraint(new ExpressionConstraint(heartUnlockVariables, customExpFunctions))
 			.setComment("Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
 				"The result resembles the absolute amount of unique food.");
+	public static IntEntry maxHearts =
+		carrotCategory.register("max-hearts", new IntEntry(-1))
+			.addConstraint(new RangeConstraint<Integer>().between(-1, 100))
+			.setComment("Specifies a maximum number of hearts a player can get to through this carrot mode.\n" +
+				"When 0, carrot mode is effectively disabled. (Why should you do this? :P)\n" +
+				"When -1, you can gain a basically infinite amount of hearts.");
 
 	public static TweedClothBridge tweedClothBridge;
 
@@ -109,6 +115,7 @@ public class Config {
 			tweedClothBridge = new TweedClothBridge(file);
 
 		file.register("history-length", new ConfigEntryLocationFixer("history-length", "food"));
+		file.register("carrot._enable", new ConfigEntryLocationFixer("enable", "carrot"));
 	}
 
 	@SuppressWarnings("unused")

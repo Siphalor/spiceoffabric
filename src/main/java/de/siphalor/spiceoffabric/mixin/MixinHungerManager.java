@@ -67,21 +67,29 @@ public abstract class MixinHungerManager implements IHungerManager {
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);
-		spiceOfFabric_foodHistory.addFood(stack, spiceOfFabric_player);
 		if(spiceOfFabric_player != null) {
+			spiceOfFabric_foodHistory.addFood(stack, spiceOfFabric_player);
 			spiceOfFabric_player.networkHandler.sendPacket(new HealthUpdateS2CPacket(spiceOfFabric_player.getHealth(), this.getFoodLevel(), this.getSaturationLevel()));
             int health = (int) spiceOfFabric_player.getHealthMaximum() / 2;
-            if(Config.carrotEnabled.value) {
+            if(Config.carrotEnabled.value && health < Config.maxHearts.value) {
             	if(spiceOfFabric_foodHistory.carrotHistory == null)
             		spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
 				Config.setHeartUnlockExpressionValues(spiceOfFabric_foodHistory.carrotHistory.size(), health);
 				boolean changed = false;
-				while (spiceOfFabric_foodHistory.carrotHistory.size() >= Config.heartUnlockExpression.evaluate()) {
+				int loops = 0;
+				while(spiceOfFabric_foodHistory.carrotHistory.size() >= Config.heartUnlockExpression.evaluate()) {
 					Config.heartUnlockExpression.setVariable("heartAmount", ++health);
 					changed = true;
+					if(++loops > 50) {
+						System.err.println("Spice of Fabric health gain overflowed. This might be due to an incorrect formula.");
+                        callbackInfo.cancel();
+                        return;
+					}
 				}
-				if (changed) {
+				if(changed) {
 					spiceOfFabric_player.world.playSound(null, spiceOfFabric_player.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.0F);
+					if(Config.maxHearts.value != -1)
+						health = Math.min(health, Config.maxHearts.value);
 					spiceOfFabric_player.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(2 * health);
 				}
 			}

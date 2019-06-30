@@ -12,5 +12,6 @@ public class ClientCore implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientSidePacketRegistry.INSTANCE.register(SpiceOfFabric.SYNC_FOOD_HISTORY_S2C_PACKET, (packetContext, packetByteBuf) -> ((IHungerManager) MinecraftClient.getInstance().player.getHungerManager()).spiceOfFabric_getFoodHistory().read(packetByteBuf));
 		ClientSidePacketRegistry.INSTANCE.register(SpiceOfFabric.ADD_FOOD_S2C_PACKET, (packetContext, packetByteBuf) -> ((IHungerManager) packetContext.getPlayer().getHungerManager()).spiceOfFabric_getFoodHistory().addFood(FoodHistoryEntry.from(packetByteBuf)));
+		ClientSidePacketRegistry.INSTANCE.register(SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, (packetContext, packetByteBuf) -> ((IHungerManager) packetContext.getPlayer().getHungerManager()).spiceOfFabric_clearHistory());
 	}
 }

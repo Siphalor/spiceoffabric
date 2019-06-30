@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric;
 
 import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
@@ -18,10 +19,12 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final Identifier MOD_PRESENT_C2S_PACKET = new Identifier(MOD_ID, "client_mod_present");
 	public static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = new Identifier(MOD_ID, "sync_food_history");
 	public static final Identifier ADD_FOOD_S2C_PACKET = new Identifier(MOD_ID, "add_food");
+	public static final Identifier CLEAR_FOODS_S2C_PACKET = new Identifier(MOD_ID, "clear_foods");
 
 	@Override
 	public void onInitialize() {
 		Config.initialize();
+
 		ServerSidePacketRegistry.INSTANCE.register(MOD_PRESENT_C2S_PACKET, (packetContext, packetByteBuf) -> {
 			ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) packetContext.getPlayer();
 			((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_setClientMod(true);
@@ -29,6 +32,8 @@ public class SpiceOfFabric implements ModInitializer {
 				syncFoodHistory(serverPlayerEntity);
 			}
 		});
+
+		Commands.register();
 	}
 
 	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
