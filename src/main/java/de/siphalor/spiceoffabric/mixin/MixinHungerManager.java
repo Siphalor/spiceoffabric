@@ -71,7 +71,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 			spiceOfFabric_foodHistory.addFood(stack, spiceOfFabric_player);
 			spiceOfFabric_player.networkHandler.sendPacket(new HealthUpdateS2CPacket(spiceOfFabric_player.getHealth(), this.getFoodLevel(), this.getSaturationLevel()));
             int health = (int) spiceOfFabric_player.getHealthMaximum() / 2;
-            if(Config.carrotEnabled.value && health < Config.maxHearts.value) {
+            if(Config.carrotEnabled.value && (health < Config.maxHearts.value || Config.maxHearts.value == -1)) {
             	if(spiceOfFabric_foodHistory.carrotHistory == null)
             		spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
 				Config.setHeartUnlockExpressionValues(spiceOfFabric_foodHistory.carrotHistory.size(), health);

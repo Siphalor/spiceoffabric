@@ -72,6 +72,9 @@ public class Config {
 				"\thungerValue is the game defined hunger value for the current item" + System.lineSeparator() +
 				"\tsaturationValue is the saturation modifier defined for the current item"
 			);
+	public static BooleanEntry increaseEatingTime =
+		foodCategory.register("increase-eating-time", new BooleanEntry(true))
+			.setComment("Increases the time it takes for food to be eaten depending on the amount of times it has been eaten in the history");
 	public static StringEntry hungerConfig =
 		foodCategory.register("hunger", new StringEntry("hungerValue * 0.7 ^ timesEaten"))
 			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))

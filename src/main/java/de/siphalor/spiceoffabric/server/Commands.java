@@ -1,12 +1,14 @@
 package de.siphalor.spiceoffabric.server;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
+import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.command.arguments.EntityArgumentType;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.MessageType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -38,6 +40,8 @@ public class Commands {
 			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_clearHistory();
 			if(((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_hasClientMod()) {
 				ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
+				if(Config.carrotEnabled.value)
+					serverPlayerEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(Config.startHearts.value * 2);
 				serverPlayerEntity.sendChatMessage(new TranslatableText("spiceoffabric.command.clearfoods.was_cleared"), MessageType.CHAT);
 			} else {
 				serverPlayerEntity.sendChatMessage(new LiteralText("Your food history has been cleared"), MessageType.CHAT);
