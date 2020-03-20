@@ -2,22 +2,19 @@
 	"schemaVersion": 1,
 	"id": "spiceoffabric",
 	"version": "${version}",
-
 	"name": "Spice of Fabric",
 	"description": "A new iteration on the good ol' \"Spice of life\".",
-
 	"authors": [
-		"Siphalor"
+		"Siphalor",
+		"halotroop2288"
 	],
 	"contact": {
 		"email": "xyx0125@gmail.com",
 		"issues": "https://github.com/Siphalor/tweed-api/issues",
 		"sources": "https://github.com/Siphalor/tweed-api"
 	},
-
 	"license": "Unlicense",
 	"icon": "assets/spiceoffabric/logo.png",
-
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -47,8 +44,10 @@
 			"environment": "client"
 		}
 	],
-
 	"requires": {
 		"fabricloader": ">=0.4.0"
+	},
+	"breaks": {
+		"modmenu": "<1.10"
 	}
 }

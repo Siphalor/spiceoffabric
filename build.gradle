@@ -25,27 +25,58 @@ minecraft {
 }
 
 dependencies {
-	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
+	
+	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
-	shadow 'net.objecthunter:exp4j:0.4.8'
+	shadow ('net.objecthunter:exp4j:0.4.8') {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+	}
 	
-	// REI
-//	modImplementation "me.shedaniel:RoughlyEnoughItems:3.6.4"
 	// Tweed
-	include "${project.tweed_maven}:${project.tweed_version}"
-	modImplementation "${project.tweed_maven}:${project.tweed_version}"
+	include ("${project.tweed_maven}:${project.tweed_version}") {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+	}
+	modImplementation ("${project.tweed_maven}:${project.tweed_version}") {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+	}
 	
 	// AppleSkin
-	modImplementation 'com.github.squeek502:AppleSkin:1.15-fabric-SNAPSHOT'
+	modImplementation ('com.github.squeek502:AppleSkin:1.15-fabric-SNAPSHOT') {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+	}
 	
 	// NBT Crafting
-	include "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
-	modImplementation "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
+	include ("com.github.siphalor:nbt-crafting:2.0.0-alpha.16") {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+		exclude module: "RoughlyEnoughItems"
+		exclude module: "ModsOfTheWorld"
+	}
+	modImplementation ("com.github.siphalor:nbt-crafting:2.0.0-alpha.16") {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+		exclude module: "RoughlyEnoughItems"
+		exclude module: "ModsOfTheWorld"
+	}
+	// REI
+	modImplementation ("me.shedaniel:RoughlyEnoughItems:3.6.4") {
+		exclude group: ("net.fabricmc.fabric-api")
+		exclude module: "modmenu"
+	}
+	
+	// Modmenu
+	modImplementation ("io.github.prospector:modmenu:v1.10.0") {
+		force = true
+	}
 }
 
 processResources {
