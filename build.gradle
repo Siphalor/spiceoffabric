@@ -11,7 +11,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 archivesBaseName = project.archives_base_name
-version = "${project.mod_version}+${minecraft_version}"
+version = project.mod_version + '+' + minecraft_version
 group = project.maven_group
 
 repositories {
@@ -27,29 +27,25 @@ minecraft {
 dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}"
-	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
-
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
 	// exp4j
 	shadow 'net.objecthunter:exp4j:0.4.8'
+	
+	// REI
+//	modImplementation "me.shedaniel:RoughlyEnoughItems:3.6.4"
 	// Tweed
 	include "${project.tweed_maven}:${project.tweed_version}"
 	modImplementation "${project.tweed_maven}:${project.tweed_version}"
-	// Fabric
-	include "net.fabricmc.fabric-api:fabric-networking-v0:+"
-	modCompile "net.fabricmc.fabric-api:fabric-networking-v0:+"
-	include "net.fabricmc.fabric-api:fabric-api-base:+"
-	modCompile "net.fabricmc.fabric-api:fabric-api-base:+"
-	include "net.fabricmc.fabric-api:fabric-resource-loader-v0:+"
-	modCompile "net.fabricmc.fabric-api:fabric-resource-loader-v0:+"
-	include "net.fabricmc.fabric-api:fabric-commands-v0:+"
-	modCompile "net.fabricmc.fabric-api:fabric-commands-v0:+"
+	
 	// AppleSkin
-	modImplementation 'com.github.squeek502:AppleSkin:1.14-fabric-SNAPSHOT'
-	//modCompile 'squeek.appleskin:AppleSkin:unspecified'
-	// Nbt Crafting
-	modImplementation "com.github.siphalor:nbt-crafting:-SNAPSHOT"
-	include "com.github.siphalor:nbt-crafting:-SNAPSHOT"
+	modImplementation 'com.github.squeek502:AppleSkin:1.15-fabric-SNAPSHOT'
+	
+	// NBT Crafting
+	include "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
+	modImplementation "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
 }
 
 processResources {

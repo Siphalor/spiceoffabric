@@ -24,7 +24,7 @@ public class REIPlugin implements REIPluginV0 {
 		compoundTag.putString("author", "Me");
 		compoundTag.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
 		itemStack.getOrCreateSubTag("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
-		entryRegistry.registerItemStack(itemStack);
+//		entryRegistry.registerItemStack(itemStack); // FIXME
 	}
 
 	@Override
