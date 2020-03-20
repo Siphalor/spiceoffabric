@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.4-SNAPSHOT'
+	id 'fabric-loom' version '0.2.6-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
@@ -114,14 +114,12 @@ jar {
 
 shadowJar {
 	configurations = [project.configurations.shadow]
-	classifier = ""
+	classifier = "dev"
 	relocate "net.objecthunter", "de.siphalor.spiceoffabric.shadow.net.objecthunter"
 }
 
 remapJar {
-	dependsOn shadowJar
-	input shadowJar.archivePath
-	output jar.archivePath
+	dependsOn(shadowJar)
 }
 
 // configure the maven publication
@@ -129,7 +127,7 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			// add all the jars that should be included when publishing to maven
-			artifact(shadowJar) {
+			artifact(remapJar) {
 				builtBy remapJar
 			}
 			artifact(sourcesJar) {

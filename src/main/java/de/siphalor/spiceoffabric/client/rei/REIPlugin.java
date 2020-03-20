@@ -2,6 +2,7 @@ package de.siphalor.spiceoffabric.client.rei;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
@@ -24,7 +25,7 @@ public class REIPlugin implements REIPluginV0 {
 		compoundTag.putString("author", "Me");
 		compoundTag.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
 		itemStack.getOrCreateSubTag("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
-//		entryRegistry.registerItemStack(itemStack); // FIXME
+		entryRegistry.registerEntries(EntryStack.create(itemStack));
 	}
 
 	@Override

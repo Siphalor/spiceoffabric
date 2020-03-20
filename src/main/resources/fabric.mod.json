@@ -26,7 +26,7 @@
 		"modmenu": [
 			"de.siphalor.spiceoffabric.client.ModMenuInitializer"
 		],
-		"rei_plugins": [
+		"rei_plugins_v0": [
 			"de.siphalor.spiceoffabric.client.rei.REIPlugin"
 		]
 	},
