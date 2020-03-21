@@ -33,16 +33,10 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
-	shadow ('net.objecthunter:exp4j:0.4.8') {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
-	}
+	shadow 'net.objecthunter:exp4j:0.4.8'
 	
 	// Tweed
-	include ("${project.tweed_maven}:${project.tweed_version}") {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
-	}
+	include "${project.tweed_maven}:${project.tweed_version}"
 	modImplementation ("${project.tweed_maven}:${project.tweed_version}") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
@@ -52,15 +46,11 @@ dependencies {
 	modImplementation ('com.github.squeek502:AppleSkin:1.15-fabric-SNAPSHOT') {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
+		transitive false
 	}
 	
 	// NBT Crafting
-	include ("com.github.siphalor:nbt-crafting:2.0.0-alpha.16") {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
-		exclude module: "RoughlyEnoughItems"
-		exclude module: "ModsOfTheWorld"
-	}
+	include "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
 	modImplementation ("com.github.siphalor:nbt-crafting:2.0.0-alpha.16") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
@@ -71,11 +61,13 @@ dependencies {
 	modImplementation ("me.shedaniel:RoughlyEnoughItems:3.6.4") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
+		transitive false
 	}
 	
 	// Modmenu
 	modImplementation ("io.github.prospector:modmenu:v1.10.0") {
 		force = true
+		transitive false
 	}
 }
 
