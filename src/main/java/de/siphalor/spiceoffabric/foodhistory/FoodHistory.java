@@ -94,7 +94,7 @@ public class FoodHistory {
 		compoundTag.put("dictionary", list);
 		ListTag historyList = new ListTag();
 		for(Integer id : history) {
-			historyList.add(new IntTag(id));
+			historyList.add(IntTag.of(id));
 		}
 		compoundTag.put("history", historyList);
 		if(carrotHistory != null) {
@@ -109,19 +109,19 @@ public class FoodHistory {
 
 	public static FoodHistory read(CompoundTag compoundTag) {
         FoodHistory foodHistory = new FoodHistory();
-		ListTag list = (ListTag) compoundTag.getTag("dictionary");
+		ListTag list = (ListTag) compoundTag.get("dictionary");
         for(int i = 0; i < list.size(); i++) {
-        	foodHistory.dictionary.put(i, new FoodHistoryEntry().read(list.getCompoundTag(i)));
+        	foodHistory.dictionary.put(i, new FoodHistoryEntry().read(list.getCompound(i)));
         }
         foodHistory.nextId = foodHistory.dictionary.size();
-        list = (ListTag) compoundTag.getTag("history");
+        list = (ListTag) compoundTag.get("history");
         for(Tag tag : list) {
         	foodHistory.history.offer(((IntTag) tag).getInt());
         }
         foodHistory.buildStats();
 
-        if(compoundTag.containsKey("carrotHistory")) {
-        	list = (ListTag) compoundTag.getTag("carrotHistory");
+        if(compoundTag.contains("carrotHistory")) {
+        	list = (ListTag) compoundTag.get("carrotHistory");
         	if(Config.carrotEnabled.value) {
         		foodHistory.carrotHistory = new HashSet<>();
 				for (Tag tag : list) {
@@ -232,14 +232,14 @@ public class FoodHistory {
 				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle)).append(new LiteralText(foodHistoryEntry.getName()).setStyle(itemStyle.copy().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))).setBold(false))).append("\n");
 			number++; linesOnPage++;
 			if(linesOnPage >= 14) {
-				pages.add(new StringTag(Text.Serializer.toJson(textOnPage)));
+				pages.add(StringTag.of(Text.Serializer.toJson(textOnPage)));
 				linesOnPage = 0;
 				textOnPage = new LiteralText("");
 			}
 		}
 
 		if(linesOnPage > 0) {
-			pages.add(new StringTag(Text.Serializer.toJson(textOnPage)));
+			pages.add(StringTag.of(Text.Serializer.toJson(textOnPage)));
 		}
 
 		return pages;

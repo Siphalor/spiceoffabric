@@ -16,6 +16,7 @@ public class ExpressionConstraint implements Constraint<String> {
 		this.functions = functions;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void apply(DataValue dataValue, AbstractValueEntry<String, ?> configEntry) throws ConstraintException {
 		try {

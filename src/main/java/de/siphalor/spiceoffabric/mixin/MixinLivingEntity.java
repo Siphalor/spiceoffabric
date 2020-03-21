@@ -7,12 +7,9 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
 public abstract class MixinLivingEntity {
 	@Shadow protected ItemStack activeItemStack;
@@ -29,10 +26,5 @@ public abstract class MixinLivingEntity {
 		if((Object) this instanceof PlayerEntity) {
 			MaxUseTimeCalculator.currentPlayer = (PlayerEntity)(Object) this;
 		}
-	}
-
-    @ModifyConstant(method = "method_6076", constant = @Constant(intValue = 25))
-	private int getConsumeEffectBeginTime(int old) {
-		return (int) (activeItemStack.getMaxUseTime() * 0.75F);
 	}
 }
