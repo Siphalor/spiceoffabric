@@ -50,8 +50,8 @@ dependencies {
 	}
 	
 	// NBT Crafting
-	include "com.github.siphalor:nbt-crafting:2.0.0-alpha.16"
-	modImplementation ("com.github.siphalor:nbt-crafting:2.0.0-alpha.16") {
+	include "com.github.siphalor:nbt-crafting:${nbtcrafting_version}"
+	modImplementation ("com.github.siphalor:nbt-crafting:${nbtcrafting_version}") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 		exclude module: "RoughlyEnoughItems"
@@ -67,6 +67,13 @@ dependencies {
 	// Modmenu
 	modImplementation ("io.github.prospector:modmenu:v1.10.0") {
 		force = true
+		transitive false
+	}
+
+	// Cloth Config
+	include "me.shedaniel.cloth:config-2:${project.clothconfig_version}"
+	modImplementation ("me.shedaniel.cloth:config-2:${project.clothconfig_version}") {
+		exclude group: "net.fabricmc.fabric-api"
 		transitive false
 	}
 }
