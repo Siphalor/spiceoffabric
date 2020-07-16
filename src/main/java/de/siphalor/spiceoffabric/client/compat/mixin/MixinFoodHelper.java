@@ -1,4 +1,4 @@
-package de.siphalor.spiceoffabric.client.appleskin.mixin;
+package de.siphalor.spiceoffabric.client.compat.mixin;
 
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;

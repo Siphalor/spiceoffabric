@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.6-SNAPSHOT'
+	id 'fabric-loom' version '0.4-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
@@ -17,8 +17,8 @@ group = project.maven_group
 repositories {
 	mavenLocal()
     maven { url "https://minecraft.curseforge.com/api/maven"}
-	maven { url 'https://jitpack.io' }
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 minecraft {
@@ -33,6 +33,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
+	runtime 'net.objecthunter:exp4j:0.4.8'
 	shadow 'net.objecthunter:exp4j:0.4.8'
 	
 	// Tweed
@@ -43,7 +44,7 @@ dependencies {
 	}
 	
 	// AppleSkin
-	modImplementation ('com.github.squeek502:AppleSkin:1.15-fabric-SNAPSHOT') {
+	modImplementation ('com.github.squeek502:AppleSkin:1.16-fabric-SNAPSHOT') {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 		transitive false
@@ -58,14 +59,13 @@ dependencies {
 		exclude module: "ModsOfTheWorld"
 	}
 	// REI
-	modImplementation ("me.shedaniel:RoughlyEnoughItems:3.6.4") {
+	modImplementation ("me.shedaniel:RoughlyEnoughItems:4+") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
-		transitive false
 	}
-	
+
 	// Modmenu
-	modImplementation ("io.github.prospector:modmenu:v1.10.0") {
+	modImplementation ("io.github.prospector:modmenu:1.14.1+build.26") {
 		force = true
 		transitive false
 	}

@@ -70,8 +70,8 @@ public abstract class MixinHungerManager implements IHungerManager {
 		if(spiceOfFabric_player != null) {
 			spiceOfFabric_foodHistory.addFood(stack, spiceOfFabric_player);
 			spiceOfFabric_player.networkHandler.sendPacket(new HealthUpdateS2CPacket(spiceOfFabric_player.getHealth(), this.getFoodLevel(), this.getSaturationLevel()));
-            int health = (int) spiceOfFabric_player.getMaximumHealth() / 2;
-            if(Config.carrotEnabled.value && (health < Config.maxHearts.value || Config.maxHearts.value == -1)) {
+            int health = (int) spiceOfFabric_player.getMaxHealth() / 2;
+            if(Config.carrot.enable && (health < Config.carrot.maxHearts || Config.carrot.maxHearts == -1)) {
             	if(spiceOfFabric_foodHistory.carrotHistory == null)
             		spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
 				Config.setHeartUnlockExpressionValues(spiceOfFabric_foodHistory.carrotHistory.size(), health);
@@ -88,16 +88,16 @@ public abstract class MixinHungerManager implements IHungerManager {
 				}
 				if(changed) {
 					spiceOfFabric_player.world.playSound(null, spiceOfFabric_player.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.0F);
-					if(Config.maxHearts.value != -1)
-						health = Math.min(health, Config.maxHearts.value);
-					spiceOfFabric_player.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(2 * health);
+					if(Config.carrot.maxHearts != -1)
+						health = Math.min(health, Config.carrot.maxHearts);
+					spiceOfFabric_player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(2 * health);
 				}
 			}
 		}
 		callbackInfo.cancel();
 	}
 
-	@Inject(method = "deserialize", at = @At("RETURN"))
+	@Inject(method = "fromTag", at = @At("RETURN"))
 	public void onDeserialize(CompoundTag compoundTag, CallbackInfo callbackInfo) {
 		if(compoundTag.contains(SpiceOfFabric.FOOD_HISTORY_ID, 10)) {
 			spiceOfFabric_foodHistory = FoodHistory.read(compoundTag.getCompound(SpiceOfFabric.FOOD_HISTORY_ID));
@@ -109,7 +109,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 		}*/
 	}
 
-	@Inject(method = "serialize", at = @At("RETURN"))
+	@Inject(method = "toTag", at = @At("RETURN"))
 	public void onSerialize(CompoundTag compoundTag, CallbackInfo callbackInfo) {
 		compoundTag.put(SpiceOfFabric.FOOD_HISTORY_ID, spiceOfFabric_foodHistory.write(new CompoundTag()));
 	}

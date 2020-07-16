@@ -4,8 +4,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 public class FoodHistoryEntry {
@@ -21,11 +24,14 @@ public class FoodHistoryEntry {
 		buffer.writeVarInt(itemId);
 	}
 
-	public String getName() {
-		Item item = Registry.ITEM.get(itemId);
-		ItemStack stack = new ItemStack(item, 1);
+	public BaseText getStackName() {
+		return new TranslatableText(getStack().getTranslationKey());
+	}
+
+	public ItemStack getStack() {
+		ItemStack stack = new ItemStack(Registry.ITEM.get(itemId));
 		stack.setTag(data);
-		return item.getName(stack).asFormattedString();
+		return stack;
 	}
 
 	public String getItemStackSerialization() {

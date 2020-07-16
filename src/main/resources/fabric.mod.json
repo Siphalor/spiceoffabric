@@ -23,25 +23,21 @@
 		"client": [
 			"de.siphalor.spiceoffabric.client.ClientCore"
 		],
-		"modmenu": [
-			"de.siphalor.spiceoffabric.client.ModMenuInitializer"
-		],
 		"rei_plugins_v0": [
-			"de.siphalor.spiceoffabric.client.rei.REIPlugin"
+			"de.siphalor.spiceoffabric.client.compat.REIPlugin"
+		],
+		"tweed:config": [
+			"de.siphalor.spiceoffabric.config.Config"
 		]
 	},
 	"mixins": [
 		{
-			"config": "de.siphalor.spiceoffabric.common.json",
+			"config": "spiceoffabric.mixins.json",
 			"environment": "*"
 		},
 		{
-			"config": "de.siphalor.spiceoffabric.client.json",
-			"environment": "client"
-		},
-		{
-			"config": "de.siphalor.spiceoffabric.appleskin.json",
-			"environment": "client"
+			"config": "spiceoffabric.compat.mixins.json",
+			"environment": "*"
 		}
 	],
 	"requires": {

@@ -18,7 +18,7 @@ public abstract class MixinItemStack {
 
 	@Inject(method = "getMaxUseTime", at = @At("RETURN"), cancellable = true)
 	public void getMaxUseTime(CallbackInfoReturnable<Integer> callbackInfoReturnable) {
-		if(isFood() && Config.increaseEatingTime.value) {
+		if(isFood() && Config.food.increaseEatingTime) {
             callbackInfoReturnable.setReturnValue(MaxUseTimeCalculator.getMaxUseTime((ItemStack)(Object) this));
 		}
 	}

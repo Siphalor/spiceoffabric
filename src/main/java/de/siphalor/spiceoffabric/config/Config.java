@@ -1,32 +1,43 @@
 package de.siphalor.spiceoffabric.config;
 
-import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.tweed.client.TweedClothBridge;
-import de.siphalor.tweed.config.*;
+import com.google.common.base.CaseFormat;
+import com.mojang.datafixers.util.Pair;
+import de.siphalor.tweed.config.ConfigEnvironment;
+import de.siphalor.tweed.config.ConfigScope;
+import de.siphalor.tweed.config.annotated.*;
 import de.siphalor.tweed.config.constraints.RangeConstraint;
-import de.siphalor.tweed.config.entry.BooleanEntry;
-import de.siphalor.tweed.config.entry.IntEntry;
-import de.siphalor.tweed.config.entry.StringEntry;
-import de.siphalor.tweed.config.fixers.ConfigEntryLocationFixer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
 
+@ATweedConfig(
+		scope = ConfigScope.SMALLEST,
+		environment = ConfigEnvironment.SERVER,
+		casing = CaseFormat.LOWER_HYPHEN,
+		tailors = "tweed:cloth"
+)
 public class Config {
-	static final String[] itemVariables = new String[]{"timesEaten", "hungerValue", "saturationValue"};
+	@AConfigExclude
+	private static final String[] itemVariables = new String[]{"timesEaten", "hungerValue", "saturationValue"};
+	@AConfigExclude
 	public static Expression hungerExpression;
+	@AConfigExclude
 	public static Expression saturationExpression;
 
+	@AConfigExclude
 	static final String[] afterDeathVariables = new String[]{"hunger", "saturation"};
+	@AConfigExclude
 	public static Expression hungerAfterDeathExpression;
+	@AConfigExclude
 	public static Expression saturationAfterDeathExpression;
 
+	@AConfigExclude
 	static final String[] heartUnlockVariables = new String[]{"uniqueFoodsEaten", "heartAmount"};
+	@AConfigExclude
 	public static Expression heartUnlockExpression;
 
-	public static final Function[] customExpFunctions = new Function[]{
+	@AConfigExclude
+	private static final Function[] customExpFunctions = new Function[]{
 		new Function("max", 2) {
 			@Override
 			public double apply(double... args) {
@@ -41,95 +52,89 @@ public class Config {
 		}
 	};
 
-	private static ConfigFile file = TweedRegistry.registerConfigFile(SpiceOfFabric.MOD_ID).setReloadListener(Config::reload)
-		.setEnvironment(ConfigEnvironment.SERVER);
-
-	public static ConfigCategory respawnCategory =
-		file.register("respawn", new ConfigCategory())
-			.setComment("Here can you edit the used expressions used for calculating the player stats after respawning." + System.lineSeparator() +
-					"Expressions are simple mathematical terms with the following variables:" + System.lineSeparator() +
-					"\thunger is the amount of hunger the player had when dying" + System.lineSeparator() +
+	@AConfigEntry(
+			comment = "Here can you edit the used expressions used for calculating the player stats after respawning.\n" +
+					"Expressions are simple mathematical terms with the following variables:\n" +
+					"\thunger is the amount of hunger the player had when dying\n" +
 					"\tsaturation is the amount of hunger the player had when dying"
-				);
-	public static StringEntry hungerAfterDeathConfig =
-		respawnCategory.register("hunger", new StringEntry("max(14, hunger)"))
-			.addConstraint(new ExpressionConstraint(afterDeathVariables, customExpFunctions))
-			.setComment("An expression to calculate the hunger value after a fresh respawn");
-	public static StringEntry saturationAfterDeathConfig =
-		respawnCategory.register("saturation", new StringEntry("saturation"))
-			.addConstraint(new ExpressionConstraint(afterDeathVariables, customExpFunctions))
-			.setComment("An expression to calculate the saturation value after a fresh respawn");
-	public static BooleanEntry resetHistoryAtDeath =
-		respawnCategory.register("reset-history", new BooleanEntry(false))
-			.setComment("Sets whether the food history should be cleaned at death");
+	)
+	public static Respawn respawn;
+	public static class Respawn {
+		@AConfigEntry(comment = "An expression to calculate the hunger value after a fresh respawn")
+		public String hunger = "max(14, hunger)";
 
-	public static ConfigCategory foodCategory =
-		file.register("food", new ConfigCategory())
-			.setEnvironment(ConfigEnvironment.SYNCED)
-			.setComment("Here can you edit the used expressions used for calculating the food stats." + System.lineSeparator() +
-				"Expressions are simple mathematical terms with the following variables:" + System.lineSeparator() +
-				"\ttimesEaten is the number of times the current food " + System.lineSeparator() +
-				"\thungerValue is the game defined hunger value for the current item" + System.lineSeparator() +
-				"\tsaturationValue is the saturation modifier defined for the current item"
-			);
-	public static BooleanEntry increaseEatingTime =
-		foodCategory.register("increase-eating-time", new BooleanEntry(true))
-			.setComment("Increases the time it takes for food to be eaten depending on the amount of times it has been eaten in the history");
-	public static StringEntry hungerConfig =
-		foodCategory.register("hunger", new StringEntry("hungerValue * 0.7 ^ timesEaten"))
-			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
-			.setComment("Calculates the food level bonus to earn from eating a food item");
-	public static StringEntry saturationConfig =
-		foodCategory.register("saturation", new StringEntry("saturationValue"))
-			.addConstraint(new ExpressionConstraint(itemVariables, customExpFunctions))
-			.setComment("Calculates the saturation modifier for a food item");
-	public static IntEntry historyLength =
-		foodCategory.register("history-length", new IntEntry(20))
-			.addConstraint(new RangeConstraint<Integer>().greaterThan(0))
-			.setComment("Sets the amount of eaten foods to keep in the history");
+		@AConfigEntry(comment = "An expression to calculate the saturation value after a fresh respawn")
+		public String saturation = "saturation";
 
-	public static ConfigCategory carrotCategory =
-		file.register("carrot", new ConfigCategory()
-			.setComment("Here can you enable the good ol' carrot style.\n" +
-			"This means you start with a set amount of hearts and extend it by eating unique foods"));
-	public static BooleanEntry carrotEnabled =
-		carrotCategory.register("enable", new BooleanEntry(false))
-			.setComment("Enables the carrot style module.");
-	public static IntEntry startHearts =
-		carrotCategory.register("start-hearts", new IntEntry(6))
-			.addConstraint(new RangeConstraint<Integer>().between(1, 100))
-			.setComment("Sets the amount of hearts with which a new player spawns");
-	public static StringEntry heartUnlockConfig =
-		carrotCategory.register("unlock-rule", new StringEntry("2*pow(2, heartAmount - 6)"))
-			.addConstraint(new ExpressionConstraint(heartUnlockVariables, customExpFunctions))
-			.setComment("Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
-				"The result resembles the absolute amount of unique food.");
-	public static IntEntry maxHearts =
-		carrotCategory.register("max-hearts", new IntEntry(-1))
-			.addConstraint(new RangeConstraint<Integer>().between(-1, 100))
-			.setComment("Specifies a maximum number of hearts a player can get to through this carrot mode.\n" +
-				"When 0, carrot mode is effectively disabled. (Why should you do this? :P)\n" +
-				"When -1, you can gain a basically infinite amount of hearts.");
-
-	public static TweedClothBridge tweedClothBridge;
-
-	public static void initialize() {
-		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
-			tweedClothBridge = new TweedClothBridge(file);
-
-		file.register("history-length", new ConfigEntryLocationFixer("history-length", "food"));
-		file.register("carrot._enable", new ConfigEntryLocationFixer("enable", "carrot"));
+		@AConfigEntry(comment = "Sets whether the food history should be cleaned at death")
+		public boolean resetHistory = false;
 	}
 
-	@SuppressWarnings("unused")
-	public static void reload(ConfigEnvironment environment, ConfigScope scope) {
-		hungerExpression = new ExpressionBuilder(hungerConfig.value).variables(itemVariables).functions(customExpFunctions).build();
-		saturationExpression = new ExpressionBuilder(saturationConfig.value).variables(itemVariables).functions(customExpFunctions).build();
+	@AConfigEntry(
+			comment = "Here can you edit the used expressions used for calculating the food stats.\n" +
+					"Expressions are simple mathematical terms with the following variables:\n" +
+					"\ttimesEaten is the number of times the current food\n" +
+					"\thungerValue is the game defined hunger value for the current item\n" +
+					"\tsaturationValue is the saturation modifier defined for the current item",
+			environment = ConfigEnvironment.SYNCED
+	)
+	public static Food food;
+	public static class Food {
+		@AConfigEntry(comment = "Increases the time it takes for food to be eaten depending on the amount of times it has been eaten in the history")
+		public boolean increaseEatingTime = true;
 
-		hungerAfterDeathExpression = new ExpressionBuilder(hungerAfterDeathConfig.value).variables(afterDeathVariables).functions(customExpFunctions).build();
-		saturationAfterDeathExpression = new ExpressionBuilder(saturationAfterDeathConfig.value).variables(afterDeathVariables).functions(customExpFunctions).build();
+		@AConfigEntry(comment = "Calculates the food level bonus to earn from eating a food item")
+		public String hunger = "hungerValue * 0.7 ^ timesEaten";
 
-		heartUnlockExpression = new ExpressionBuilder(heartUnlockConfig.value).variables(heartUnlockVariables).functions(customExpFunctions).build();
+		@AConfigEntry(comment = "Calculates the saturation modifier for a food item")
+		public String saturation = "saturationValue";
+
+		@AConfigEntry(
+				comment = "Sets the amount of eaten foods to keep in the history",
+				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "0..")
+		)
+		public int historyLength = 20;
+	}
+
+	@AConfigEntry(
+			comment = "Here can you enable the good ol' carrot style.\n" +
+					"This means you start with a set amount of hearts and extend it by eating unique foods"
+	)
+	public static Carrot carrot;
+	public static class Carrot {
+		@AConfigEntry(comment = "Enables the carrot style module.")
+		public boolean enable = false;
+
+		@AConfigEntry(
+				comment = "Sets the amount of hearts with which a new player spawns",
+				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "1..100")
+		)
+		public int startHearts = 6;
+
+		@AConfigEntry(
+				comment = "Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
+						"The result resembles the absolute amount of unique food."
+		)
+		public String unlockRule = "2*pow(2, heartAmount - 6)";
+
+		@AConfigEntry(
+				comment = "Specifies a maximum number of hearts a player can get to through this carrot mode.\n" +
+						"When 0, carrot mode is effectively disabled. (Why should you do this? :P)\n" +
+						"When -1, you can gain a basically infinite amount of hearts.",
+				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..100")
+		)
+		public int maxHearts = -1;
+	}
+
+	@AConfigListener
+	public static void reload() {
+		hungerExpression = new ExpressionBuilder(food.hunger).variables(itemVariables).functions(customExpFunctions).build();
+		saturationExpression = new ExpressionBuilder(food.saturation).variables(itemVariables).functions(customExpFunctions).build();
+
+		hungerAfterDeathExpression = new ExpressionBuilder(respawn.hunger).variables(afterDeathVariables).functions(customExpFunctions).build();
+		saturationAfterDeathExpression = new ExpressionBuilder(respawn.saturation).variables(afterDeathVariables).functions(customExpFunctions).build();
+
+		heartUnlockExpression = new ExpressionBuilder(carrot.unlockRule).variables(heartUnlockVariables).functions(customExpFunctions).build();
 	}
 
 	public static void setHungerExpressionValues(int timesEaten, int hungerValue, float saturationValue) {
@@ -142,12 +147,14 @@ public class Config {
 		saturationExpression.setVariable("saturationValue", saturationValue);
 	}
 
-	public static void setAfterDeathExpressionValues(int hunger, float saturation) {
+	public static Pair<Double, Double> getRespawnHunger(int hunger, float saturation) {
 		hungerAfterDeathExpression.setVariable("hunger", hunger);
 		hungerAfterDeathExpression.setVariable("saturation", saturation);
 
 		saturationAfterDeathExpression.setVariable("hunger", hunger);
 		saturationAfterDeathExpression.setVariable("saturation", saturation);
+
+		return Pair.of(hungerAfterDeathExpression.evaluate(), saturationAfterDeathExpression.evaluate());
 	}
 
 	public static void setHeartUnlockExpressionValues(int uniqueFoods, int heartAmount) {

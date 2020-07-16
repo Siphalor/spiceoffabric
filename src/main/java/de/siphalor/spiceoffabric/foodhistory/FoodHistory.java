@@ -11,10 +11,10 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.PacketByteBuf;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,7 +36,7 @@ public class FoodHistory {
     	dictionary = HashBiMap.create();
     	history = new ConcurrentLinkedQueue<>();
     	stats = new Int2IntArrayMap();
-    	if(Config.carrotEnabled.value)
+    	if(Config.carrot.enable)
     		carrotHistory = new HashSet<>();
     }
 
@@ -122,7 +122,7 @@ public class FoodHistory {
 
         if(compoundTag.contains("carrotHistory")) {
         	list = (ListTag) compoundTag.get("carrotHistory");
-        	if(Config.carrotEnabled.value) {
+        	if(Config.carrot.enable) {
         		foodHistory.carrotHistory = new HashSet<>();
 				for (Tag tag : list) {
 					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((CompoundTag) tag));
@@ -191,12 +191,12 @@ public class FoodHistory {
 			dictionary.put(id, entry);
 		}
 		history.offer(id);
-		while(history.size() > Config.historyLength.value) {
+		while(history.size() > Config.food.historyLength) {
 			removeLastFood();
 		}
 		stats.put(id, stats.getOrDefault(id, 0) + 1);
 
-		if(Config.carrotEnabled.value) {
+		if(Config.carrot.enable) {
 			if(carrotHistory == null) {
 				System.err.println("Carrot food history is null");
 			} else {
@@ -216,20 +216,56 @@ public class FoodHistory {
 
     	ListTag pages = new ListTag();
 
-		Text textOnPage = hasMod ? new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.inside_title") : new LiteralText("\u25b6 Diet Journal \u25c0").setStyle(new Style().setColor(Formatting.DARK_GRAY).setUnderline(true).setBold(true));
+    	LiteralText textOnPage = new LiteralText("");
+		textOnPage.append(
+				hasMod
+						? new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.inside_title")
+						: new LiteralText("\u25b6 Diet Journal \u25c0")
+						.setStyle(Style.EMPTY
+								.withColor(Formatting.DARK_GRAY)
+								.withFormatting(Formatting.UNDERLINE)
+								.withBold(true)
+						)
+		);
 		textOnPage.append("\n\n");
 
-		Style numberStyle = new Style().setBold(true).setUnderline(false).setColor(Formatting.BLACK);
-		Style itemStyle = new Style().setBold(false).setColor(Formatting.DARK_GRAY);
+		Style numberStyle = Style.EMPTY.withBold(true);
+		Style itemStyle = Style.EMPTY.withColor(Formatting.DARK_GRAY);
 
 		int linesOnPage = 2;
 		int number = 1;
 		for(int foodId : history) {
-			FoodHistoryEntry foodHistoryEntry = dictionary.get(foodId);
-			if(hasMod)
-				textOnPage.append(new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.line", number, foodHistoryEntry.getName()).setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))))).append("\n");
-			else
-				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle)).append(new LiteralText(foodHistoryEntry.getName()).setStyle(itemStyle.copy().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new LiteralText(foodHistoryEntry.getItemStackSerialization()))).setBold(false))).append("\n");
+			FoodHistoryEntry entry = dictionary.get(foodId);
+			if(hasMod) {
+				textOnPage.append(
+						new TranslatableText(
+								SpiceOfFabric.MOD_ID + ".journal.line",
+								number,
+								entry.getStackName()
+						).setStyle(
+								Style.EMPTY.
+										setHoverEvent(
+												new HoverEvent(
+														HoverEvent.Action.SHOW_ITEM,
+														new HoverEvent.ItemStackContent(entry.getStack())
+												)
+										)
+						)
+				).append("\n");
+			} else {
+				textOnPage.append(
+						new LiteralText(number + ". ").setStyle(numberStyle)
+				).append(entry.getStackName()
+						.setStyle(
+								itemStyle.setHoverEvent(
+										new HoverEvent(
+												HoverEvent.Action.SHOW_ITEM,
+												new HoverEvent.ItemStackContent(entry.getStack())
+										)
+								).withBold(false)
+						)
+				).append("\n");
+			}
 			number++; linesOnPage++;
 			if(linesOnPage >= 14) {
 				pages.add(StringTag.of(Text.Serializer.toJson(textOnPage)));

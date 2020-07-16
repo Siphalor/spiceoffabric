@@ -1,11 +1,11 @@
-package de.siphalor.spiceoffabric.client.mixin;
+package de.siphalor.spiceoffabric.mixin.client;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.util.PacketByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

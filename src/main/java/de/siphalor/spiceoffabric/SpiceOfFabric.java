@@ -7,9 +7,9 @@ import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
 
 public class SpiceOfFabric implements ModInitializer {
 
@@ -23,8 +23,6 @@ public class SpiceOfFabric implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		Config.initialize();
-
 		ServerSidePacketRegistry.INSTANCE.register(MOD_PRESENT_C2S_PACKET, (packetContext, packetByteBuf) -> {
 			ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) packetContext.getPlayer();
 			((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_setClientMod(true);
