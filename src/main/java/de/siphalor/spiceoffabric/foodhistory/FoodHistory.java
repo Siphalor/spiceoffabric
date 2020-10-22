@@ -50,7 +50,7 @@ public class FoodHistory {
 
 	public void write(PacketByteBuf buffer) {
     	buffer.writeVarInt(dictionary.size());
-    	for(BiMap.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
+    	for(Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
     		buffer.writeVarInt(entry.getKey());
     		entry.getValue().write(buffer);
 		}
@@ -88,7 +88,7 @@ public class FoodHistory {
 	public CompoundTag write(CompoundTag compoundTag) {
 		defragmentDictionary();
 		ListTag list = new ListTag();
-		for(BiMap.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
+		for(Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
 			list.add(entry.getKey(), entry.getValue().write(new CompoundTag()));
 		}
 		compoundTag.put("dictionary", list);
@@ -135,10 +135,12 @@ public class FoodHistory {
 	public void buildStats() {
     	stats.clear();
     	for(Integer id : history) {
-    		if(stats.containsKey(id))
-    			stats.put(id, stats.get(id) + 1);
-    		else
+    		if(stats.containsKey(id)) {
+				stats.put(id, stats.get(id) + 1);
+			}
+    		else {
 				stats.put(id, 1);
+			}
 	    }
 	}
 
@@ -163,7 +165,7 @@ public class FoodHistory {
         }
         stats = newStats;
         BiMap<Integer, FoodHistoryEntry> newDictionary = HashBiMap.create();
-        for(HashBiMap.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
+        for(Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
         	newDictionary.put(oldToNewMap.get(entry.getKey()), entry.getValue());
         }
         dictionary = newDictionary;
@@ -207,8 +209,7 @@ public class FoodHistory {
 
     public void removeLastFood() {
     	int id = history.remove();
-    	if(stats.containsKey(id))
-			stats.put(id, stats.get(id) - 1);
+    	if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
     }
 
     public ListTag genJournalPages(PlayerEntity playerEntity) {
@@ -244,20 +245,12 @@ public class FoodHistory {
 								entry.getStackName()
 						).setStyle(
 								Style.EMPTY.
-										setHoverEvent(
-												new HoverEvent(
-														HoverEvent.Action.SHOW_ITEM,
-														new HoverEvent.ItemStackContent(entry.getStack())
-												)
-										)
-						)
-				).append("\n");
+										withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
+												new HoverEvent.ItemStackContent(entry.getStack())))))
+						.append("\n");
 			} else {
-				textOnPage.append(
-						new LiteralText(number + ". ").setStyle(numberStyle)
-				).append(entry.getStackName()
-						.setStyle(
-								itemStyle.setHoverEvent(
+				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle))
+						.append(entry.getStackName().setStyle(itemStyle.withHoverEvent(
 										new HoverEvent(
 												HoverEvent.Action.SHOW_ITEM,
 												new HoverEvent.ItemStackContent(entry.getStack())

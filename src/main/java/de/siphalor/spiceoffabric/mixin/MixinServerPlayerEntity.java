@@ -23,8 +23,8 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	protected boolean spiceOfFabric_clientModPresent = false;
 	protected boolean spiceOfFabric_foodHistorySync = false;
 
-	public MixinServerPlayerEntity(World world, BlockPos blockPos, GameProfile gameProfile) {
-		super(world, blockPos, gameProfile);
+	public MixinServerPlayerEntity(World world, BlockPos pos, float yaw, GameProfile profile) {
+		super(world, pos, yaw, profile);
 	}
 
 	@Override
