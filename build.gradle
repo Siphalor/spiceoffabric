@@ -59,7 +59,7 @@ dependencies {
 		exclude module: "ModsOfTheWorld"
 	}
 	// REI
-	modImplementation ("me.shedaniel:RoughlyEnoughItems:4+") {
+	modImplementation ("me.shedaniel:RoughlyEnoughItems:5+") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 	}
