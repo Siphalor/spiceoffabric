@@ -1,6 +1,5 @@
 package de.siphalor.spiceoffabric;
 
-import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
