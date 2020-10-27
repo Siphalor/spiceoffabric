@@ -27,7 +27,7 @@ minecraft {
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -59,7 +59,7 @@ dependencies {
 		exclude module: "ModsOfTheWorld"
 	}
 	// REI
-	modImplementation ("me.shedaniel:RoughlyEnoughItems:4+") {
+	modImplementation ("me.shedaniel:RoughlyEnoughItems:5+") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 	}
