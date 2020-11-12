@@ -1,14 +1,23 @@
 package de.siphalor.spiceoffabric;
 
+import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+
+import java.util.HashSet;
 
 public class SpiceOfFabric implements ModInitializer {
 
@@ -31,6 +40,33 @@ public class SpiceOfFabric implements ModInitializer {
 		});
 
 		Commands.register();
+	}
+
+	public static void onEaten(ServerPlayerEntity player, FoodHistory foodHistory, ItemStack stack) {
+		foodHistory.addFood(stack, player);
+		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
+		int health = (int) player.getMaxHealth() / 2;
+		if (Config.carrot.enable && (health < Config.carrot.maxHearts || Config.carrot.maxHearts == -1)) {
+			if (foodHistory.carrotHistory == null)
+				foodHistory.carrotHistory = new HashSet<>();
+			Config.setHeartUnlockExpressionValues(foodHistory.carrotHistory.size(), health);
+			boolean changed = false;
+			int loops = 0;
+			while (foodHistory.carrotHistory.size() >= Config.heartUnlockExpression.evaluate()) {
+				Config.heartUnlockExpression.setVariable("heartAmount", ++health);
+				changed = true;
+				if (++loops > 50) {
+					System.err.println("Spice of Fabric health gain overflowed. This might be due to an incorrect formula.");
+					return;
+				}
+			}
+			if (changed) {
+				player.world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.0F);
+				if (Config.carrot.maxHearts != -1)
+					health = Math.min(health, Config.carrot.maxHearts);
+				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(2 * health);
+			}
+		}
 	}
 
 	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
