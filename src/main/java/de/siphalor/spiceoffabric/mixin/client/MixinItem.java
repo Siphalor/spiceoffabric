@@ -11,6 +11,7 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
@@ -30,7 +31,8 @@ public abstract class MixinItem {
 	@Inject(method = "appendTooltip", at = @At("HEAD"))
 	public void appendTooltip(ItemStack stack, World world, List<Text> texts, TooltipContext tooltipContext, CallbackInfo callbackInfo) {
 		PlayerEntity playerEntity = MinecraftClient.getInstance().player;
-        if(isFood()
+		//noinspection ConstantConditions
+		if((isFood() || (Object) this == Items.CAKE)
 				&& Config.carrot.enable
 				&& playerEntity != null
 				&& playerEntity.getHungerManager() != null

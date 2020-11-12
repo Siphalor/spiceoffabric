@@ -3,6 +3,7 @@
 	"package": "de.siphalor.spiceoffabric.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
+		"MixinCakeBlock",
 		"MixinHungerManager",
 		"MixinItemStack",
 		"MixinLivingEntity",
