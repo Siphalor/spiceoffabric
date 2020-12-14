@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.5-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
@@ -66,7 +66,7 @@ dependencies {
 	}
 
 	// Modmenu
-	modImplementation ("io.github.prospector:modmenu:1.14.1+build.26") {
+	modImplementation ("io.github.prospector:modmenu:1.14.13+") {
 		force = true
 		transitive false
 	}
