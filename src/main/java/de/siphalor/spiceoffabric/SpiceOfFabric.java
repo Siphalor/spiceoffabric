@@ -4,10 +4,10 @@ import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -31,12 +31,8 @@ public class SpiceOfFabric implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerSidePacketRegistry.INSTANCE.register(MOD_PRESENT_C2S_PACKET, (packetContext, packetByteBuf) -> {
-			ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) packetContext.getPlayer();
-			((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_setClientMod(true);
-			if(((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_foodHistorySync()) {
-				syncFoodHistory(serverPlayerEntity);
-			}
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			syncFoodHistory(handler.player);
 		});
 
 		Commands.register();
@@ -70,9 +66,10 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
-		if(!((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_hasClientMod()) return;
-		PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-		((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
-		ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
+		if (ServerPlayNetworking.canSend(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET)) {
+			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
+			ServerPlayNetworking.send(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
+		}
 	}
 }

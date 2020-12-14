@@ -1,12 +1,12 @@
 package de.siphalor.spiceoffabric.server;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.PacketByteBuf;
@@ -45,22 +45,25 @@ public class Commands {
 	private static int clearFoods(ServerCommandSource commandSource, Collection<ServerPlayerEntity> serverPlayerEntities) {
 		for(ServerPlayerEntity serverPlayerEntity : serverPlayerEntities) {
 			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_clearHistory();
-			if(((IServerPlayerEntity) serverPlayerEntity).spiceOfFabric_hasClientMod()) {
-				ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
-				if(Config.carrot.enable)
-					serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(Config.carrot.startHearts * 2);
+			if (Config.carrot.enable) {
+				serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(Config.carrot.startHearts * 2);
+			}
+			if (ServerPlayNetworking.canSend(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
+				ServerPlayNetworking.send(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
 				serverPlayerEntity.sendMessage(new TranslatableText("spiceoffabric.command.clearfoods.was_cleared"), false);
 			} else {
 				serverPlayerEntity.sendMessage(new LiteralText("Your food history has been cleared"), false);
 			}
 		}
 
-        if(commandSource.getEntity() instanceof ServerPlayerEntity && (serverPlayerEntities.size() != 1 && serverPlayerEntities.iterator().next() == commandSource.getEntity())) {
-        	if(((IServerPlayerEntity) commandSource.getEntity()).spiceOfFabric_hasClientMod()) {
-        		commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clearfoods.cleared_players", serverPlayerEntities.size()), true);
+		try {
+			if (commandSource.getEntity() instanceof ServerPlayerEntity && ServerPlayNetworking.canSend(commandSource.getPlayer(), SpiceOfFabric.ADD_FOOD_S2C_PACKET)) {
+				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clearfoods.cleared_players", serverPlayerEntities.size()), true);
 			} else {
-        		commandSource.sendFeedback(new LiteralText("Cleared food histories of " + serverPlayerEntities.size() + " players."), true);
+				commandSource.sendFeedback(new LiteralText("Cleared food histories of " + serverPlayerEntities.size() + " players."), true);
 			}
+		} catch (CommandSyntaxException e) {
+			e.printStackTrace();
 		}
 		return serverPlayerEntities.size();
 	}

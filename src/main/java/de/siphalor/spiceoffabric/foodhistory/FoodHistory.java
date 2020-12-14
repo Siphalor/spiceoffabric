@@ -4,10 +4,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
-import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -178,10 +177,10 @@ public class FoodHistory {
 	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {
     	FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
 
-    	if(serverPlayerEntity != null) {
+		if (ServerPlayNetworking.canSend(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET)) {
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 			entry.write(buffer);
-			ServerSidePacketRegistry.INSTANCE.sendToPlayer(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET, buffer);
+			ServerPlayNetworking.send(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET, buffer);
 		}
     	addFood(entry);
     }
