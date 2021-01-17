@@ -3,6 +3,7 @@ package de.siphalor.spiceoffabric.mixin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -49,17 +50,25 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	@Inject(method = "copyFrom", at = @At("RETURN"))
 	public void onPlayerCopied(ServerPlayerEntity reference, boolean exact, CallbackInfo callbackInfo) {
 		if(!exact) {
-			getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
-					.setBaseValue(
-							reference.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).getBaseValue()
-					);
-
 			Pair<Double, Double> respawnHunger = Config.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(respawnHunger.getFirst(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float)(double) respawnHunger.getSecond());
-			if(!Config.respawn.resetHistory) {
-				((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(((IHungerManager) reference.getHungerManager()).spiceOfFabric_getFoodHistory());
+
+			FoodHistory foodHistory = ((IHungerManager) reference.getHungerManager()).spiceOfFabric_getFoodHistory();
+
+			if (Config.respawn.resetHistory) {
+				foodHistory.resetHistory();
 			}
+			double maxHealth;
+			if (Config.respawn.resetCarrotMode) {
+				foodHistory.resetCarrotHistory();
+				maxHealth = Config.carrot.startHearts * 2;
+			} else {
+				maxHealth = reference.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).getBaseValue();
+			}
+			this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
+
+			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
 		}
 	}
 }

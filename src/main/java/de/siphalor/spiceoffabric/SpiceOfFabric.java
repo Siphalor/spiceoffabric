@@ -24,7 +24,6 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final String MOD_ID = "spiceoffabric";
 	public static final String FOOD_HISTORY_ID = "spiceOfFabric_history";
 	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
-	public static final Identifier MOD_PRESENT_C2S_PACKET = new Identifier(MOD_ID, "client_mod_present");
 	public static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = new Identifier(MOD_ID, "sync_food_history");
 	public static final Identifier ADD_FOOD_S2C_PACKET = new Identifier(MOD_ID, "add_food");
 	public static final Identifier CLEAR_FOODS_S2C_PACKET = new Identifier(MOD_ID, "clear_foods");

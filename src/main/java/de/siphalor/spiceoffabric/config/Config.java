@@ -68,6 +68,9 @@ public class Config {
 
 		@AConfigEntry(comment = "Sets whether the food history should be cleaned at death")
 		public boolean resetHistory = false;
+
+		@AConfigEntry(comment = "Sets whether the player's maximum hearts should be reset in carrot mode after death")
+		public boolean resetCarrotMode = false;
 	}
 
 	@AConfigEntry(

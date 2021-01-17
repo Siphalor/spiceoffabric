@@ -40,11 +40,21 @@ public class FoodHistory {
 	}
 
 	public void reset() {
+		resetHistory();
+		resetCarrotHistory();
+	}
+
+	public void resetHistory() {
 		dictionary.clear();
 		nextId = 0;
 		history.clear();
 		stats.clear();
-		if (carrotHistory != null) carrotHistory.clear();
+	}
+
+	public void resetCarrotHistory() {
+		if (carrotHistory != null) {
+			carrotHistory.clear();
+		}
 	}
 
 	public void write(PacketByteBuf buffer) {
