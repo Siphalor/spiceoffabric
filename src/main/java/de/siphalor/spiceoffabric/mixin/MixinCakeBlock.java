@@ -23,7 +23,7 @@ public class MixinCakeBlock {
 	private void eat(HungerManager hungerManager, int baseHunger, float baseSaturation, WorldAccess world, BlockPos pos, BlockState state, PlayerEntity player) {
 		ItemStack stack = new ItemStack(Items.CAKE);
 		FoodHistory foodHistory = ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
-		Config.setHungerExpressionValues(foodHistory.getTimesEaten(stack), baseHunger, baseSaturation);
+		Config.setHungerExpressionValues(foodHistory.getTimesEaten(stack), baseHunger, baseSaturation, stack.getMaxUseTime());
 		hungerManager.add(Config.getHungerValue(), Config.getSaturationValue());
 
 		if (!world.isClient() && player instanceof ServerPlayerEntity) {

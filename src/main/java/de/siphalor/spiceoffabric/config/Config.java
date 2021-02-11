@@ -6,6 +6,8 @@ import de.siphalor.tweed.config.ConfigEnvironment;
 import de.siphalor.tweed.config.ConfigScope;
 import de.siphalor.tweed.config.annotated.*;
 import de.siphalor.tweed.config.constraints.RangeConstraint;
+import de.siphalor.tweed.data.DataObject;
+import de.siphalor.tweed.data.DataValue;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
@@ -18,11 +20,13 @@ import net.objecthunter.exp4j.function.Function;
 )
 public class Config {
 	@AConfigExclude
-	private static final String[] itemVariables = new String[]{"timesEaten", "hungerValue", "saturationValue"};
+	private static final String[] itemVariables = new String[]{"timesEaten", "hungerValue", "saturationValue", "consumeDuration"};
 	@AConfigExclude
 	public static Expression hungerExpression;
 	@AConfigExclude
 	public static Expression saturationExpression;
+	@AConfigExclude
+	public static Expression consumeDurationExpression;
 
 	@AConfigExclude
 	static final String[] afterDeathVariables = new String[]{"hunger", "saturation"};
@@ -78,19 +82,20 @@ public class Config {
 					"Expressions are simple mathematical terms with the following variables:\n" +
 					"\ttimesEaten is the number of times the current food\n" +
 					"\thungerValue is the game defined hunger value for the current item\n" +
-					"\tsaturationValue is the saturation modifier defined for the current item",
+					"\tsaturationValue is the saturation modifier defined for the current item" +
+					"\tconsumeDuration is the time in ticks it takes the player to consume the current item",
 			environment = ConfigEnvironment.SYNCED
 	)
 	public static Food food;
 	public static class Food {
-		@AConfigEntry(comment = "Increases the time it takes for food to be eaten depending on the amount of times it has been eaten in the history")
-		public boolean increaseEatingTime = true;
-
 		@AConfigEntry(comment = "Calculates the food level bonus to earn from eating a food item")
 		public String hunger = "hungerValue * 0.7 ^ timesEaten";
 
 		@AConfigEntry(comment = "Calculates the saturation modifier for a food item")
 		public String saturation = "saturationValue";
+
+		@AConfigEntry(comment = "Calculates the time to consume an item in ticks")
+		public String consumeDuration = "consumeDuration * 1.3 ^ timesEaten";
 
 		@AConfigEntry(
 				comment = "Sets the amount of eaten foods to keep in the history",
@@ -133,6 +138,7 @@ public class Config {
 	public static void reload() {
 		hungerExpression = new ExpressionBuilder(food.hunger).variables(itemVariables).functions(customExpFunctions).build();
 		saturationExpression = new ExpressionBuilder(food.saturation).variables(itemVariables).functions(customExpFunctions).build();
+		consumeDurationExpression = new ExpressionBuilder(food.consumeDuration).variables(itemVariables).functions(customExpFunctions).build();
 
 		hungerAfterDeathExpression = new ExpressionBuilder(respawn.hunger).variables(afterDeathVariables).functions(customExpFunctions).build();
 		saturationAfterDeathExpression = new ExpressionBuilder(respawn.saturation).variables(afterDeathVariables).functions(customExpFunctions).build();
@@ -140,14 +146,38 @@ public class Config {
 		heartUnlockExpression = new ExpressionBuilder(carrot.unlockRule).variables(heartUnlockVariables).functions(customExpFunctions).build();
 	}
 
-	public static void setHungerExpressionValues(int timesEaten, int hungerValue, float saturationValue) {
+	@AConfigFixer("food")
+	public static void fixFood(DataObject<?> foodObject, DataObject<?> root) {
+		if (foodObject.has("increase-eating-time")) {
+			DataValue<?> dataValue = foodObject.get("increase-eating-time");
+			if (dataValue.isBoolean()) {
+				if (dataValue.asBoolean()) {
+					foodObject.set("consume-duration", "consumeDuration * timesEaten");
+				} else {
+					foodObject.set("consume-duration", "consumeDuration");
+				}
+			}
+			foodObject.remove("increase-eating-time");
+		}
+	}
+
+	public static void setHungerExpressionValues(int timesEaten, int hungerValue, float saturationValue, int consumeDuration) {
 		hungerExpression.setVariable("timesEaten", timesEaten);
 		hungerExpression.setVariable("hungerValue", hungerValue);
 		hungerExpression.setVariable("saturationValue", saturationValue);
+		hungerExpression.setVariable("consumeDuration", consumeDuration);
 
 		saturationExpression.setVariable("timesEaten", timesEaten);
 		saturationExpression.setVariable("hungerValue", hungerValue);
 		saturationExpression.setVariable("saturationValue", saturationValue);
+		saturationExpression.setVariable("consumeDuration", consumeDuration);
+	}
+
+	public static void setConsumeDurationValues(int timesEaten, int hungerValue, float saturationValue, int consumeDuration) {
+		consumeDurationExpression.setVariable("timesEaten", timesEaten);
+		consumeDurationExpression.setVariable("hungerValue", hungerValue);
+		consumeDurationExpression.setVariable("saturationValue", saturationValue);
+		consumeDurationExpression.setVariable("consumeDuration", consumeDuration);
 	}
 
 	public static Pair<Double, Double> getRespawnHunger(int hunger, float saturation) {

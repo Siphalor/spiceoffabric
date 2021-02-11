@@ -16,8 +16,9 @@ group = project.maven_group
 
 repositories {
 	mavenLocal()
-    maven { url "https://minecraft.curseforge.com/api/maven"}
+    maven { url "https://minecraft.curseforge.com/api/maven" }
 	mavenCentral()
+	maven { url "https://maven.terraformersmc.com/releases" }
 	maven { url "https://maven.siphalor.de" }
 	maven { url 'https://jitpack.io' }
 }
@@ -41,7 +42,6 @@ dependencies {
 	include "${project.tweed_maven}:${project.tweed_version}"
 	modImplementation ("${project.tweed_maven}:${project.tweed_version}") {
 		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
 	}
 	
 	// AppleSkin
@@ -63,12 +63,6 @@ dependencies {
 	modImplementation ("me.shedaniel:RoughlyEnoughItems:5+") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
-	}
-
-	// Modmenu
-	modImplementation ("io.github.prospector:modmenu:1.14.13+") {
-		force = true
-		transitive false
 	}
 
 	// Cloth Config

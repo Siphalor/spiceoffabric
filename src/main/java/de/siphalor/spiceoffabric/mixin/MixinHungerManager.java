@@ -5,22 +5,17 @@ import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 @Mixin(HungerManager.class)
@@ -61,7 +56,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 
 	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"), cancellable = true)
     public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
-		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), Objects.requireNonNull(item.getFoodComponent()).getHunger(), item.getFoodComponent().getSaturationModifier());
+		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), Objects.requireNonNull(item.getFoodComponent()).getHunger(), item.getFoodComponent().getSaturationModifier(), stack.getMaxUseTime());
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);

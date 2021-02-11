@@ -22,7 +22,7 @@ public abstract class MixinFoodHelper {
 	private static void getModifiedFoodValuesDefault(ItemStack stack, PlayerEntity playerEntity, CallbackInfoReturnable<FoodHelper.BasicFoodValues> callbackInfoReturnable) {
 		FoodHelper.BasicFoodValues foodValues = getDefaultFoodValues(stack);
 		//noinspection ConstantConditions
-		Config.setHungerExpressionValues(((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().getTimesEaten(stack), foodValues.hunger, foodValues.saturationModifier);
+		Config.setHungerExpressionValues(((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().getTimesEaten(stack), foodValues.hunger, foodValues.saturationModifier, stack.getMaxUseTime());
         FoodHelper.BasicFoodValues result = new FoodHelper.BasicFoodValues(Config.getHungerValue(), Config.getSaturationValue());
 		callbackInfoReturnable.setReturnValue(result);
 	}
