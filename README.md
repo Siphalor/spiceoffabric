@@ -7,4 +7,4 @@ Another iteration of [Spice of Life](https://github.com/squeek502/SpiceOfLife) b
 
 ## License
 
-This mod is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+This mod is available under the MIT license. Feel free to learn from it and incorporate it in your own projects as long as you attribute me.

@@ -14,7 +14,7 @@
 		"issues": "https://github.com/Siphalor/tweed-api/issues",
 		"sources": "https://github.com/Siphalor/tweed-api"
 	},
-	"license": "Unlicense",
+	"license": "MIT",
 	"icon": "assets/spiceoffabric/logo.png",
 	"environment": "*",
 	"entrypoints": {
