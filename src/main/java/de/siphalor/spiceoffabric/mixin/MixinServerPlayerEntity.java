@@ -2,6 +2,7 @@ package de.siphalor.spiceoffabric.mixin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
+import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
@@ -69,6 +70,8 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
+
+			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity)(Object) this);
 		}
 	}
 }

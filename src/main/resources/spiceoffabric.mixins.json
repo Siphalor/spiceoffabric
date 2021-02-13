@@ -8,7 +8,8 @@
 		"MixinItemStack",
 		"MixinLivingEntity",
 		"MixinServerPlayerEntity",
-		"MixinWrittenBookItem"
+		"MixinWrittenBookItem",
+		"client.MixinClientPlayNetworkHandler"
 	],
 	"client": [
 		"client.MixinItem"
