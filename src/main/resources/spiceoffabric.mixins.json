@@ -8,11 +8,11 @@
 		"MixinItemStack",
 		"MixinLivingEntity",
 		"MixinServerPlayerEntity",
-		"MixinWrittenBookItem",
-		"client.MixinClientPlayNetworkHandler"
+		"MixinWrittenBookItem"
 	],
 	"client": [
-		"client.MixinItem"
+		"client.MixinItem",
+		"client.MixinClientPlayNetworkHandler"
 	],
 	"injectors": {
 		"defaultRequire": 1
