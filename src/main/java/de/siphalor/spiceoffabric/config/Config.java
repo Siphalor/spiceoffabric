@@ -82,7 +82,7 @@ public class Config {
 					"Expressions are simple mathematical terms with the following variables:\n" +
 					"\ttimesEaten is the number of times the current food\n" +
 					"\thungerValue is the game defined hunger value for the current item\n" +
-					"\tsaturationValue is the saturation modifier defined for the current item" +
+					"\tsaturationValue is the saturation modifier defined for the current item\n" +
 					"\tconsumeDuration is the time in ticks it takes the player to consume the current item",
 			environment = ConfigEnvironment.SYNCED
 	)
