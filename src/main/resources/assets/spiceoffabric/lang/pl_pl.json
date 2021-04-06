@@ -1,0 +1,26 @@
+{
+	"Diet Journal": "Diet Journal",
+	"spiceoffabric.journal.inside_title": "§8§l§n\u25b6 Diet Journal \u25c0§r",
+	"spiceoffabric.journal.line": "§l%s.§r %s",
+
+	"spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo-nieznanie§r",
+
+	"spiceoffabric.command.clearfoods.was_cleared": "Twoja historia jedzenia została skasowana",
+	"spiceoffabric.command.clearfoods.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
+
+	"tweed.cloth.spiceoffabric": "Konfiguracja Spice of Fabric",
+	"tweed.cloth.spiceoffabric.respawn": "Respawn",
+	"tweed.cloth.spiceoffabric.respawn.saturation": "Nasycenie",
+	"tweed.cloth.spiceoffabric.respawn.hunger": "Głód",
+	"tweed.cloth.spiceoffabric.respawn.reset-history": "Skasuj historię jedzenia po każdej śmierci",
+	"tweed.cloth.spiceoffabric.food": "Jedzenie",
+	"tweed.cloth.spiceoffabric.food.increase-eating-time": "Wydłuż czas spożywania jedzenia",
+	"tweed.cloth.spiceoffabric.food.history-length": "Długość historii",
+	"tweed.cloth.spiceoffabric.food.saturation": "Nasycenie",
+	"tweed.cloth.spiceoffabric.food.hunger": "Głód",
+	"tweed.cloth.spiceoffabric.carrot": "Tryb marchewki",
+	"tweed.cloth.spiceoffabric.carrot.enable": "Włącz tryb marchewki",
+	"tweed.cloth.spiceoffabric.carrot.start-hearts": "Ilość serc przy dołączaniu po raz pierwszy",
+	"tweed.cloth.spiceoffabric.carrot.unlock-rule": "Unikatowych jedzeń aby zdobyć serce",
+	"tweed.cloth.spiceoffabric.carrot.max-hearts": "Max ilość serc"
+}
