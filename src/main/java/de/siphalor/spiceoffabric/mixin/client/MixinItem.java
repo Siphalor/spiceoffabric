@@ -37,7 +37,6 @@ public abstract class MixinItem {
 				&& playerEntity != null
 				&& playerEntity.getHungerManager() != null
 				&& ((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory() != null
-				&& ((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().carrotHistory != null
 				&& !((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().carrotHistory.contains(FoodHistoryEntry.fromItemStack(stack))) {
         	texts.add(new TranslatableText(SpiceOfFabric.MOD_ID + ".item.tooltip.never_eaten"));
 		}

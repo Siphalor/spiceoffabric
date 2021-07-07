@@ -42,8 +42,7 @@ public class SpiceOfFabric implements ModInitializer {
 		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
 		int health = (int) player.getMaxHealth() / 2;
 		if (Config.carrot.enable && (health < Config.carrot.maxHearts || Config.carrot.maxHearts == -1)) {
-			if (foodHistory.carrotHistory == null)
-				foodHistory.carrotHistory = new HashSet<>();
+			foodHistory.carrotHistory.clear();
 			Config.setHeartUnlockExpressionValues(foodHistory.carrotHistory.size(), health);
 			boolean changed = false;
 			int loops = 0;

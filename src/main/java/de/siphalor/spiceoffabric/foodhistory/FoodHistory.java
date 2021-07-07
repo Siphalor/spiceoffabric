@@ -35,8 +35,7 @@ public class FoodHistory {
 		dictionary = HashBiMap.create();
 		history = new ConcurrentLinkedQueue<>();
 		stats = new Int2IntArrayMap();
-		if (Config.carrot.enable)
-			carrotHistory = new HashSet<>();
+		carrotHistory = new HashSet<>();
 	}
 
 	public void reset() {
@@ -52,9 +51,7 @@ public class FoodHistory {
 	}
 
 	public void resetCarrotHistory() {
-		if (carrotHistory != null) {
-			carrotHistory.clear();
-		}
+		carrotHistory.clear();
 	}
 
 	public void write(PacketByteBuf buffer) {
@@ -67,14 +64,10 @@ public class FoodHistory {
 		for (int integer : history) {
 			buffer.writeVarInt(integer);
 		}
-		if (carrotHistory != null) {
-			buffer.writeBoolean(true);
-			buffer.writeVarInt(carrotHistory.size());
-			for (FoodHistoryEntry entry : carrotHistory) {
-				entry.write(buffer);
-			}
-		} else
-			buffer.writeBoolean(false);
+		buffer.writeVarInt(carrotHistory.size());
+		for (FoodHistoryEntry entry : carrotHistory) {
+			entry.write(buffer);
+		}
 	}
 
 	public void read(PacketByteBuf buffer) {
@@ -106,13 +99,11 @@ public class FoodHistory {
 			historyList.add(NbtInt.of(id));
 		}
 		compoundTag.put("history", historyList);
-		if (carrotHistory != null) {
-			NbtList carrotHistoryList = new NbtList();
-			for (FoodHistoryEntry entry : carrotHistory) {
-				carrotHistoryList.add(entry.write(new NbtCompound()));
-			}
-			compoundTag.put("carrotHistory", carrotHistoryList);
+		NbtList carrotHistoryList = new NbtList();
+		for (FoodHistoryEntry entry : carrotHistory) {
+			carrotHistoryList.add(entry.write(new NbtCompound()));
 		}
+		compoundTag.put("carrotHistory", carrotHistoryList);
 		return compoundTag;
 	}
 
@@ -135,7 +126,7 @@ public class FoodHistory {
 		if (compoundTag.contains("carrotHistory")) {
 			list = (NbtList) compoundTag.get("carrotHistory");
 			if (Config.carrot.enable) {
-				foodHistory.carrotHistory = new HashSet<>();
+				foodHistory.carrotHistory = new HashSet<>(list.size());
 				for (NbtElement tag : list) {
 					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((NbtCompound) tag));
 				}
@@ -210,11 +201,7 @@ public class FoodHistory {
 		stats.put(id, stats.getOrDefault(id, 0) + 1);
 
 		if (Config.carrot.enable) {
-			if (carrotHistory == null) {
-				System.err.println("Carrot food history is null");
-			} else {
-				carrotHistory.add(entry);
-			}
+			carrotHistory.add(entry);
 		}
 	}
 
