@@ -120,7 +120,10 @@ public class FoodHistory {
 		FoodHistory foodHistory = new FoodHistory();
 		NbtList list = (NbtList) compoundTag.get("dictionary");
 		for (int i = 0; i < list.size(); i++) {
-			foodHistory.dictionary.put(i, new FoodHistoryEntry().read(list.getCompound(i)));
+			FoodHistoryEntry entry = new FoodHistoryEntry().read(list.getCompound(i));
+			if (entry != null) {
+				foodHistory.dictionary.put(i, entry);
+			}
 		}
 		foodHistory.nextId = foodHistory.dictionary.size();
 		list = (NbtList) compoundTag.get("history");

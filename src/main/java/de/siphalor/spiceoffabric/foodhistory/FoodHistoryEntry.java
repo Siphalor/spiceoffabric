@@ -1,5 +1,6 @@
 package de.siphalor.spiceoffabric.foodhistory;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -8,6 +9,9 @@ import net.minecraft.text.BaseText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class FoodHistoryEntry {
 	private int itemId;
@@ -49,7 +53,11 @@ public class FoodHistoryEntry {
 	}
 
 	public FoodHistoryEntry read(NbtCompound compoundTag) {
-		itemId = Registry.ITEM.getRawId(Registry.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item"))).orElse(Items.AIR));
+		Optional<Item> item = Registry.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item")));
+		if (item.isEmpty()) {
+			return null;
+		}
+		itemId = Registry.ITEM.getRawId(item.get());
 		data = compoundTag.getCompound("data");
 		return this;
 	}
