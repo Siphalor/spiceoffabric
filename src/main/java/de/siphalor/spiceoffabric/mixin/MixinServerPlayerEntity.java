@@ -50,6 +50,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 
 	@Inject(method = "copyFrom", at = @At("RETURN"))
 	public void onPlayerCopied(ServerPlayerEntity reference, boolean exact, CallbackInfo callbackInfo) {
+		double maxHealth = reference.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).getBaseValue();
 		if(!exact) {
 			Pair<Double, Double> respawnHunger = Config.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(respawnHunger.getFirst(), reference.getHungerManager().getFoodLevel()));
@@ -60,18 +61,15 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			if (Config.respawn.resetHistory) {
 				foodHistory.resetHistory();
 			}
-			double maxHealth;
 			if (Config.respawn.resetCarrotMode) {
 				foodHistory.resetCarrotHistory();
 				maxHealth = Config.carrot.startHearts * 2;
-			} else {
-				maxHealth = reference.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).getBaseValue();
 			}
-			this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
 
 			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity)(Object) this);
 		}
+		getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
 	}
 }
