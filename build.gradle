@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.5-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '4.0.0'
@@ -9,8 +9,8 @@ plugins {
 
 evaluationDependsOnChildren()
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version + '+' + minecraft_version
@@ -18,9 +18,9 @@ group = project.maven_group
 
 repositories {
 	mavenLocal()
-    maven { url "https://minecraft.curseforge.com/api/maven" }
 	mavenCentral()
 	maven { url "https://maven.terraformersmc.com/releases" }
+	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://maven.siphalor.de" }
 	maven { url 'https://jitpack.io' }
 }
@@ -37,54 +37,52 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
-	runtime 'net.objecthunter:exp4j:0.4.8'
+	runtimeOnly 'net.objecthunter:exp4j:0.4.8'
 	shadow 'net.objecthunter:exp4j:0.4.8'
 	
 	// Tweed
-	include "${project.tweed_maven}:${project.tweed_version}"
-	modImplementation ("${project.tweed_maven}:${project.tweed_version}") {
-		exclude group: ("net.fabricmc.fabric-api")
-	}
-	
+	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.0.0+"))
+	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.9"))
+
 	// AppleSkin
-	modImplementation ('com.github.squeek502:AppleSkin:1.16-fabric-SNAPSHOT') {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
+	implementation("squeek.appleskin:AppleSkin"){
+		version {
+			branch = "1.17-fabric"
+		}
 		transitive false
 	}
-	
+
 	// NBT Crafting
-	include "de.siphalor:nbtcrafting-1.16:${nbtcrafting_version}"
-	modImplementation ("de.siphalor:nbtcrafting-1.16:${nbtcrafting_version}") {
+	include "de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}"
+	modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 		exclude module: "RoughlyEnoughItems"
 		exclude module: "ModsOfTheWorld"
 	}
-	// REI
-	modImplementation ("me.shedaniel:RoughlyEnoughItems:5+") {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
-	}
 
-	// Cloth Config
-	include "me.shedaniel.cloth:config-2:${project.clothconfig_version}"
-	modImplementation ("me.shedaniel.cloth:config-2:${project.clothconfig_version}") {
-		exclude group: "net.fabricmc.fabric-api"
-		transitive false
-	}
+	// REI
+	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:6.0+"
+	modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:6.0+"
+
+	// LazyDFU
+	modRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property "version", version
 
-	from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
+	afterEvaluate {
+		from(sourceSets.main.resources.srcDirs) {
+			include "fabric.mod.json"
+			expand "version": version
+			duplicatesStrategy DuplicatesStrategy.INCLUDE
+		}
 	}
 }
 

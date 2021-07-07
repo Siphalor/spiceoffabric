@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(CakeBlock.class)
 public class MixinCakeBlock {
 	@Redirect(method = "tryEat", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/HungerManager;add(IF)V"))
-	private void eat(HungerManager hungerManager, int baseHunger, float baseSaturation, WorldAccess world, BlockPos pos, BlockState state, PlayerEntity player) {
+	private static void eat(HungerManager hungerManager, int baseHunger, float baseSaturation, WorldAccess world, BlockPos pos, BlockState state, PlayerEntity player) {
 		ItemStack stack = new ItemStack(Items.CAKE);
 		FoodHistory foodHistory = ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
 		Config.setHungerExpressionValues(foodHistory.getTimesEaten(stack), baseHunger, baseSaturation, stack.getMaxUseTime());

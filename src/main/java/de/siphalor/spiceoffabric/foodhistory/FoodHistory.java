@@ -94,47 +94,47 @@ public class FoodHistory {
 		buildStats();
 	}
 
-	public CompoundTag write(CompoundTag compoundTag) {
+	public NbtCompound write(NbtCompound compoundTag) {
 		defragmentDictionary();
-		ListTag list = new ListTag();
+		NbtList list = new NbtList();
 		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
-			list.add(entry.getKey(), entry.getValue().write(new CompoundTag()));
+			list.add(entry.getKey(), entry.getValue().write(new NbtCompound()));
 		}
 		compoundTag.put("dictionary", list);
-		ListTag historyList = new ListTag();
+		NbtList historyList = new NbtList();
 		for (Integer id : history) {
-			historyList.add(IntTag.of(id));
+			historyList.add(NbtInt.of(id));
 		}
 		compoundTag.put("history", historyList);
 		if (carrotHistory != null) {
-			ListTag carrotHistoryList = new ListTag();
+			NbtList carrotHistoryList = new NbtList();
 			for (FoodHistoryEntry entry : carrotHistory) {
-				carrotHistoryList.add(entry.write(new CompoundTag()));
+				carrotHistoryList.add(entry.write(new NbtCompound()));
 			}
 			compoundTag.put("carrotHistory", carrotHistoryList);
 		}
 		return compoundTag;
 	}
 
-	public static FoodHistory read(CompoundTag compoundTag) {
+	public static FoodHistory read(NbtCompound compoundTag) {
 		FoodHistory foodHistory = new FoodHistory();
-		ListTag list = (ListTag) compoundTag.get("dictionary");
+		NbtList list = (NbtList) compoundTag.get("dictionary");
 		for (int i = 0; i < list.size(); i++) {
 			foodHistory.dictionary.put(i, new FoodHistoryEntry().read(list.getCompound(i)));
 		}
 		foodHistory.nextId = foodHistory.dictionary.size();
-		list = (ListTag) compoundTag.get("history");
-		for (Tag tag : list) {
-			foodHistory.history.offer(((IntTag) tag).getInt());
+		list = (NbtList) compoundTag.get("history");
+		for (NbtElement tag : list) {
+			foodHistory.history.offer(((NbtInt) tag).intValue());
 		}
 		foodHistory.buildStats();
 
 		if (compoundTag.contains("carrotHistory")) {
-			list = (ListTag) compoundTag.get("carrotHistory");
+			list = (NbtList) compoundTag.get("carrotHistory");
 			if (Config.carrot.enable) {
 				foodHistory.carrotHistory = new HashSet<>();
-				for (Tag tag : list) {
-					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((CompoundTag) tag));
+				for (NbtElement tag : list) {
+					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((NbtCompound) tag));
 				}
 			}
 		}
@@ -220,10 +220,10 @@ public class FoodHistory {
 		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
 	}
 
-	public ListTag genJournalPages(PlayerEntity playerEntity) {
+	public NbtList genJournalPages(PlayerEntity playerEntity) {
 		boolean hasMod = ServerPlayNetworking.canSend((ServerPlayerEntity) playerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET);
 
-		ListTag pages = new ListTag();
+		NbtList pages = new NbtList();
 
 		LiteralText textOnPage = new LiteralText("");
 		textOnPage.append(
@@ -270,14 +270,14 @@ public class FoodHistory {
 			number++;
 			linesOnPage++;
 			if (linesOnPage >= 14) {
-				pages.add(StringTag.of(Text.Serializer.toJson(textOnPage)));
+				pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
 				linesOnPage = 0;
 				textOnPage = new LiteralText("");
 			}
 		}
 
 		if (linesOnPage > 0) {
-			pages.add(StringTag.of(Text.Serializer.toJson(textOnPage)));
+			pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
 		}
 
 		return pages;

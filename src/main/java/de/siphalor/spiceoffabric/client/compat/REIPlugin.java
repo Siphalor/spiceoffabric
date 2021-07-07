@@ -1,31 +1,26 @@
 package de.siphalor.spiceoffabric.client.compat;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.NbtCompound;
 
 @Environment(EnvType.CLIENT)
-public class REIPlugin implements REIPluginV0 {
-	@Override
-	public Identifier getPluginIdentifier() {
-		return new Identifier(SpiceOfFabric.MOD_ID, "rei_plugin");
-	}
+public class REIPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerEntries(EntryRegistry entryRegistry) {
 		ItemStack itemStack = new ItemStack(Items.WRITTEN_BOOK);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		compoundTag.putString("title", "");
-		compoundTag.putString("author", "Me");
-		compoundTag.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
+		NbtCompound compound = itemStack.getOrCreateTag();
+		compound.putString("title", "");
+		compound.putString("author", "Me");
+		compound.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
 		itemStack.getOrCreateSubTag("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
-		entryRegistry.registerEntries(EntryStack.create(itemStack));
+		entryRegistry.addEntries(EntryStacks.of(itemStack));
 	}
 }

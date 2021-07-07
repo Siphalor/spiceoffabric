@@ -41,7 +41,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, ServerPlayerInteractionManager interactionManager, CallbackInfo callbackInfo) {
+	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo ci) {
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity)(Object) this);
 
 		if(Config.carrot.enable)

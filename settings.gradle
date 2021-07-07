@@ -8,3 +8,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+sourceControl {
+    gitRepository(uri("https://github.com/squeek502/AppleSkin.git")) {
+        producesModule('squeek.appleskin:AppleSkin')
+    }
+}

@@ -27,17 +27,13 @@
 		"rei_plugins_v0": [
 			"de.siphalor.spiceoffabric.client.compat.REIPlugin"
 		],
-		"tweed:config": [
+		"tweed4:config": [
 			"de.siphalor.spiceoffabric.config.Config"
 		]
 	},
 	"mixins": [
 		{
 			"config": "spiceoffabric.mixins.json",
-			"environment": "*"
-		},
-		{
-			"config": "spiceoffabric.compat.mixins.json",
 			"environment": "*"
 		}
 	],

@@ -2,12 +2,12 @@ package de.siphalor.spiceoffabric.config;
 
 import com.google.common.base.CaseFormat;
 import com.mojang.datafixers.util.Pair;
-import de.siphalor.tweed.config.ConfigEnvironment;
-import de.siphalor.tweed.config.ConfigScope;
-import de.siphalor.tweed.config.annotated.*;
-import de.siphalor.tweed.config.constraints.RangeConstraint;
-import de.siphalor.tweed.data.DataObject;
-import de.siphalor.tweed.data.DataValue;
+import de.siphalor.tweed4.annotated.*;
+import de.siphalor.tweed4.config.ConfigEnvironment;
+import de.siphalor.tweed4.config.ConfigScope;
+import de.siphalor.tweed4.config.constraints.RangeConstraint;
+import de.siphalor.tweed4.data.DataObject;
+import de.siphalor.tweed4.data.DataValue;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
