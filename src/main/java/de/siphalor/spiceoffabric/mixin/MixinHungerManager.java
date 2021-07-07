@@ -10,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,6 +22,7 @@ import java.util.Objects;
 @Mixin(HungerManager.class)
 public abstract class MixinHungerManager implements IHungerManager {
 
+	@Nullable
 	protected ServerPlayerEntity spiceOfFabric_player = null;
 
 	@Shadow public abstract void add(int int_1, float float_1);
@@ -60,7 +62,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 		int hunger = Config.getHungerValue();
 		float saturation = Config.getSaturationValue();
 		add(hunger, saturation);
-		if(spiceOfFabric_player != null) {
+		if (spiceOfFabric_player != null) {
 			SpiceOfFabric.onEaten(spiceOfFabric_player, spiceOfFabric_foodHistory, stack);
 		}
 		callbackInfo.cancel();
@@ -71,7 +73,9 @@ public abstract class MixinHungerManager implements IHungerManager {
 		if(compoundTag.contains(SpiceOfFabric.FOOD_HISTORY_ID, 10)) {
 			spiceOfFabric_foodHistory = FoodHistory.read(compoundTag.getCompound(SpiceOfFabric.FOOD_HISTORY_ID));
 		}
-		((IServerPlayerEntity) spiceOfFabric_player).spiceOfFabric_scheduleFoodHistorySync();
+		if (spiceOfFabric_player != null) {
+			((IServerPlayerEntity) spiceOfFabric_player).spiceOfFabric_scheduleFoodHistorySync();
+		}
 		/*if(Config.carrotEnabled.value && spiceOfFabric_foodHistory.carrotHistory == null) {
 			spiceOfFabric_player.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(Config.startHearts.value * 2);
 			spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
