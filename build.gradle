@@ -2,12 +2,10 @@ plugins {
 	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
-	id 'com.github.johnrengelman.shadow' version '4.0.0'
+	id 'com.github.johnrengelman.shadow' version '7.0.0'
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
-	id 'com.modrinth.minotaur' version '1.1.0'
+	id 'com.modrinth.minotaur' version '1.2+'
 }
-
-evaluationDependsOnChildren()
 
 sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_16
@@ -37,9 +35,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
-	runtimeOnly 'net.objecthunter:exp4j:0.4.8'
-	shadow 'net.objecthunter:exp4j:0.4.8'
-	
+	include(runtimeOnly('net.objecthunter:exp4j:0.4.8'))
+
 	// Tweed
 	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.0.0+"))
 	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.0.0+"))
@@ -58,13 +55,12 @@ dependencies {
 	}
 
 	// NBT Crafting
-	include "de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}"
-	modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
+	include(modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
 		exclude group: ("net.fabricmc.fabric-api")
 		exclude module: "modmenu"
 		exclude module: "RoughlyEnoughItems"
 		exclude module: "ModsOfTheWorld"
-	}
+	})
 
 	// REI
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:6.0+"
@@ -97,18 +93,18 @@ tasks.withType(JavaCompile) {
 // if it is present.
 // If you remove this task, sources will not be generated.
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
+	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 
 jar {
 	from "LICENSE"
-	classifier = ""
+	archiveClassifier.set("")
 }
 
 shadowJar {
 	configurations = [project.configurations.shadow]
-	classifier = "dev"
+	archiveClassifier.set("dev")
 	relocate "net.objecthunter", "de.siphalor.spiceoffabric.shadow.net.objecthunter"
 }
 
@@ -160,7 +156,7 @@ def getChangelog() {
 
 No changelog found!"""
 	}
-	return ('git log -1 --format=format:"## %s%n%n%b%nRelease by %an" ' + versionCommit).execute().text.trim()
+	return ('git log -1 --format=format:##%x20%s%n%n%b%nRelease%x20by%x20%an ' + versionCommit).execute().text.trim()
 }
 
 task uploadToModSites {
@@ -177,6 +173,7 @@ if (project.hasProperty("siphalorCurseForgeApi")) {
 			releaseType = project.mod_release
 			changelogType = "markdown"
 			changelog = changes
+			addGameVersion('Fabric')
 			for (version in ((String) project.mod_mc_versions).split(";")) {
 				addGameVersion(version)
 			}
@@ -207,7 +204,7 @@ if (project.hasProperty("siphalorModrinthApi")) {
 		versionName = "[${project.mod_mc_version_specifier}] ${project.mod_version}"
 		changelog = getChangelog()
 		uploadFile = remapJar
-		releaseType = project.mod_release
+		versionType = project.mod_release
 		for (version in ((String) project.mod_mc_versions).split(";")) {
 			addGameVersion(version)
 		}
