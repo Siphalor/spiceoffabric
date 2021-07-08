@@ -35,7 +35,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// exp4j
-	include(runtimeOnly('net.objecthunter:exp4j:0.4.8'))
+	include(implementation('net.objecthunter:exp4j:0.4.8'))
 
 	// Tweed
 	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.0.0+"))
