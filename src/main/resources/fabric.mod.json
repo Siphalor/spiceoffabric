@@ -3,7 +3,7 @@
 	"id": "spiceoffabric",
 	"version": "${version}",
 	"name": "Spice of Fabric",
-	"description": "A new iteration on the good ol' \"Spice of life\".",
+	"description": "A new iteration on the good ol' \"Spice of life\".\n\nThis mod embeds exp4j (https://github.com/fasseg/exp4j), licensed as Apache 2.0.",
 	"authors": [
 		"Siphalor",
 		"CoolMineman",
