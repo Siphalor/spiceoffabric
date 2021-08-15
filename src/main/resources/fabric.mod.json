@@ -29,6 +29,9 @@
 		],
 		"tweed4:config": [
 			"de.siphalor.spiceoffabric.config.Config"
+		],
+		"appleskin": [
+			"de.siphalor.spiceoffabric.client.compat.AppleSkinPlugin"
 		]
 	},
 	"mixins": [
@@ -42,5 +45,8 @@
 	},
 	"breaks": {
 		"modmenu": "<1.10"
+	},
+	"conflicts": {
+		"appleskin": "<1.17-2.1"
 	}
 }
