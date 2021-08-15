@@ -16,7 +16,7 @@ import net.objecthunter.exp4j.function.Function;
 		scope = ConfigScope.SMALLEST,
 		environment = ConfigEnvironment.SERVER,
 		casing = CaseFormat.LOWER_HYPHEN,
-		tailors = "tweed:cloth"
+		tailors = "tweed4:cloth"
 )
 public class Config {
 	@AConfigExclude
