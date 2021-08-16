@@ -57,10 +57,11 @@ public class Config {
 	};
 
 	@AConfigEntry(
-			comment = "Here can you edit the used expressions used for calculating the player stats after respawning.\n" +
-					"Expressions are simple mathematical terms with the following variables:\n" +
-					"\thunger is the amount of hunger the player had when dying\n" +
-					"\tsaturation is the amount of hunger the player had when dying"
+			comment = """
+					Here can you edit the used expressions used for calculating the player stats after respawning.
+					Expressions are simple mathematical terms with the following variables:
+					\thunger is the amount of hunger the player had when dying
+					\tsaturation is the amount of hunger the player had when dying"""
 	)
 	public static Respawn respawn;
 	public static class Respawn {
@@ -78,12 +79,13 @@ public class Config {
 	}
 
 	@AConfigEntry(
-			comment = "Here can you edit the used expressions used for calculating the food stats.\n" +
-					"Expressions are simple mathematical terms with the following variables:\n" +
-					"\ttimesEaten is the number of times the current food\n" +
-					"\thungerValue is the game defined hunger value for the current item\n" +
-					"\tsaturationValue is the saturation modifier defined for the current item\n" +
-					"\tconsumeDuration is the time in ticks it takes the player to consume the current item",
+			comment = """
+					Here can you edit the used expressions used for calculating the food stats.
+					Expressions are simple mathematical terms with the following variables:
+					\ttimesEaten is the number of times the current food
+					\thungerValue is the game defined hunger value for the current item
+					\tsaturationValue is the saturation modifier defined for the current item
+					\tconsumeDuration is the time in ticks it takes the player to consume the current item""",
 			environment = ConfigEnvironment.SYNCED
 	)
 	public static Food food;
@@ -105,8 +107,9 @@ public class Config {
 	}
 
 	@AConfigEntry(
-			comment = "Here can you enable the good ol' carrot style.\n" +
-					"This means you start with a set amount of hearts and extend it by eating unique foods"
+			comment = """
+					Here can you enable the good ol' carrot style.
+					This means you start with a set amount of hearts and extend it by eating unique foods"""
 	)
 	public static Carrot carrot;
 	public static class Carrot {
@@ -120,15 +123,17 @@ public class Config {
 		public int startHearts = 6;
 
 		@AConfigEntry(
-				comment = "Specifies an expression for how many foods a player needs to eat to earn the next heart.\n" +
-						"The result resembles the absolute amount of unique food."
+				comment = """
+						Specifies an expression for how many foods a player needs to eat to earn the next heart.
+						The result resembles the absolute amount of unique food."""
 		)
 		public String unlockRule = "2*pow(2, heartAmount - 6)";
 
 		@AConfigEntry(
-				comment = "Specifies a maximum number of hearts a player can get to through this carrot mode.\n" +
-						"When 0, carrot mode is effectively disabled. (Why should you do this? :P)\n" +
-						"When -1, you can gain a basically infinite amount of hearts.",
+				comment = """
+						Specifies a maximum number of hearts a player can get to through this carrot mode.
+						When 0, carrot mode is effectively disabled. (Why should you do this? :P)
+						When -1, you can gain a basically infinite amount of hearts.""",
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..100")
 		)
 		public int maxHearts = -1;
