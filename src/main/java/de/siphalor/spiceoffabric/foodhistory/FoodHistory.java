@@ -64,9 +64,14 @@ public class FoodHistory {
 		for (int integer : history) {
 			buffer.writeVarInt(integer);
 		}
-		buffer.writeVarInt(carrotHistory.size());
-		for (FoodHistoryEntry entry : carrotHistory) {
-			entry.write(buffer);
+		if (Config.carrot.enable) {
+			buffer.writeBoolean(true);
+			buffer.writeVarInt(carrotHistory.size());
+			for (FoodHistoryEntry entry : carrotHistory) {
+				entry.write(buffer);
+			}
+		} else {
+			buffer.writeBoolean(false);
 		}
 	}
 
