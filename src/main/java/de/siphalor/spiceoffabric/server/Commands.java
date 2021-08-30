@@ -22,17 +22,17 @@ import java.util.Collections;
 public class Commands {
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) -> {
-			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_foods")
+			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_history")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context ->
-							clearFoods(
+							clearHistory(
 									context.getSource(),
 									Collections.singleton(context.getSource().getPlayer())
 							)
 					).then(
-							CommandManager.argument("targets", EntityArgumentType.player())
+							CommandManager.argument("targets", EntityArgumentType.players())
 							.executes(context ->
-									clearFoods(
+									clearHistory(
 											context.getSource(),
 											EntityArgumentType.getPlayers(context, "targets")
 									)
@@ -42,29 +42,29 @@ public class Commands {
 		});
 	}
 
-	private static int clearFoods(ServerCommandSource commandSource, Collection<ServerPlayerEntity> serverPlayerEntities) {
-		for(ServerPlayerEntity serverPlayerEntity : serverPlayerEntities) {
-			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_clearHistory();
+	private static int clearHistory(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
+		for(ServerPlayerEntity player : players) {
+			((IHungerManager) player.getHungerManager()).spiceOfFabric_clearHistory();
 			if (Config.carrot.enable) {
-				SpiceOfFabric.updateMaxHealth(serverPlayerEntity);
+				SpiceOfFabric.updateMaxHealth(player);
 			}
-			if (ServerPlayNetworking.canSend(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
-				ServerPlayNetworking.send(serverPlayerEntity, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
-				serverPlayerEntity.sendMessage(new TranslatableText("spiceoffabric.command.clearfoods.was_cleared"), false);
+			if (ServerPlayNetworking.canSend(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
+				ServerPlayNetworking.send(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
+				player.sendMessage(new TranslatableText("spiceoffabric.command.clearfoods.was_cleared"), false);
 			} else {
-				serverPlayerEntity.sendMessage(new LiteralText("Your food history has been cleared"), false);
+				player.sendMessage(new LiteralText("Your food history has been cleared"), false);
 			}
 		}
 
 		try {
-			if (commandSource.getEntity() instanceof ServerPlayerEntity && ServerPlayNetworking.canSend(commandSource.getPlayer(), SpiceOfFabric.ADD_FOOD_S2C_PACKET)) {
-				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clearfoods.cleared_players", serverPlayerEntities.size()), true);
+			if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clearfoods.cleared_players", players.size()), true);
 			} else {
-				commandSource.sendFeedback(new LiteralText("Cleared food histories of " + serverPlayerEntities.size() + " players."), true);
+				commandSource.sendFeedback(new LiteralText("Cleared food histories of " + players.size() + " players."), true);
 			}
 		} catch (CommandSyntaxException e) {
 			e.printStackTrace();
 		}
-		return serverPlayerEntities.size();
+		return players.size();
 	}
 }
