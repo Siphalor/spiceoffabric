@@ -43,6 +43,10 @@ public class SpiceOfFabric implements ModInitializer {
 		Commands.register();
 	}
 
+	public static boolean hasMod(ServerPlayerEntity player) {
+		return ServerPlayNetworking.canSend(player, SYNC_FOOD_HISTORY_S2C_PACKET);
+	}
+
 	public static void onEaten(ServerPlayerEntity player, FoodHistory foodHistory, ItemStack stack) {
 		foodHistory.addFood(stack, player);
 		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
