@@ -133,12 +133,6 @@ public class Config {
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
 		public int maxHealth = -1;
-
-		@AConfigEntry(
-				comment = """
-						Don't mind me - I'm just here for legacy reasons :P"""
-		)
-		public int oldStartHearts = -1;
 	}
 
 	@AConfigListener
