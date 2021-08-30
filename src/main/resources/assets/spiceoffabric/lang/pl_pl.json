@@ -5,8 +5,8 @@
 
 	"spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo-nieznanie§r",
 
-	"spiceoffabric.command.clearfoods.was_cleared": "Twoja historia jedzenia została skasowana",
-	"spiceoffabric.command.clearfoods.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
+	"spiceoffabric.command.clear_history.was_cleared": "Twoja historia jedzenia została skasowana",
+	"spiceoffabric.command.clear_history.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
 
 	"tweed.cloth.spiceoffabric": "Konfiguracja Spice of Fabric",
 	"tweed.cloth.spiceoffabric.respawn": "Respawn",

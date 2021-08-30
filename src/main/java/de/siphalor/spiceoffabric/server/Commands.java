@@ -50,7 +50,7 @@ public class Commands {
 			}
 			if (ServerPlayNetworking.canSend(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
 				ServerPlayNetworking.send(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
-				player.sendMessage(new TranslatableText("spiceoffabric.command.clearfoods.was_cleared"), false);
+				player.sendMessage(new TranslatableText("spiceoffabric.command.clear_history.was_cleared"), false);
 			} else {
 				player.sendMessage(new LiteralText("Your food history has been cleared"), false);
 			}
@@ -58,7 +58,7 @@ public class Commands {
 
 		try {
 			if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
-				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clearfoods.cleared_players", players.size()), true);
+				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
 			} else {
 				commandSource.sendFeedback(new LiteralText("Cleared food histories of " + players.size() + " players."), true);
 			}

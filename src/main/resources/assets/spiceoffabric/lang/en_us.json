@@ -5,8 +5,8 @@
 
 	"spiceoffabric.item.tooltip.never_eaten": "§3§oThis smells mysteriously unfamiliar§r",
 
-	"spiceoffabric.command.clearfoods.was_cleared": "Your food history has been reset",
-	"spiceoffabric.command.clearfoods.cleared_players": "Cleared food histories of %s players",
+	"spiceoffabric.command.clear_history.was_cleared": "Your food history has been reset",
+	"spiceoffabric.command.clear_history.cleared_players": "Cleared food histories of %s players",
 
 	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
 	"tweed.cloth.spiceoffabric.respawn": "Respawn",
