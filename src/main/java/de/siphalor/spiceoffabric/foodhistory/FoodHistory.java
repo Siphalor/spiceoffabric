@@ -7,6 +7,8 @@ import de.siphalor.spiceoffabric.config.Config;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -14,6 +16,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -213,6 +216,18 @@ public class FoodHistory {
 	public void removeLastFood() {
 		int id = history.remove();
 		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
+	}
+
+	public int getCarrotHealthOffset(PlayerEntity player) {
+		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
+		return Math.max(1, MathHelper.floor(Config.healthFormulaExpression.evaluate())) - (int) maxHealthAttr.getBaseValue();
+	}
+
+	public int getCarrotMaxHealth(PlayerEntity player) {
+		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
+		return MathHelper.floor(Config.healthFormulaExpression.evaluate());
 	}
 
 	public NbtList genJournalPages(PlayerEntity playerEntity) {

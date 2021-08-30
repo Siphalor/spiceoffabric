@@ -6,6 +6,7 @@ import de.siphalor.tweed4.annotated.*;
 import de.siphalor.tweed4.config.ConfigEnvironment;
 import de.siphalor.tweed4.config.ConfigScope;
 import de.siphalor.tweed4.config.constraints.RangeConstraint;
+import de.siphalor.tweed4.data.DataList;
 import de.siphalor.tweed4.data.DataObject;
 import de.siphalor.tweed4.data.DataValue;
 import net.objecthunter.exp4j.Expression;
@@ -36,9 +37,9 @@ public class Config {
 	public static Expression saturationAfterDeathExpression;
 
 	@AConfigExclude
-	static final String[] heartUnlockVariables = new String[]{"uniqueFoodsEaten", "heartAmount"};
+	static final String[] healthFormulaVariables = new String[]{"uniqueFoodsEaten", "baseHealth"};
 	@AConfigExclude
-	public static Expression heartUnlockExpression;
+	public static Expression healthFormulaExpression;
 
 	@AConfigExclude
 	private static final Function[] customExpFunctions = new Function[]{
@@ -117,26 +118,27 @@ public class Config {
 		public boolean enable = false;
 
 		@AConfigEntry(
-				comment = "Sets the amount of hearts with which a new player spawns",
-				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "1..100")
-		)
-		public int startHearts = 6;
-
-		@AConfigEntry(
 				comment = """
-						Specifies an expression for how many foods a player needs to eat to earn the next heart.
-						The result resembles the absolute amount of unique food."""
+						Specifies an offset in health points (half hearts) from default health.
+						Default health in vanilla is 20 but that may change through mods like Origins.
+						The resulting value will be floored before use."""
 		)
-		public String unlockRule = "2*pow(2, heartAmount - 6)";
+		public String healthFormula = "baseHealth + log2(uniqueFoodsEaten) - 8";
 
 		@AConfigEntry(
 				comment = """
 						Specifies a maximum number of hearts a player can get to through this carrot mode.
 						When 0, carrot mode is effectively disabled. (Why should you do this? :P)
 						When -1, you can gain a basically infinite amount of hearts.""",
-				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..100")
+				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
-		public int maxHearts = -1;
+		public int maxHealth = -1;
+
+		@AConfigEntry(
+				comment = """
+						Don't mind me - I'm just here for legacy reasons :P"""
+		)
+		public int oldStartHearts = -1;
 	}
 
 	@AConfigListener
@@ -148,13 +150,14 @@ public class Config {
 		hungerAfterDeathExpression = new ExpressionBuilder(respawn.hunger).variables(afterDeathVariables).functions(customExpFunctions).build();
 		saturationAfterDeathExpression = new ExpressionBuilder(respawn.saturation).variables(afterDeathVariables).functions(customExpFunctions).build();
 
-		heartUnlockExpression = new ExpressionBuilder(carrot.unlockRule).variables(heartUnlockVariables).functions(customExpFunctions).build();
+		healthFormulaExpression = new ExpressionBuilder(carrot.healthFormula).variables(healthFormulaVariables).functions(customExpFunctions).build();
 	}
 
 	@AConfigFixer("food")
-	public static void fixFood(DataObject<?> foodObject, DataObject<?> root) {
+	public static <V extends DataValue<V, L, O>, L extends DataList<V, L, O>, O extends DataObject<V, L, O>>
+	void fixFood(O foodObject, O root) {
 		if (foodObject.has("increase-eating-time")) {
-			DataValue<?> dataValue = foodObject.get("increase-eating-time");
+			V dataValue = foodObject.get("increase-eating-time");
 			if (dataValue.isBoolean()) {
 				if (dataValue.asBoolean()) {
 					foodObject.set("consume-duration", "consumeDuration * timesEaten");
@@ -163,6 +166,33 @@ public class Config {
 				}
 			}
 			foodObject.remove("increase-eating-time");
+		}
+	}
+
+	@AConfigFixer("carrot")
+	public static <V extends DataValue<V, L, O>, L extends DataList<V, L, O>, O extends DataObject<V, L, O>>
+	void fixCarrot(O carrotObject, O root) {
+		boolean oldFormulaFound = false;
+		if (carrotObject.has("start-hearts")) {
+			carrotObject.set("old-start-hearts", carrotObject.get("start-hearts"));
+			carrotObject.remove("start-hearts");
+			oldFormulaFound = true;
+		}
+		if (carrotObject.has("unlock-rule")) {
+			carrotObject.set("old-unlock-rule", carrotObject.get("unlock-rule"));
+			carrotObject.remove("unlock-rule");
+			oldFormulaFound = true;
+		}
+		if (carrotObject.hasInt("max-hearts")) {
+			int maxHearts = carrotObject.getInt("max-hearts", -1);
+			if (maxHearts < 0) {
+				carrotObject.set("max-health", -1);
+			} else {
+				carrotObject.set("max-health", maxHearts * 2);
+			}
+		}
+		if (carrotObject.getBoolean("enable", false) && oldFormulaFound) {
+			System.err.println("[Spice of Fabric] Found old carrot configuration! You'll need to fix the config manually since formulas changed drastically");
 		}
 	}
 
@@ -195,9 +225,9 @@ public class Config {
 		return Pair.of(hungerAfterDeathExpression.evaluate(), saturationAfterDeathExpression.evaluate());
 	}
 
-	public static void setHeartUnlockExpressionValues(int uniqueFoods, int heartAmount) {
-		heartUnlockExpression.setVariable("uniqueFoodsEaten", uniqueFoods);
-		heartUnlockExpression.setVariable("heartAmount", heartAmount);
+	public static void setHealthFormulaExpressionValues(int uniqueFoods, int baseHealth) {
+		healthFormulaExpression.setVariable("uniqueFoodsEaten", uniqueFoods);
+		healthFormulaExpression.setVariable("baseHealth", baseHealth);
 	}
 
 	public static int getHungerValue() {
