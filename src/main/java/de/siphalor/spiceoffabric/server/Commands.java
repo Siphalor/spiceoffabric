@@ -22,7 +22,7 @@ import java.util.Collections;
 public class Commands {
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) -> {
-			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clearfoods")
+			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_foods")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context ->
 							clearFoods(
