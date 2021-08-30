@@ -59,17 +59,17 @@ public class Config {
 
 	@AConfigEntry(
 			comment = """
-					Here can you edit the used expressions used for calculating the player stats after respawning.
-					Expressions are simple mathematical terms with the following variables:
+					Edit the expressions that are used for calculating the player stats after respawning.
+					Expressions are mathematical terms with the following variables:
 					\thunger is the amount of hunger the player had when dying
 					\tsaturation is the amount of hunger the player had when dying"""
 	)
 	public static Respawn respawn;
 	public static class Respawn {
-		@AConfigEntry(comment = "An expression to calculate the hunger value after a fresh respawn")
+		@AConfigEntry(comment = "Expression that determines the hunger level after a fresh respawn")
 		public String hunger = "max(14, hunger)";
 
-		@AConfigEntry(comment = "An expression to calculate the saturation value after a fresh respawn")
+		@AConfigEntry(comment = "Expression that determines the saturation level after a fresh respawn")
 		public String saturation = "saturation";
 
 		@AConfigEntry(comment = "Sets whether the food history should be cleaned at death")
@@ -81,8 +81,8 @@ public class Config {
 
 	@AConfigEntry(
 			comment = """
-					Here can you edit the used expressions used for calculating the food stats.
-					Expressions are simple mathematical terms with the following variables:
+					Change the expressions used for calculating the various food properties.
+					Expressions are mathematical terms with the following variables:
 					\ttimesEaten is the number of times the current food
 					\thungerValue is the game defined hunger value for the current item
 					\tsaturationValue is the saturation modifier defined for the current item
@@ -91,17 +91,17 @@ public class Config {
 	)
 	public static Food food;
 	public static class Food {
-		@AConfigEntry(comment = "Calculates the food level bonus to earn from eating a food item")
+		@AConfigEntry(comment = "Expression that determines the food level to restore when eating a food item")
 		public String hunger = "hungerValue * 0.7 ^ timesEaten";
 
-		@AConfigEntry(comment = "Calculates the saturation modifier for a food item")
+		@AConfigEntry(comment = "Expression that determines the saturation modifier for a food item")
 		public String saturation = "saturationValue";
 
-		@AConfigEntry(comment = "Calculates the time to consume an item in ticks")
+		@AConfigEntry(comment = "Expression that determines the time requited to consume an item, given in ticks")
 		public String consumeDuration = "consumeDuration * 1.3 ^ timesEaten";
 
 		@AConfigEntry(
-				comment = "Sets the amount of eaten foods to keep in the history",
+				comment = "Sets the amount of last eaten foods to use for the calculations in this category",
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "0..")
 		)
 		public int historyLength = 20;
@@ -109,8 +109,8 @@ public class Config {
 
 	@AConfigEntry(
 			comment = """
-					Here can you enable the good ol' carrot style.
-					This means you start with a set amount of hearts and extend it by eating unique foods"""
+					The good ol' carrot style.
+					Carrot style means, that you start with a certain amount of hearts and gain more by eating unique foods."""
 	)
 	public static Carrot carrot;
 	public static class Carrot {
@@ -127,8 +127,8 @@ public class Config {
 
 		@AConfigEntry(
 				comment = """
-						Specifies a maximum number of hearts a player can get to through this carrot mode.
-						When 0, carrot mode is effectively disabled. (Why should you do this? :P)
+						Specifies the maximum number of health points (half hearts) a player can get to through carrot mode.
+						When 0, carrot mode is effectively disabled. (Why would you do this? :P)
 						When -1, you can gain a basically infinite amount of hearts.""",
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
@@ -184,6 +184,7 @@ public class Config {
 			} else {
 				carrotObject.set("max-health", maxHearts * 2);
 			}
+			carrotObject.remove("max-hearts");
 		}
 		if (carrotObject.getBoolean("enable", false) && oldFormulaFound) {
 			System.err.println("[Spice of Fabric] Found old carrot configuration! You'll need to fix the config manually since formulas changed drastically");
