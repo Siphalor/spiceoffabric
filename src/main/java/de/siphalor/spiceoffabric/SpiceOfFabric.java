@@ -11,14 +11,17 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.UUID;
 
 public class SpiceOfFabric implements ModInitializer {
@@ -51,7 +54,7 @@ public class SpiceOfFabric implements ModInitializer {
 		foodHistory.addFood(stack, player);
 		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
 		if (Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1)) {
-			SpiceOfFabric.updateMaxHealth(player);
+			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
 	}
 
@@ -64,11 +67,19 @@ public class SpiceOfFabric implements ModInitializer {
 		);
 	}
 
-	public static void updateMaxHealth(PlayerEntity player) {
+	public static void updateMaxHealth(ServerPlayerEntity player, boolean sync, boolean announce) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+		double oldValue = maxHealthAttr.getValue();
 		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
 		FoodHistory foodHistory = ((IHungerManager) player.getHungerManager()).spiceOfFabric_getFoodHistory();
 		maxHealthAttr.addPersistentModifier(createHealthModifier(foodHistory.getCarrotHealthOffset(player)));
+		if (sync) {
+			player.networkHandler.sendPacket(new EntityAttributesS2CPacket(player.getId(), Collections.singleton(maxHealthAttr)));
+			player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
+		}
+		if (announce && maxHealthAttr.getValue() > oldValue) {
+			player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1F, 1F);
+		}
 	}
 
 	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {

@@ -89,7 +89,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 					if (Config.carrot.enable) {
 						EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
 						if (modifier == null) {
-							SpiceOfFabric.updateMaxHealth(spiceOfFabric_player);
+							SpiceOfFabric.updateMaxHealth(spiceOfFabric_player, false, false);
 						}
 					}
 				} else { // Migrate from old system

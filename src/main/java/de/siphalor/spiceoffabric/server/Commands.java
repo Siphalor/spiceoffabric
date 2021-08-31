@@ -46,7 +46,7 @@ public class Commands {
 		for(ServerPlayerEntity player : players) {
 			((IHungerManager) player.getHungerManager()).spiceOfFabric_clearHistory();
 			if (Config.carrot.enable) {
-				SpiceOfFabric.updateMaxHealth(player);
+				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
 			if (ServerPlayNetworking.canSend(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
 				ServerPlayNetworking.send(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
