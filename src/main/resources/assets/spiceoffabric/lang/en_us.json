@@ -7,6 +7,10 @@
 
 	"spiceoffabric.command.clear_history.was_cleared": "Your food history has been reset",
 	"spiceoffabric.command.clear_history.cleared_players": "Cleared food histories of %s players",
+	"spiceoffabric.command.set_base_max_health.target": "Your health has been adjusted",
+	"spiceoffabric.command.set_base_max_health.executor": "Set base health of %d players to %d (%s hearts)",
+	"spiceoffabric.command.update_max_health.success": "Refreshed the health of %d players",
+	"spiceoffabric.commands.carrot_not_enabled": "Carrot mode is not enabled!",
 
 	"tweed.cloth.spiceoffabric": "Spice of Fabric Config",
 	"tweed.cloth.spiceoffabric.respawn": "Respawn",

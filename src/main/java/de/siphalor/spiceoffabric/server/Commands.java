@@ -1,5 +1,6 @@
 package de.siphalor.spiceoffabric.server;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
@@ -8,6 +9,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
@@ -31,19 +33,56 @@ public class Commands {
 							)
 					).then(
 							CommandManager.argument("targets", EntityArgumentType.players())
-							.executes(context ->
-									clearHistory(
-											context.getSource(),
-											EntityArgumentType.getPlayers(context, "targets")
+									.executes(context ->
+											clearHistory(
+													context.getSource(),
+													EntityArgumentType.getPlayers(context, "targets")
+											)
 									)
-							)
+					)
+			);
+			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":set_base_max_health")
+					.requires(source -> source.hasPermissionLevel(2))
+					.then(
+							CommandManager.argument("targets", EntityArgumentType.players())
+									.then(
+											CommandManager.argument("amount", IntegerArgumentType.integer(1, 200))
+													.executes(context ->
+															setBaseMaxHealth(
+																	context.getSource(),
+																	EntityArgumentType.getPlayers(context, "targets"),
+																	IntegerArgumentType.getInteger(context, "amount")
+															)
+													)
+									)
+					)
+					.then(
+							CommandManager.argument("amount", IntegerArgumentType.integer(1, 200))
+									.executes(context ->
+											setBaseMaxHealth(
+													context.getSource(),
+													Collections.singleton(context.getSource().getPlayer()),
+													IntegerArgumentType.getInteger(context, "amount")
+											)
+									)
+					)
+			);
+			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":update_max_health")
+					.requires(source -> source.hasPermissionLevel(2))
+					.executes(context ->
+							updateMaxHealth(context.getSource(), Collections.singleton(context.getSource().getPlayer()))
+					).then(
+							CommandManager.argument("targets", EntityArgumentType.players())
+									.executes(context ->
+											updateMaxHealth(context.getSource(), EntityArgumentType.getPlayers(context, "targets"))
+									)
 					)
 			);
 		});
 	}
 
 	private static int clearHistory(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
-		for(ServerPlayerEntity player : players) {
+		for (ServerPlayerEntity player : players) {
 			((IHungerManager) player.getHungerManager()).spiceOfFabric_clearHistory();
 			if (Config.carrot.enable) {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
@@ -64,6 +103,60 @@ public class Commands {
 			}
 		} catch (CommandSyntaxException e) {
 			e.printStackTrace();
+		}
+		return players.size();
+	}
+
+	private static int setBaseMaxHealth(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players, int amount) {
+		for (ServerPlayerEntity player : players) {
+			EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+			//noinspection ConstantConditions
+			maxHealthAttr.setBaseValue(amount);
+			if (Config.carrot.enable) {
+				SpiceOfFabric.updateMaxHealth(player, true, true);
+			}
+			if (SpiceOfFabric.hasMod(player)) {
+				player.sendMessage(new TranslatableText("spiceoffabric.command.set_base_max_health.target"), false);
+			} else {
+				player.sendMessage(new LiteralText("Your health has been adjusted"), false);
+			}
+		}
+
+		try {
+			if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
+			} else {
+				commandSource.sendFeedback(new LiteralText("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
+			}
+		} catch (CommandSyntaxException e) {
+			e.printStackTrace();
+		}
+		return players.size();
+	}
+
+	private static int updateMaxHealth(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
+		boolean sourceHasMod;
+		try {
+			sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer());
+		} catch (CommandSyntaxException e) {
+			sourceHasMod = false;
+		}
+
+		if (!Config.carrot.enable) {
+			if (sourceHasMod) {
+				commandSource.sendError(new TranslatableText("spiceoffabric.commands.carrot_not_enabled"));
+			} else {
+				commandSource.sendError(new LiteralText("Carrot mode is not enabled!"));
+			}
+			return 0;
+		}
+		for (ServerPlayerEntity player : players) {
+			SpiceOfFabric.updateMaxHealth(player, true, true);
+		}
+		if (sourceHasMod) {
+			commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.update_max_health.success", players.size()), false);
+		} else {
+			commandSource.sendFeedback(new LiteralText("Refreshed the max health of " + players.size() + " players"), false);
 		}
 		return players.size();
 	}
