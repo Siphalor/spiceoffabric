@@ -65,6 +65,7 @@ public class Config {
 					\tsaturation is the amount of hunger the player had when dying"""
 	)
 	public static Respawn respawn;
+	@AConfigBackground("textures/block/red_wool.png")
 	public static class Respawn {
 		@AConfigEntry(comment = "Expression that determines the hunger level after a fresh respawn")
 		public String hunger = "max(14, hunger)";
@@ -90,6 +91,7 @@ public class Config {
 			environment = ConfigEnvironment.SYNCED
 	)
 	public static Food food;
+	@AConfigBackground("textures/block/melon_side.png")
 	public static class Food {
 		@AConfigEntry(comment = "Expression that determines the food level to restore when eating a food item")
 		public String hunger = "hungerValue * 0.7 ^ timesEaten";
@@ -113,6 +115,7 @@ public class Config {
 					Carrot style means, that you start with a certain amount of hearts and gain more by eating unique foods."""
 	)
 	public static Carrot carrot;
+	@AConfigBackground("textures/block/orange_terracotta.png")
 	public static class Carrot {
 		@AConfigEntry(comment = "Enables the carrot style module.")
 		public boolean enable = false;
