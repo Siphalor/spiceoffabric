@@ -17,6 +17,7 @@
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Saturation",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.hunger": "Hunger",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.reset-history": "Reset food history",
+	"tweed4_tailor_screen.screen.spiceoffabric.respawn.reset-carrot-mode": "Reset carrot mode",
 	"tweed4_tailor_screen.screen.spiceoffabric.food": "Food",
 	"tweed4_tailor_screen.screen.spiceoffabric.food.increase-eating-time": "Increase food eating time",
 	"tweed4_tailor_screen.screen.spiceoffabric.food.history-length": "History length",
@@ -24,7 +25,6 @@
 	"tweed4_tailor_screen.screen.spiceoffabric.food.hunger": "Hunger",
 	"tweed4_tailor_screen.screen.spiceoffabric.carrot": "Carrot Mode",
 	"tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Enable Carrot Mode",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot.start-hearts": "Amount of hearts when first joining",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot.unlock-rule": "Unique foods to gain a heart",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot.max-hearts": "Max amount of hearts"
+	"tweed4_tailor_screen.screen.spiceoffabric.carrot.health-formula": "Health Formula",
+	"tweed4_tailor_screen.screen.spiceoffabric.carrot.max-health": "Max Health"
 }
