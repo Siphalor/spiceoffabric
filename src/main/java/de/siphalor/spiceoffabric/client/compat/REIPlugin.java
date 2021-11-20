@@ -16,11 +16,11 @@ public class REIPlugin implements REIClientPlugin {
 	@Override
 	public void registerEntries(EntryRegistry entryRegistry) {
 		ItemStack itemStack = new ItemStack(Items.WRITTEN_BOOK);
-		NbtCompound compound = itemStack.getOrCreateTag();
+		NbtCompound compound = itemStack.getOrCreateNbt();
 		compound.putString("title", "");
 		compound.putString("author", "Me");
 		compound.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
-		itemStack.getOrCreateSubTag("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
+		itemStack.getOrCreateSubNbt("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
 		entryRegistry.addEntries(EntryStacks.of(itemStack));
 	}
 }

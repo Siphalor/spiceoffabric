@@ -32,7 +32,7 @@ public class FoodHistoryEntry {
 
 	public ItemStack getStack() {
 		ItemStack stack = new ItemStack(Registry.ITEM.get(itemId));
-		stack.setTag(data);
+		stack.setNbt(data);
 		return stack;
 	}
 

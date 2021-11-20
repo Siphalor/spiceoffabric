@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinWrittenBookItem {
 	@Inject(method = "resolve", at = @At("HEAD"), cancellable = true)
 	private static void resolve(ItemStack itemStack, ServerCommandSource serverCommandSource, PlayerEntity playerEntity, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		NbtCompound compoundTag = itemStack.getTag();
+		NbtCompound compoundTag = itemStack.getNbt();
 		if(compoundTag != null && compoundTag.getBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG)) {
 			FoodHistory foodHistory = ((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory();
 
