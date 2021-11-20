@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '7.0.0'
@@ -61,10 +61,10 @@ dependencies {
 
 	// REI
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:6.0+"
-	modRuntime "me.shedaniel:RoughlyEnoughItems-fabric:6.0+"
+	modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:6.0+"
 
 	// LazyDFU
-	modRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
+	modRuntimeOnly("com.github.astei:lazydfu:master-SNAPSHOT")
 }
 
 processResources {
@@ -112,15 +112,10 @@ remapJar {
 // configure the maven publication
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
-			artifactId = "${project.archives_base_name}-${project.minecraft_major_version}"
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+		create("mavenJava", MavenPublication) {
+			it.artifactId("${project.archives_base_name}-${project.minecraft_major_version}")
+
+			from components.java
 		}
 	}
 	repositories {
