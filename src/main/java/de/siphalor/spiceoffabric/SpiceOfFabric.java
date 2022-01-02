@@ -53,7 +53,7 @@ public class SpiceOfFabric implements ModInitializer {
 	public static void onEaten(ServerPlayerEntity player, FoodHistory foodHistory, ItemStack stack) {
 		foodHistory.addFood(stack, player);
 		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
-		if (Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1)) {
+		if (shouldUpdatePlayerHealth(player)) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
 	}
@@ -82,11 +82,19 @@ public class SpiceOfFabric implements ModInitializer {
 		}
 	}
 
-	public static void syncFoodHistory(ServerPlayerEntity serverPlayerEntity) {
-		if (ServerPlayNetworking.canSend(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET)) {
+	public static void syncFoodHistory(ServerPlayerEntity player) {
+		if (ServerPlayNetworking.canSend(player, SYNC_FOOD_HISTORY_S2C_PACKET)) {
 			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
-			ServerPlayNetworking.send(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
+			((IHungerManager) player.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
+			ServerPlayNetworking.send(player, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
+
+			if (shouldUpdatePlayerHealth(player)) {
+				SpiceOfFabric.updateMaxHealth(player, true, true);
+			}
 		}
+	}
+
+	private static boolean shouldUpdatePlayerHealth(ServerPlayerEntity player) {
+		return Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1);
 	}
 }
