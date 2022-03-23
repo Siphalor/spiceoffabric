@@ -174,7 +174,7 @@ if (project.hasProperty("curseforgeToken")) {
 modrinth {
 	if (project.hasProperty("modrinthToken")) {
 		token = project.modrinthToken
-		uploadToModSites.finalizedBy(tasks.modrinth)
+		uploadToModSites.finalizedBy(tasks.modrinth, tasks.modrinthSyncBody)
 	}
 
 	projectId = "roxihOCb"
@@ -184,8 +184,10 @@ modrinth {
 	uploadFile = remapJar
 	gameVersions = project.mod_mc_versions.split(";") as List<String>
 	loaders = ["fabric"]
+	syncBodyFrom = file("README.md").text
 }
 tasks.modrinth.group = "upload"
+tasks.modrinthSyncBody.group = "upload"
 
 if (project.hasProperty("githubToken")) {
 	githubRelease {
