@@ -10,6 +10,7 @@ import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -45,6 +46,8 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity) (Object) this);
 
 		if (Config.carrot.enable) {
+			// Set the max health and health for new players
+			// The max health for existing players will be overwritten when reading the nbt data
 			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
 			setHealth(getMaxHealth());
 		}
@@ -75,5 +78,12 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 
 			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity) (Object) this);
 		}
+	}
+
+	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+	public void afterReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
+		// Update the max health. This overwrites the base definition in the constructor
+		// and older data that has been read from the player nbt.
+		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
 	}
 }
