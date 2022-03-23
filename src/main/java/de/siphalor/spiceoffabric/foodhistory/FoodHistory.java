@@ -79,6 +79,8 @@ public class FoodHistory {
 	}
 
 	public void read(PacketByteBuf buffer) {
+		dictionary.clear();
+		history.clear();
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
 			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.from(buffer));
 		}
