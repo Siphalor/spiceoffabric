@@ -22,7 +22,7 @@
 			"de.siphalor.spiceoffabric.SpiceOfFabric"
 		],
 		"client": [
-			"de.siphalor.spiceoffabric.client.ClientCore"
+			"de.siphalor.spiceoffabric.client.SoFClient"
 		],
 		"rei_plugins_v0": [
 			"de.siphalor.spiceoffabric.client.compat.REIPlugin"
