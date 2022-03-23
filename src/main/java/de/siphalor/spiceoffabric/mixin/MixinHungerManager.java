@@ -31,7 +31,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 
 	@Shadow public abstract void add(int int_1, float float_1);
 
-	@Shadow private float foodSaturationLevel;
+	@Shadow private float saturationLevel;
 
 	protected FoodHistory spiceOfFabric_foodHistory = new FoodHistory();
 
@@ -47,7 +47,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 
 	@Override
 	public void spiceOfFabric_setSaturationLevel(float level) {
-		foodSaturationLevel = level;
+		saturationLevel = level;
 	}
 
 	@Override
