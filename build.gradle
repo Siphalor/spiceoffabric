@@ -1,10 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '0.11-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '7.0.0'
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
-	id 'com.modrinth.minotaur' version '1.2+'
+	id 'com.modrinth.minotaur' version '2.1.1'
 	id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
@@ -25,7 +25,7 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
-minecraft {
+loom {
 }
 
 dependencies {
@@ -134,21 +134,8 @@ publishing {
 
 // Mod sites
 
-def getChangelog() {
-	def commits = 'git log -20 --format=oneline'.execute().text.readLines()
-	def versionCommit = null
-	for (commit in commits) {
-		if (commit.contains('Version')) {
-			versionCommit = commit.split(' ')[0]
-			break
-		}
-	}
-	if (versionCommit == null) {
-		return """## Version ${project.mod_version}
-
-No changelog found!"""
-	}
-	return ('git log -1 --format=format:##%x20%s%n%n%b%nRelease%x20by%x20%an ' + versionCommit).execute().text.trim()
+static def getChangelog() {
+	return 'git log -1 --format=format:##%x20%s%n%n%b%nRelease%x20by%x20%an --grep Version'.execute().text.trim()
 }
 
 task uploadToModSites {
@@ -156,20 +143,19 @@ task uploadToModSites {
 	group = "upload"
 }
 
-if (project.hasProperty("siphalorCurseForgeApi")) {
+if (project.hasProperty("curseforgeToken")) {
 	curseforge {
-		apiKey project.siphalorCurseForgeApi
-		def changes = getChangelog()
+		apiKey project.curseforgeToken
+		def changes = project.getChangelog()
 		project {
 			id = "318416"
 			releaseType = project.mod_release
 			changelogType = "markdown"
 			changelog = changes
 			addGameVersion('Fabric')
-			//for (version in ((String) project.mod_mc_versions).split(";")) {
-			//	addGameVersion(version)
-			//}
-			addGameVersion('1.18-Snapshot')
+			for (version in ((String) project.mod_mc_versions).split(";")) {
+				addGameVersion(version)
+			}
 			relations {
 				requiredDependency "fabric-api"
 				optionalDependency "appleskin"
@@ -185,36 +171,31 @@ if (project.hasProperty("siphalorCurseForgeApi")) {
 	uploadToModSites.finalizedBy(tasks.curseforge)
 }
 
-import com.modrinth.minotaur.TaskModrinthUpload
-if (project.hasProperty("siphalorModrinthApi")) {
-	task modrinth (type: TaskModrinthUpload) {
-		group = "upload"
-		dependsOn(build)
-
-		token = project.siphalorModrinthApi
-		projectId = "roxihOCb"
-		versionNumber = version
-		versionName = "[${project.mod_mc_version_specifier}] ${project.mod_version}"
-		changelog = getChangelog()
-		uploadFile = remapJar
-		versionType = project.mod_release
-		for (version in ((String) project.mod_mc_versions).split(";")) {
-			addGameVersion(version)
-		}
-		addLoader("fabric")
+modrinth {
+	if (project.hasProperty("modrinthToken")) {
+		token = project.modrinthToken
+		uploadToModSites.finalizedBy(tasks.modrinth)
 	}
-	uploadToModSites.finalizedBy(tasks.modrinth)
-}
 
-if (project.hasProperty("siphalorGitHubToken")) {
+	projectId = "roxihOCb"
+	versionName = "[$project.mod_mc_version_specifier] $project.mod_version"
+	versionType = project.mod_release
+	changelog = project.getChangelog()
+	uploadFile = remapJar
+	gameVersions = project.mod_mc_versions.split(";") as List<String>
+	loaders = ["fabric"]
+}
+tasks.modrinth.group = "upload"
+
+if (project.hasProperty("githubToken")) {
 	githubRelease {
-		token siphalorGitHubToken
-		targetCommitish.set("master")
-		releaseName.set("Version $mod_version")
-		body.set(getChangelog())
+		token githubToken
+		targetCommitish = "master"
+		releaseName = "Version $mod_version"
+		body = project.getChangelog()
 		releaseAssets remapJar.getArchiveFile()
-		prerelease.set(mod_release != "release")
-		overwrite.set(true)
+		prerelease = mod_release != "release"
+		overwrite = true
 	}
 	uploadToModSites.finalizedBy(tasks.githubRelease)
 }
