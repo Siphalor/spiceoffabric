@@ -185,7 +185,11 @@ public class FoodHistory {
 	}
 
 	public int getTimesEaten(ItemStack stack) {
-		return stats.getOrDefault((int) dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack)), 0);
+		Integer id = dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack));
+		if (id == null) {
+			return 0;
+		}
+		return stats.getOrDefault((int) id, 0);
 	}
 
 	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {
