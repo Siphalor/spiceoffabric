@@ -4,8 +4,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -18,17 +20,18 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class FoodHistory {
 
 	public Set<FoodHistoryEntry> carrotHistory;
 
 	public BiMap<Integer, FoodHistoryEntry> dictionary;
-	public int nextId = 0;
-	public Queue<Integer> history;
-	public Map<Integer, Integer> stats;
+	protected int nextId = 0;
+	protected FixedLengthIntFIFOQueue history;
+	public Int2IntMap stats;
 
 	public FoodHistory() {
 		setup();
@@ -36,7 +39,7 @@ public class FoodHistory {
 
 	public void setup() {
 		dictionary = HashBiMap.create();
-		history = new ConcurrentLinkedQueue<>();
+		history = new FixedLengthIntFIFOQueue(Config.food.historyLength);
 		stats = new Int2IntArrayMap();
 		carrotHistory = new HashSet<>();
 	}
@@ -81,11 +84,12 @@ public class FoodHistory {
 	public void read(PacketByteBuf buffer) {
 		dictionary.clear();
 		history.clear();
+		history.setLength(Config.food.historyLength);
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
 			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.from(buffer));
 		}
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
-			history.offer(buffer.readVarInt());
+			history.enqueue(buffer.readVarInt());
 		}
 		if (buffer.readBoolean()) {
 			final int length = buffer.readVarInt();
@@ -129,7 +133,7 @@ public class FoodHistory {
 		foodHistory.nextId = foodHistory.dictionary.size();
 		list = (NbtList) compoundTag.get("history");
 		for (NbtElement tag : list) {
-			foodHistory.history.offer(((NbtInt) tag).intValue());
+			foodHistory.history.enqueue(((NbtInt) tag).intValue());
 		}
 		foodHistory.buildStats();
 
@@ -147,44 +151,41 @@ public class FoodHistory {
 
 	public void buildStats() {
 		stats.clear();
-		for (Integer id : history) {
+		history.forEach(id -> {
 			if (stats.containsKey(id)) {
 				stats.put(id, stats.get(id) + 1);
 			} else {
 				stats.put(id, 1);
 			}
-		}
+		});
 	}
 
 	public void defragmentDictionary() {
-		Map<Integer, Integer> oldToNewMap = new HashMap<>();
+		Int2IntMap oldToNewMap = new Int2IntArrayMap();
 		int i = 0;
 		for (Integer id : dictionary.keySet()) {
-			oldToNewMap.put(id, i);
+			oldToNewMap.put((int) id, i);
 			i++;
 		}
 		nextId = i;
-		Queue<Integer> newHistory = new ConcurrentLinkedQueue<>();
-		while (true) {
-			Integer id = history.poll();
-			if (id == null) break;
-			newHistory.offer(id);
+		int historySize = history.size();
+		for (int j = 0; j < historySize; j++) {
+			history.enqueue(oldToNewMap.get(history.dequeueInt()));
 		}
-		history = newHistory;
-		Map<Integer, Integer> newStats = new Int2IntArrayMap();
-		for (Map.Entry<Integer, Integer> entry : stats.entrySet()) {
-			newStats.put(oldToNewMap.get(entry.getKey()), entry.getValue());
+		Int2IntMap newStats = new Int2IntArrayMap();
+		for (Int2IntMap.Entry entry : stats.int2IntEntrySet()) {
+			newStats.put(oldToNewMap.get(entry.getIntKey()), entry.getIntValue());
 		}
 		stats = newStats;
 		BiMap<Integer, FoodHistoryEntry> newDictionary = HashBiMap.create();
 		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
-			newDictionary.put(oldToNewMap.get(entry.getKey()), entry.getValue());
+			newDictionary.put(oldToNewMap.get((int) entry.getKey()), entry.getValue());
 		}
 		dictionary = newDictionary;
 	}
 
 	public int getTimesEaten(ItemStack stack) {
-		return stats.getOrDefault(dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack)), 0);
+		return stats.getOrDefault((int) dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack)), 0);
 	}
 
 	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {
@@ -204,11 +205,12 @@ public class FoodHistory {
 			id = nextId++;
 			dictionary.put(id, entry);
 		}
-		history.offer(id);
+		history.setLength(Config.food.historyLength);
+		history.enqueue((int) id);
 		while (history.size() > Config.food.historyLength) {
 			removeLastFood();
 		}
-		stats.put(id, stats.getOrDefault(id, 0) + 1);
+		stats.put((int) id, stats.getOrDefault((int) id, 0) + 1);
 
 		if (Config.carrot.enable) {
 			carrotHistory.add(entry);
@@ -216,7 +218,7 @@ public class FoodHistory {
 	}
 
 	public void removeLastFood() {
-		int id = history.remove();
+		int id = history.dequeueInt();
 		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
 	}
 

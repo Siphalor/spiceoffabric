@@ -65,6 +65,13 @@ dependencies {
 
 	// LazyDFU
 	modRuntimeOnly("com.github.astei:lazydfu:master-SNAPSHOT")
+
+	// Testing
+	testImplementation "org.junit.jupiter:junit-jupiter:5+"
+}
+
+test {
+	useJUnitPlatform()
 }
 
 processResources {
