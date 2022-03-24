@@ -4,6 +4,11 @@
 	"spiceoffabric.journal.line": "§l%s.§r %s",
 
 	"spiceoffabric.item.tooltip.never_eaten": "§3§oThis smells mysteriously unfamiliar§r",
+	"spiceoffabric.item.tooltip.last_eaten.simple": "Last eaten %d foods ago",
+	"spiceoffabric.item.tooltip.last_eaten.simple.one": "Last eaten a single food ago",
+	"spiceoffabric.item.tooltip.last_eaten.simple.last": "Has just been eaten",
+	"spiceoffabric.item.tooltip.last_eaten.extended": "%s,\neat %d other foods\nto fully restore the nutrition value.",
+	"spiceoffabric.item.tooltip.last_eaten.extended.one": "%s,\neat a single other food\nto fully restore the nutrition value.",
 
 	"spiceoffabric.command.clear_history.was_cleared": "Your food history has been reset",
 	"spiceoffabric.command.clear_history.cleared_players": "Cleared food histories of %s players",

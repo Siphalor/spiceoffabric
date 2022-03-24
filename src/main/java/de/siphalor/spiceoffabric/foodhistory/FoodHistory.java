@@ -8,6 +8,7 @@ import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -190,6 +191,22 @@ public class FoodHistory {
 			return 0;
 		}
 		return stats.getOrDefault((int) id, 0);
+	}
+
+	public int getLastEaten(ItemStack stack) {
+		Integer id = dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack));
+		if (id == null) {
+			return -1;
+		}
+		IntIterator iterator = history.iterator();
+		int foundI = Integer.MIN_VALUE;
+		while (iterator.hasNext()) {
+			foundI++;
+			if (iterator.nextInt() == id) {
+				foundI = 0;
+			}
+		}
+		return foundI;
 	}
 
 	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {

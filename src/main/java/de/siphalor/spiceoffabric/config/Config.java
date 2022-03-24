@@ -81,6 +81,21 @@ public class Config {
 	}
 
 	@AConfigEntry(
+			environment = ConfigEnvironment.SYNCED,
+			comment = """
+					Must be set on the server!
+					Whether the players will be able to see how many foods ago they ate an item directly on the item.
+					When set to SIMPLE, just this information will be shown.
+					If set to EXTENDED, there'll also be information on how many other foods the player needs to eat to restore the nutrition value.
+					With NONE this tooltip is hidden."""
+	)
+	public static ITEM_TIP_DISPLAY showLastEatenTips = ITEM_TIP_DISPLAY.NONE;
+
+	public enum ITEM_TIP_DISPLAY {
+		NONE, SIMPLE, EXTENDED
+	}
+
+	@AConfigEntry(
 			comment = """
 					Change the expressions used for calculating the various food properties.
 					Expressions are mathematical terms with the following variables:
