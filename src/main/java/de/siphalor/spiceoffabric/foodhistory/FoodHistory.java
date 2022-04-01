@@ -143,7 +143,10 @@ public class FoodHistory {
 			if (Config.carrot.enable) {
 				foodHistory.carrotHistory = new HashSet<>(list.size());
 				for (NbtElement tag : list) {
-					foodHistory.carrotHistory.add(new FoodHistoryEntry().read((NbtCompound) tag));
+					FoodHistoryEntry entry = new FoodHistoryEntry().read((NbtCompound) tag);
+					if (entry != null) {
+						foodHistory.carrotHistory.add(entry);
+					}
 				}
 			}
 		}
