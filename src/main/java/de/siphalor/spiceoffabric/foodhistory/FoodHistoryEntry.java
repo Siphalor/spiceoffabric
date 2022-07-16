@@ -2,14 +2,12 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -26,8 +24,8 @@ public class FoodHistoryEntry {
 		buffer.writeVarInt(itemId);
 	}
 
-	public BaseText getStackName() {
-		return new TranslatableText(getStack().getTranslationKey());
+	public MutableText getStackName() {
+		return Text.translatable(getStack().getTranslationKey());
 	}
 
 	public ItemStack getStack() {
