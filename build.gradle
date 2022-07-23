@@ -201,7 +201,7 @@ tasks.modrinthSyncBody.group = "upload"
 if (project.hasProperty("githubToken")) {
 	githubRelease {
 		token githubToken
-		targetCommitish = "master"
+		targetCommitish = minecraft_major_version
 		releaseName = "Version $mod_version"
 		body = project.getChangelog()
 		releaseAssets remapJar.getArchiveFile()
