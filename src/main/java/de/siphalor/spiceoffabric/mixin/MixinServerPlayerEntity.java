@@ -7,8 +7,6 @@ import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.PlayerPublicKey;
@@ -47,12 +45,10 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, PlayerPublicKey publicKey, CallbackInfo ci) {
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity) (Object) this);
 
-		if (Config.carrot.enable) {
-			// Set the max health and health for new players
-			// The max health for existing players will be overwritten when reading the nbt data
-			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
-			setHealth(getMaxHealth());
-		}
+		// Set the max health and health for new players
+		// The max health for existing players will be overwritten when reading the nbt data
+		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
+		setHealth(getMaxHealth());
 	}
 
 	@Inject(method = "copyFrom", at = @At("RETURN"))
@@ -67,13 +63,9 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			if (Config.respawn.resetHistory) {
 				foodHistory.resetHistory();
 			}
-			if (Config.respawn.resetCarrotMode) {
+			if (Config.carrot.enable && Config.respawn.resetCarrotMode) {
 				foodHistory.resetCarrotHistory();
-				EntityAttributeInstance maxHealthAttr = getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-				maxHealthAttr.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
-				maxHealthAttr.addPersistentModifier(
-						SpiceOfFabric.createHealthModifier(foodHistory.getCarrotHealthOffset(((ServerPlayerEntity)(Object) this)))
-				);
+				SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			}
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);

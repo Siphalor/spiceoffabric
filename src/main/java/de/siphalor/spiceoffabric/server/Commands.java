@@ -127,14 +127,6 @@ public class Commands {
 	private static int updateMaxHealth(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
 		boolean sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer());
 
-		if (!Config.carrot.enable) {
-			if (sourceHasMod) {
-				commandSource.sendError(Text.translatable("spiceoffabric.commands.carrot_not_enabled"));
-			} else {
-				commandSource.sendError(Text.literal("Carrot mode is not enabled!"));
-			}
-			return 0;
-		}
 		for (ServerPlayerEntity player : players) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}

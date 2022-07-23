@@ -77,7 +77,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 		if(data.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID, 10)) {
 			spiceOfFabric_foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
 
-			if (spiceOfFabric_player != null) {
+			if (spiceOfFabric_player != null && Config.carrot.enable) {
 				EntityAttributeInstance healthAttribute = spiceOfFabric_player.getAttributeInstance(
 						EntityAttributes.GENERIC_MAX_HEALTH
 				);
@@ -86,23 +86,19 @@ public abstract class MixinHungerManager implements IHungerManager {
 					return;
 				}
 				if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
-					if (Config.carrot.enable) {
-						EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
-						if (modifier == null) {
-							SpiceOfFabric.updateMaxHealth(spiceOfFabric_player, false, false);
-						}
+					EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+					if (modifier == null) {
+						SpiceOfFabric.updateMaxHealth(spiceOfFabric_player, false, false);
 					}
 				} else { // Migrate from old system
-					if (Config.carrot.enable) {
-						healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
-						healthAttribute.setBaseValue(20D);
-						healthAttribute.addPersistentModifier(new EntityAttributeModifier(
-								SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID,
-								SpiceOfFabric.MOD_ID,
-								spiceOfFabric_foodHistory.getCarrotHealthOffset(spiceOfFabric_player),
-								EntityAttributeModifier.Operation.ADDITION
-						));
-					}
+					healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+					healthAttribute.setBaseValue(20D);
+					healthAttribute.addPersistentModifier(new EntityAttributeModifier(
+							SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID,
+							SpiceOfFabric.MOD_ID,
+							spiceOfFabric_foodHistory.getCarrotHealthOffset(spiceOfFabric_player),
+							EntityAttributeModifier.Operation.ADDITION
+					));
 				}
 			}
 		}
