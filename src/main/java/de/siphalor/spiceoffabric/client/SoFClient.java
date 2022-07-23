@@ -12,9 +12,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,26 +60,26 @@ public class SoFClient implements ClientModInitializer {
 					return;
 				}
 
-				BaseText text;
+				Text text;
 				if (lastEaten == 0) {
-					text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.last", lastEaten);
+					text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.last", lastEaten);
 				} else if (lastEaten == 1) {
-					text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.one", lastEaten);
+					text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.one", lastEaten);
 				} else {
-					text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
+					text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
 				}
 
 				if (Config.showLastEatenTips == Config.ITEM_TIP_DISPLAY.EXTENDED) {
 					int left = Config.food.historyLength - lastEaten;
 					if (left == 1) {
-						text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, Config.food.historyLength - lastEaten);
+						text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, Config.food.historyLength - lastEaten);
 					} else {
-						text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, Config.food.historyLength - lastEaten);
+						text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, Config.food.historyLength - lastEaten);
 					}
 				}
 
 				for (String line : StringUtils.split(text.getString(), '\n')) {
-					lines.add(new LiteralText(line).styled(style -> style.withColor(Formatting.GRAY).withItalic(true)));
+					lines.add(Text.literal(line).styled(style -> style.withColor(Formatting.GRAY).withItalic(true)));
 				}
 			}
 		});

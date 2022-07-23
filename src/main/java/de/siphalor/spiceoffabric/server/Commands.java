@@ -1,12 +1,11 @@
 package de.siphalor.spiceoffabric.server;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -15,15 +14,14 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.Collections;
 
 public class Commands {
 	public static void register() {
-		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((commandDispatcher, registryAccess, registrationEnvironment) -> {
 			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_history")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context ->
@@ -89,20 +87,16 @@ public class Commands {
 			}
 			if (ServerPlayNetworking.canSend(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
 				ServerPlayNetworking.send(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
-				player.sendMessage(new TranslatableText("spiceoffabric.command.clear_history.was_cleared"), false);
+				player.sendMessage(Text.translatable("spiceoffabric.command.clear_history.was_cleared"), false);
 			} else {
-				player.sendMessage(new LiteralText("Your food history has been cleared"), false);
+				player.sendMessage(Text.literal("Your food history has been cleared"), false);
 			}
 		}
 
-		try {
-			if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
-				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
-			} else {
-				commandSource.sendFeedback(new LiteralText("Cleared food histories of " + players.size() + " players."), true);
-			}
-		} catch (CommandSyntaxException e) {
-			e.printStackTrace();
+		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
+		} else {
+			commandSource.sendFeedback(Text.literal("Cleared food histories of " + players.size() + " players."), true);
 		}
 		return players.size();
 	}
@@ -116,47 +110,30 @@ public class Commands {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
 			if (SpiceOfFabric.hasMod(player)) {
-				player.sendMessage(new TranslatableText("spiceoffabric.command.set_base_max_health.target"), false);
+				player.sendMessage(Text.translatable("spiceoffabric.command.set_base_max_health.target"), false);
 			} else {
-				player.sendMessage(new LiteralText("Your health has been adjusted"), false);
+				player.sendMessage(Text.literal("Your health has been adjusted"), false);
 			}
 		}
 
-		try {
-			if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
-				commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
-			} else {
-				commandSource.sendFeedback(new LiteralText("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
-			}
-		} catch (CommandSyntaxException e) {
-			e.printStackTrace();
+		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
+		} else {
+			commandSource.sendFeedback(Text.literal("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
 		}
 		return players.size();
 	}
 
 	private static int updateMaxHealth(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
-		boolean sourceHasMod;
-		try {
-			sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer());
-		} catch (CommandSyntaxException e) {
-			sourceHasMod = false;
-		}
+		boolean sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer());
 
-		if (!Config.carrot.enable) {
-			if (sourceHasMod) {
-				commandSource.sendError(new TranslatableText("spiceoffabric.commands.carrot_not_enabled"));
-			} else {
-				commandSource.sendError(new LiteralText("Carrot mode is not enabled!"));
-			}
-			return 0;
-		}
 		for (ServerPlayerEntity player : players) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
 		if (sourceHasMod) {
-			commandSource.sendFeedback(new TranslatableText("spiceoffabric.command.update_max_health.success", players.size()), false);
+			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.update_max_health.success", players.size()), false);
 		} else {
-			commandSource.sendFeedback(new LiteralText("Refreshed the max health of " + players.size() + " players"), false);
+			commandSource.sendFeedback(Text.literal("Refreshed the max health of " + players.size() + " players"), false);
 		}
 		return players.size();
 	}

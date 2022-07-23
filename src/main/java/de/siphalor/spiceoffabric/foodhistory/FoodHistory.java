@@ -263,11 +263,11 @@ public class FoodHistory {
 
 		NbtList pages = new NbtList();
 
-		LiteralText textOnPage = new LiteralText("");
+		MutableText textOnPage = Text.literal("");
 		textOnPage.append(
 				hasMod
-						? new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.inside_title")
-						: new LiteralText("\u25b6 Diet Journal \u25c0")
+						? Text.translatable(SpiceOfFabric.MOD_ID + ".journal.inside_title")
+						: Text.literal("\u25b6 Diet Journal \u25c0")
 						.setStyle(Style.EMPTY
 								.withColor(Formatting.DARK_GRAY)
 								.withFormatting(Formatting.UNDERLINE)
@@ -285,7 +285,7 @@ public class FoodHistory {
 			FoodHistoryEntry entry = dictionary.get(foodId);
 			if (hasMod) {
 				textOnPage.append(
-						new TranslatableText(
+						Text.translatable(
 								SpiceOfFabric.MOD_ID + ".journal.line",
 								number,
 								entry.getStackName()
@@ -295,7 +295,7 @@ public class FoodHistory {
 												new HoverEvent.ItemStackContent(entry.getStack())))))
 						.append("\n");
 			} else {
-				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle))
+				textOnPage.append(Text.literal(number + ". ").setStyle(numberStyle))
 						.append(entry.getStackName().setStyle(
 								itemStyle.withHoverEvent(
 										new HoverEvent(
@@ -310,7 +310,7 @@ public class FoodHistory {
 			if (linesOnPage >= 14) {
 				pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
 				linesOnPage = 0;
-				textOnPage = new LiteralText("");
+				textOnPage = Text.literal("");
 			}
 		}
 
