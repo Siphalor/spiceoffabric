@@ -1,12 +1,11 @@
 package de.siphalor.spiceoffabric.server;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -22,7 +21,7 @@ import java.util.Collections;
 
 public class Commands {
 	public static void register() {
-		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((commandDispatcher, registryAccess, registrationEnvironment) -> {
 			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_history")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context ->
