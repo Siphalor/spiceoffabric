@@ -142,14 +142,6 @@ public class Commands {
 			sourceHasMod = false;
 		}
 
-		if (!Config.carrot.enable) {
-			if (sourceHasMod) {
-				commandSource.sendError(new TranslatableText("spiceoffabric.commands.carrot_not_enabled"));
-			} else {
-				commandSource.sendError(new LiteralText("Carrot mode is not enabled!"));
-			}
-			return 0;
-		}
 		for (ServerPlayerEntity player : players) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
