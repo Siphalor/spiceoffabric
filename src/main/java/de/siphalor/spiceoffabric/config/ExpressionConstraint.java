@@ -33,11 +33,11 @@ public class ExpressionConstraint implements AnnotationConstraint<String> {
 			return new Result<>(true, value, Collections.emptyList());
 		} catch (IllegalArgumentException e) {
 			return new Result<>(false, null, ImmutableList.of(
-					Pair.of(Severity.ERROR, e.getMessage())
+					Pair.of(Severity.ERROR, e.getMessage() + "; in expression: " + value)
 			));
 		} catch (Exception e) {
 			return new Result<>(false, null, ImmutableList.of(
-					Pair.of(Severity.ERROR, "Invalid expression, got " + e.getClass().getSimpleName() + ": " + e.getMessage())
+					Pair.of(Severity.ERROR, "Invalid expression, got " + e.getClass().getSimpleName() + ": " + e.getMessage() + "; in expression: " + value)
 			));
 		}
 	}
