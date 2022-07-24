@@ -12,6 +12,7 @@ import de.siphalor.tweed4.data.DataValue;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
+import org.apache.commons.lang3.StringUtils;
 
 @ATweedConfig(
 		scope = ConfigScope.SMALLEST,
@@ -21,7 +22,9 @@ import net.objecthunter.exp4j.function.Function;
 )
 public class Config {
 	@AConfigExclude
-	private static final String[] itemVariables = new String[]{"timesEaten", "hungerValue", "saturationValue", "consumeDuration"};
+	private static final String ITEM_VARIABLES_JOINED = "timesEaten,hungerValue,saturationValue,consumeDuration";
+	@AConfigExclude
+	private static final String[] itemVariables = StringUtils.split(ITEM_VARIABLES_JOINED, ',');
 	@AConfigExclude
 	public static Expression hungerExpression;
 	@AConfigExclude
@@ -30,7 +33,9 @@ public class Config {
 	public static Expression consumeDurationExpression;
 
 	@AConfigExclude
-	static final String[] afterDeathVariables = new String[]{"hunger", "saturation"};
+	private static final String AFTER_DEATH_VARIABLES_JOINED = "hunger,saturation";
+	@AConfigExclude
+	static final String[] afterDeathVariables = StringUtils.split(AFTER_DEATH_VARIABLES_JOINED, ',');
 	@AConfigExclude
 	public static Expression hungerAfterDeathExpression;
 	@AConfigExclude
@@ -42,7 +47,7 @@ public class Config {
 	public static Expression healthFormulaExpression;
 
 	@AConfigExclude
-	private static final Function[] customExpFunctions = new Function[]{
+	static final Function[] customExpFunctions = new Function[]{
 		new Function("max", 2) {
 			@Override
 			public double apply(double... args) {
@@ -82,10 +87,16 @@ public class Config {
 	public static Respawn respawn;
 	@AConfigBackground("textures/block/red_wool.png")
 	public static class Respawn {
-		@AConfigEntry(comment = "Expression that determines the hunger level after a fresh respawn")
+		@AConfigEntry(
+				comment = "Expression that determines the hunger level after a fresh respawn",
+				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
+		)
 		public String hunger = "max(14, hunger)";
 
-		@AConfigEntry(comment = "Expression that determines the saturation level after a fresh respawn")
+		@AConfigEntry(
+				comment = "Expression that determines the saturation level after a fresh respawn",
+				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
+		)
 		public String saturation = "saturation";
 
 		@AConfigEntry(comment = "Sets whether the food history should be cleaned at death")
@@ -108,13 +119,22 @@ public class Config {
 	public static Food food;
 	@AConfigBackground("textures/block/melon_side.png")
 	public static class Food {
-		@AConfigEntry(comment = "Expression that determines the food level to restore when eating a food item")
+		@AConfigEntry(
+				comment = "Expression that determines the food level to restore when eating a food item",
+				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
+		)
 		public String hunger = "hungerValue * 0.7 ^ timesEaten";
 
-		@AConfigEntry(comment = "Expression that determines the saturation modifier for a food item")
+		@AConfigEntry(
+				comment = "Expression that determines the saturation modifier for a food item",
+				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
+		)
 		public String saturation = "saturationValue";
 
-		@AConfigEntry(comment = "Expression that determines the time requited to consume an item, given in ticks")
+		@AConfigEntry(
+				comment = "Expression that determines the time requited to consume an item, given in ticks",
+				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
+		)
 		public String consumeDuration = "consumeDuration * 1.3 ^ timesEaten";
 
 		@AConfigEntry(
