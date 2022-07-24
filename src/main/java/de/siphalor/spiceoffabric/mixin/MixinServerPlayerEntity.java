@@ -47,13 +47,17 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 
 		// Set the max health and health for new players
 		// The max health for existing players will be overwritten when reading the nbt data
-		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
+		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 		setHealth(getMaxHealth());
 	}
 
 	@Inject(method = "copyFrom", at = @At("RETURN"))
 	public void onPlayerCopied(ServerPlayerEntity reference, boolean exact, CallbackInfo callbackInfo) {
-		if (!exact) {
+		if (exact) { // Teleporting back from the end
+			((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity) (Object) this);
+			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
+			setHealth(reference.getHealth());
+		} else { // Respawning
 			Pair<Double, Double> respawnHunger = Config.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(respawnHunger.getFirst(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) (double) respawnHunger.getSecond());
@@ -65,12 +69,13 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			}
 			if (Config.carrot.enable && Config.respawn.resetCarrotMode) {
 				foodHistory.resetCarrotHistory();
-				SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			}
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
 
 			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity) (Object) this);
+			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
+			setHealth(getMaxHealth());
 		}
 	}
 
@@ -79,5 +84,9 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 		// Update the max health. This overwrites the base definition in the constructor
 		// and older data that has been read from the player nbt.
 		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
+
+		if (nbt.contains("Health", 99)) {
+			this.setHealth(nbt.getFloat("Health"));
+		}
 	}
 }
