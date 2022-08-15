@@ -15,8 +15,8 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 	protected int start; // inclusive
 
 	public FixedLengthIntFIFOQueue(int size) {
-		if (size <= 0) {
-			throw new IllegalArgumentException("A fixed length fifo queue must at least be one element long!");
+		if (size < 0) {
+			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");
 		}
 		array = new int[size];
 	}
@@ -36,6 +36,9 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 
 	@Override
 	public void enqueue(int x) {
+		if (array.length == 0) {
+			return;
+		}
 		if (size == array.length) {
 			array[start] = x;
 			if (++start >= size) {
@@ -116,21 +119,25 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 		int[] newArray = new int[newLength];
 		int toEnd = array.length - start;
 		if (newLength < size) {
-			int diff = size - newLength;
-			if (size <= toEnd) {
-				System.arraycopy(array, start + diff, newArray, start, newLength);
-			} else {
-				System.arraycopy(array, start, newArray, Math.max(0, start - diff), toEnd);
-				System.arraycopy(array, 0, newArray, 0, size - toEnd);
+			if (newLength > 0) {
+				int diff = size - newLength;
+				if (size <= toEnd) {
+					System.arraycopy(array, start + diff, newArray, start, newLength);
+				} else {
+					System.arraycopy(array, start, newArray, Math.max(0, start - diff), toEnd);
+					System.arraycopy(array, 0, newArray, 0, size - toEnd);
+				}
 			}
 			size = Math.min(size, newLength);
 		} else {
-			if (size <= toEnd) {
-				System.arraycopy(array, start, newArray, start, toEnd);
-			} else {
-				System.arraycopy(array, start, newArray, 0, toEnd);
-				System.arraycopy(array, 0, newArray, toEnd, size - toEnd);
-				start = 0;
+			if (array.length > 0) {
+				if (size <= toEnd) {
+					System.arraycopy(array, start, newArray, start, toEnd);
+				} else {
+					System.arraycopy(array, start, newArray, 0, toEnd);
+					System.arraycopy(array, 0, newArray, toEnd, size - toEnd);
+					start = 0;
+				}
 			}
 		}
 		array = newArray;
