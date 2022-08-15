@@ -18,6 +18,7 @@
 	"spiceoffabric.commands.carrot_not_enabled": "Carrot mode is not enabled!",
 
 	"tweed4_tailor_screen.screen.spiceoffabric": "Spice of Fabric Config",
+  "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips": "Last Eaten Information",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Saturation",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.hunger": "Hunger",
