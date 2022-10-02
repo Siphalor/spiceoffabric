@@ -60,11 +60,11 @@ dependencies {
 	})
 
 	// REI
-	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.528"
-	//modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:6.2+"
+	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.528")
+	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.528")
 
 	// LazyDFU
-	modRuntimeOnly("com.github.astei:lazydfu:master-SNAPSHOT")
+	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
 
 	// Testing
 	testImplementation "org.junit.jupiter:junit-jupiter:5+"
