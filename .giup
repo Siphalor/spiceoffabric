@@ -12,8 +12,8 @@
 		},
 		{
 			"title": "Publish",
-			"run": "./gradlew publish",
-			"nt": "gradlew publish"
+			"run": "./gradlew check publish",
+			"nt": "gradlew check publish"
 		},
 		{
 			"title": "Push Changes",
