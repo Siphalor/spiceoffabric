@@ -10,9 +10,9 @@ import java.util.NoSuchElementException;
 public class FixedLengthIntFIFOQueueTests {
 	@Test
 	public void testConstructor() {
+		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(0));
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(1));
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(1000));
-		Assertions.assertThrows(IllegalArgumentException.class, () -> new FixedLengthIntFIFOQueue(0));
 		Assertions.assertThrows(IllegalArgumentException.class, () -> new FixedLengthIntFIFOQueue(-1));
 	}
 
