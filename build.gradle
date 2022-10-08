@@ -50,6 +50,7 @@ dependencies {
 
 	// AppleSkin
 	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.18.2-2.4.0:api"
+	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.18.2-2.4.0"
 
 	// NBT Crafting
 	include(modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
