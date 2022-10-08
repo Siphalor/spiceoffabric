@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
+	id 'fabric-loom' version '1.0-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '7.0.0'
@@ -49,7 +49,8 @@ dependencies {
 	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.18+mc22w17a"))
 
 	// AppleSkin
-	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.18.2-2.4.0:api"
+	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0:api"
+	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0"
 
 	// NBT Crafting
 	include(modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
