@@ -52,14 +52,6 @@ dependencies {
 	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.18.2-2.4.0:api"
 	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.18.2-2.4.0"
 
-	// NBT Crafting
-	include(modImplementation ("de.siphalor:nbtcrafting-$minecraft_major_version:${nbtcrafting_version}") {
-		exclude group: ("net.fabricmc.fabric-api")
-		exclude module: "modmenu"
-		exclude module: "RoughlyEnoughItems"
-		exclude module: "ModsOfTheWorld"
-	})
-
 	// REI
 	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:8.0.442")
 	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-api-fabric:8.0.442")

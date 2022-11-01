@@ -2,6 +2,7 @@ package de.siphalor.spiceoffabric;
 
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
 import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
@@ -12,6 +13,8 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
@@ -19,6 +22,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -39,6 +43,8 @@ public class SpiceOfFabric implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		Registry.register(Registry.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
+
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			syncFoodHistory(handler.player);
 		});
@@ -92,5 +98,15 @@ public class SpiceOfFabric implements ModInitializer {
 			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
 			ServerPlayNetworking.send(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
 		}
+	}
+
+	public static ItemStack createFoodJournalStack() {
+		ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
+		NbtCompound compound = stack.getOrCreateNbt();
+		compound.putString("title", "");
+		compound.putString("author", "Me");
+		compound.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
+		stack.getOrCreateSubNbt("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
+		return stack;
 	}
 }
