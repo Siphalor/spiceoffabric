@@ -47,7 +47,7 @@ public class SoFClient implements ClientModInitializer {
 		);
 
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-			if (Config.showLastEatenTips != Config.ITEM_TIP_DISPLAY.NONE && Config.food.historyLength > 0) {
+			if (Config.showLastEatenTips != Config.ItemTipDisplayStyle.NONE && Config.food.historyLength > 0) {
 				ClientPlayerEntity player = MinecraftClient.getInstance().player;
 				if (player == null) {
 					return;
@@ -71,7 +71,7 @@ public class SoFClient implements ClientModInitializer {
 					text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
 				}
 
-				if (Config.showLastEatenTips == Config.ITEM_TIP_DISPLAY.EXTENDED) {
+				if (Config.showLastEatenTips == Config.ItemTipDisplayStyle.EXTENDED) {
 					int left = Config.food.historyLength - lastEaten;
 					if (left == 1) {
 						text = new TranslatableText(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, Config.food.historyLength - lastEaten);

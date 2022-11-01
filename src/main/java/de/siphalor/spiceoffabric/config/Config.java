@@ -71,9 +71,9 @@ public class Config {
 					If set to EXTENDED, there'll also be information on how many other foods the player needs to eat to restore the nutrition value.
 					With NONE this tooltip is hidden."""
 	)
-	public static ITEM_TIP_DISPLAY showLastEatenTips = ITEM_TIP_DISPLAY.NONE;
+	public static ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
 
-	public enum ITEM_TIP_DISPLAY {
+	public enum ItemTipDisplayStyle {
 		NONE, SIMPLE, EXTENDED
 	}
 
