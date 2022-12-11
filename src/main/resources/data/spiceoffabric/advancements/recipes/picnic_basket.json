@@ -1,0 +1,43 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"spiceoffabric:picnic_basket"
+		]
+	},
+	"criteria": {
+		"has_bamboo": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:bamboo"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "spiceoffabric:picnic_basket"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_bamboo",
+			"has_the_recipe"
+		]
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "spiceoffabric:registry_populated",
+			"registry": "minecraft:item",
+			"ids": [
+				"spiceoffabric:picnic_basket"
+			]
+		}
+	]
+}

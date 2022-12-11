@@ -59,6 +59,12 @@ public class Config {
 			public double apply(double... args) {
 				return Math.min(args[0], args[1]);
 			}
+		},
+		new Function("power", 2) {
+			@Override
+			public double apply(double... args) {
+				return Math.pow(args[0], args[1]);
+			}
 		}
 	};
 
@@ -71,9 +77,9 @@ public class Config {
 					If set to EXTENDED, there'll also be information on how many other foods the player needs to eat to restore the nutrition value.
 					With NONE this tooltip is hidden."""
 	)
-	public static ITEM_TIP_DISPLAY showLastEatenTips = ITEM_TIP_DISPLAY.NONE;
+	public static ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
 
-	public enum ITEM_TIP_DISPLAY {
+	public enum ItemTipDisplayStyle {
 		NONE, SIMPLE, EXTENDED
 	}
 
@@ -123,7 +129,7 @@ public class Config {
 				comment = "Expression that determines the food level to restore when eating a food item",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
-		public String hunger = "hungerValue * 0.7 ^ timesEaten";
+		public String hunger = "hungerValue * power(0.7, timesEaten)";
 
 		@AConfigEntry(
 				comment = "Expression that determines the saturation modifier for a food item",
@@ -135,7 +141,7 @@ public class Config {
 				comment = "Expression that determines the time requited to consume an item, given in ticks",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
-		public String consumeDuration = "consumeDuration * 1.3 ^ timesEaten";
+		public String consumeDuration = "consumeDuration * power(1.3, timesEaten)";
 
 		@AConfigEntry(
 				comment = "Sets the amount of last eaten foods to use for the calculations in this category",
@@ -161,7 +167,7 @@ public class Config {
 						Default health in vanilla is 20 but that may change through mods like Origins.
 						The resulting value will be floored before use."""
 		)
-		public String healthFormula = "(0.6 * baseHealth) + max(2 * log2(uniqueFoodsEaten), 0)";
+		public String healthFormula = "0.6 * baseHealth + max(2 * floor(log2(uniqueFoodsEaten)), 0)";
 
 		@AConfigEntry(
 				comment = """
@@ -171,6 +177,37 @@ public class Config {
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
 		public int maxHealth = -1;
+	}
+
+	@AConfigEntry(
+			comment = """
+					Settings concerning the items of this mod.
+					
+					Install the mod "Polymer" if you want to use these items server-side only.
+					You can generate the resource pack with the command "/polymer generate".
+					
+					Otherwise the mod has to be installed on the client as well."""
+	)
+	public static Items items;
+	@AConfigBackground("textures/block/beehive_end.png")
+	public static class Items {
+		@AConfigEntry(
+				comment = """
+						Enable a low end food container that can be crafted from paper and holds up to 5 stacks of food."""
+		)
+		public boolean enablePaperBag = false;
+
+		@AConfigEntry(
+				comment = """
+						Enable a food container that can be crafted from planks and gold and holds up to 9 stacks of food."""
+		)
+		public boolean enableLunchBox = false;
+
+		@AConfigEntry(
+				comment = """
+						Enable a food container that can be crafted from bamboo and holds up to 9 stacks of food."""
+		)
+		public boolean enablePicnicBasket = false;
 	}
 
 	@AConfigListener

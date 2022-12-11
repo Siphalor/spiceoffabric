@@ -1,0 +1,25 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" P ",
+		"P P",
+		"PPP"
+	],
+	"key": {
+		"P": {
+			"item": "minecraft:paper"
+		}
+	},
+	"result": {
+		"item": "spiceoffabric:paper_bag"
+	},
+	"fabric:load_conditions": [
+		{
+			"condition": "spiceoffabric:registry_populated",
+			"registry": "minecraft:item",
+			"ids": [
+				"spiceoffabric:paper_bag"
+			]
+		}
+	]
+}

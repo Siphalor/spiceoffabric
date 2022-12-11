@@ -40,8 +40,11 @@
 			"environment": "*"
 		}
 	],
-	"requires": {
+	"depends": {
 		"fabricloader": ">=0.4.0"
+	},
+	"suggests": {
+		"polymer": "*"
 	},
 	"breaks": {
 		"modmenu": "<1.10"

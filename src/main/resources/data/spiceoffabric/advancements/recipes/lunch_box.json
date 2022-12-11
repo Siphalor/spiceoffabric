@@ -1,0 +1,43 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"spiceoffabric:lunch_box"
+		]
+	},
+	"criteria": {
+		"has_gold": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:gold_ingot"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "spiceoffabric:lunch_box"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_gold",
+			"has_the_recipe"
+		]
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "spiceoffabric:registry_populated",
+			"registry": "minecraft:item",
+			"ids": [
+				"spiceoffabric:lunch_box"
+			]
+		}
+	]
+}

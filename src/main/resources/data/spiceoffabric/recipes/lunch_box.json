@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"PNP",
+		"PPP"
+	],
+	"key": {
+		"P": {
+			"tag": "minecraft:planks"
+		},
+		"N": {
+			"item": "minecraft:gold_ingot"
+		}
+	},
+	"result": {
+		"item": "spiceoffabric:lunch_box"
+	},
+	"fabric:load_conditions": [
+		{
+			"condition": "spiceoffabric:registry_populated",
+			"registry": "minecraft:item",
+			"ids": [
+				"spiceoffabric:lunch_box"
+			]
+		}
+	]
+}

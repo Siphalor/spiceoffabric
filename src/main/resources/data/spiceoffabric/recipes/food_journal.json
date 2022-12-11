@@ -1,25 +1,11 @@
 {
-	"type": "nbtcrafting:wrapped",
-	"recipe": {
-		"type": "minecraft:crafting_shapeless",
-		"ingredients": [
-			{
-				"item": "minecraft:writable_book"
-			},
-			{
-				"item": "minecraft:apple"
-			}
-		],
-		"result": {
-			"item": "minecraft:written_book",
-			"data": {
-				"spiceoffabric:food_journal": 1,
-				"title": "",
-				"author": "Me",
-				"display": {
-					"Name": "{\"translate\":\"Diet Journal\",\"bold\":true}"
-				}
-			}
+	"type": "spiceoffabric:food_journal",
+	"ingredients": [
+		{
+			"item": "minecraft:writable_book"
+		},
+		{
+			"item": "minecraft:apple"
 		}
-	}
+	]
 }

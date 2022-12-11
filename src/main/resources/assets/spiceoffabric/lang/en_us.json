@@ -2,23 +2,25 @@
 	"Diet Journal": "Diet Journal",
 	"spiceoffabric.journal.inside_title": "§8§l§n\u25b6 Diet Journal \u25c0§r",
 	"spiceoffabric.journal.line": "§l%s.§r %s",
-
 	"spiceoffabric.item.tooltip.never_eaten": "§3§oThis smells mysteriously unfamiliar§r",
 	"spiceoffabric.item.tooltip.last_eaten.simple": "Last eaten %d foods ago",
 	"spiceoffabric.item.tooltip.last_eaten.simple.one": "Last eaten a single food ago",
 	"spiceoffabric.item.tooltip.last_eaten.simple.last": "Has just been eaten",
 	"spiceoffabric.item.tooltip.last_eaten.extended": "%s,\neat %d other foods\nto fully restore the nutrition value.",
 	"spiceoffabric.item.tooltip.last_eaten.extended.one": "%s,\neat a single other food\nto fully restore the nutrition value.",
-
+	"item.spiceoffabric.paper_bag": "Paper Bag",
+	"item.spiceoffabric.lunch_box": "Lunch Box",
+	"item.spiceoffabric.picnic_basket": "Picnic Basket",
+	"spiceoffabric.food_container.lore.empty": "Empty",
+	"spiceoffabric.food_container.lore.general": "Filled %1$s/%2$s (%3$s foods)",
 	"spiceoffabric.command.clear_history.was_cleared": "Your food history has been reset",
 	"spiceoffabric.command.clear_history.cleared_players": "Cleared food histories of %s players",
 	"spiceoffabric.command.set_base_max_health.target": "Your health has been adjusted",
 	"spiceoffabric.command.set_base_max_health.executor": "Set base health of %d players to %d (%s hearts)",
 	"spiceoffabric.command.update_max_health.success": "Refreshed the health of %d players",
 	"spiceoffabric.commands.carrot_not_enabled": "Carrot mode is not enabled!",
-
 	"tweed4_tailor_screen.screen.spiceoffabric": "Spice of Fabric Config",
-  "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips": "Last Eaten Information",
+	"tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips": "Last Eaten Information",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Saturation",
 	"tweed4_tailor_screen.screen.spiceoffabric.respawn.hunger": "Hunger",
@@ -33,5 +35,9 @@
 	"tweed4_tailor_screen.screen.spiceoffabric.carrot": "Carrot Mode",
 	"tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Enable Carrot Mode",
 	"tweed4_tailor_screen.screen.spiceoffabric.carrot.health-formula": "Health Formula",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot.max-health": "Max Health"
+	"tweed4_tailor_screen.screen.spiceoffabric.carrot.max-health": "Max Health",
+	"tweed4_tailor_screen.screen.spiceoffabric.items": "Items",
+	"tweed4_tailor_screen.screen.spiceoffabric.items.enable-paper-bag": "Paper Bag",
+	"tweed4_tailor_screen.screen.spiceoffabric.items.enable-lunch-box": "Lunch Box",
+	"tweed4_tailor_screen.screen.spiceoffabric.items.enable-picnic-basket": "Picnic Basket"
 }

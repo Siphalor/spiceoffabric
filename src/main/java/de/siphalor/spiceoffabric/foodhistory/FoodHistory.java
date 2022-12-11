@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
+import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -12,6 +13,7 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -26,6 +28,17 @@ import java.util.Map;
 import java.util.Set;
 
 public class FoodHistory {
+
+	public static FoodHistory get(PlayerEntity player) {
+		if (player == null) {
+			return null;
+		}
+		HungerManager hungerManager = player.getHungerManager();
+		if (!(hungerManager instanceof IHungerManager)) {
+			return null;
+		}
+		return ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
+	}
 
 	public Set<FoodHistoryEntry> carrotHistory;
 
