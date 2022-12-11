@@ -12,7 +12,6 @@
 		"MixinWrittenBookItem"
 	],
 	"client": [
-		"client.MixinItem",
 		"client.MixinClientPlayNetworkHandler"
 	],
 	"injectors": {

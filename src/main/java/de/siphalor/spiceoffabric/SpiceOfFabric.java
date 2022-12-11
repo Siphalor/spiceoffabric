@@ -1,31 +1,50 @@
 package de.siphalor.spiceoffabric;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import de.siphalor.spiceoffabric.polymer.SoFPolymer;
 import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
 import de.siphalor.spiceoffabric.server.Commands;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import de.siphalor.tweed4.Tweed;
+import de.siphalor.tweed4.config.ConfigEnvironment;
+import de.siphalor.tweed4.config.ConfigLoader;
+import de.siphalor.tweed4.config.TweedRegistry;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
 import net.minecraft.util.registry.Registry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class SpiceOfFabric implements ModInitializer {
@@ -41,8 +60,18 @@ public class SpiceOfFabric implements ModInitializer {
 
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
+	public static final Logger LOGGER = LoggerFactory.getLogger(SpiceOfFabric.class);
+
+	public static Item[] foodContainerItems;
+
 	@Override
 	public void onInitialize() {
+		Tweed.runEntryPoints();
+		ConfigLoader.initialReload(
+				TweedRegistry.getConfigFile(MOD_ID),
+				FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER ? ConfigEnvironment.SERVER : ConfigEnvironment.UNIVERSAL
+		);
+
 		Registry.register(Registry.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -50,9 +79,52 @@ public class SpiceOfFabric implements ModInitializer {
 		});
 
 		Commands.register();
+
+		if (FabricLoader.getInstance().isModLoaded("polymer")) {
+			SoFPolymer.init();
+		} else {
+			List<Item> foodContainerItems = new ArrayList<>(4);
+			if (Config.items.enablePaperBag) {
+				foodContainerItems.add(Registry.register(
+						Registry.ITEM, new Identifier(MOD_ID, "paper_bag"),
+						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 5, ScreenHandlerType.HOPPER)
+				));
+			}
+			if (Config.items.enableLunchBox) {
+				foodContainerItems.add(Registry.register(
+						Registry.ITEM, new Identifier(MOD_ID, "lunch_box"),
+						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
+				));
+			}
+			if (Config.items.enablePicnicBasket) {
+				foodContainerItems.add(Registry.register(
+						Registry.ITEM, new Identifier(MOD_ID, "picnic_basket"),
+						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
+				));
+			}
+			SpiceOfFabric.foodContainerItems = foodContainerItems.toArray(new Item[0]);
+		}
+
+		ResourceConditions.register(new Identifier(MOD_ID, "registry_populated"), optionsJson -> {
+			Identifier id = new Identifier(JsonHelper.getString(optionsJson, "registry"));
+			Registry<?> registry = Registry.REGISTRIES.get(id);
+			if (registry == null) {
+				throw new JsonSyntaxException(id + " is not a valid registry!");
+			}
+			for (JsonElement elementJson : JsonHelper.getArray(optionsJson, "ids")) {
+				Identifier elementId = new Identifier(JsonHelper.asString(elementJson, "id"));
+				if (!registry.containsId(elementId)) {
+					return false;
+				}
+			}
+			return true;
+		});
 	}
 
 	public static boolean hasMod(ServerPlayerEntity player) {
+		if (player == null) {
+			return false;
+		}
 		return ServerPlayNetworking.canSend(player, SYNC_FOOD_HISTORY_S2C_PACKET);
 	}
 

@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"BBB",
+		"BSB",
+		"BBB"
+	],
+	"key": {
+		"B": {
+			"item": "minecraft:bamboo"
+		},
+		"S": {
+			"item": "minecraft:stick"
+		}
+	},
+	"result": {
+		"item": "spiceoffabric:picnic_basket"
+	},
+	"fabric:load_conditions": [
+		{
+			"condition": "spiceoffabric:registry_populated",
+			"registry": "minecraft:item",
+			"ids": [
+				"spiceoffabric:picnic_basket"
+			]
+		}
+	]
+}

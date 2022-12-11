@@ -1,0 +1,14 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "spiceoffabric:item/picnic_basket"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"spiceoffabric:filled": 1
+			},
+			"model": "spiceoffabric:item/picnic_basket_filled"
+		}
+	]
+}

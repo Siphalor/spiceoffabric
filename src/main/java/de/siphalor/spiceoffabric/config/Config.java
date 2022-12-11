@@ -173,6 +173,37 @@ public class Config {
 		public int maxHealth = -1;
 	}
 
+	@AConfigEntry(
+			comment = """
+					Settings concerning the items of this mod.
+					
+					Install the mod "Polymer" if you want to use these items server-side only.
+					You can generate the resource pack with the command "/polymer generate".
+					
+					Otherwise the mod has to be installed on the client as well."""
+	)
+	public static Items items;
+	@AConfigBackground("textures/block/beehive_end.png")
+	public static class Items {
+		@AConfigEntry(
+				comment = """
+						Enable a low end food container that can be crafted from paper and holds up to 5 stacks of food."""
+		)
+		public boolean enablePaperBag = false;
+
+		@AConfigEntry(
+				comment = """
+						Enable a food container that can be crafted from planks and gold and holds up to 9 stacks of food."""
+		)
+		public boolean enableLunchBox = false;
+
+		@AConfigEntry(
+				comment = """
+						Enable a food container that can be crafted from bamboo and holds up to 9 stacks of food."""
+		)
+		public boolean enablePicnicBasket = false;
+	}
+
 	@AConfigListener
 	public static void reload() {
 		hungerExpression = new ExpressionBuilder(food.hunger).variables(itemVariables).functions(customExpFunctions).build();
