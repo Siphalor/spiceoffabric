@@ -167,7 +167,7 @@ public class Config {
 						Default health in vanilla is 20 but that may change through mods like Origins.
 						The resulting value will be floored before use."""
 		)
-		public String healthFormula = "(0.6 * baseHealth) + max(2 * log2(uniqueFoodsEaten), 0)";
+		public String healthFormula = "0.6 * baseHealth + max(2 * floor(log2(uniqueFoodsEaten)), 0)";
 
 		@AConfigEntry(
 				comment = """
