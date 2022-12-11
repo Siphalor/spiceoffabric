@@ -59,6 +59,12 @@ public class Config {
 			public double apply(double... args) {
 				return Math.min(args[0], args[1]);
 			}
+		},
+		new Function("power", 2) {
+			@Override
+			public double apply(double... args) {
+				return Math.pow(args[0], args[1]);
+			}
 		}
 	};
 
@@ -123,7 +129,7 @@ public class Config {
 				comment = "Expression that determines the food level to restore when eating a food item",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
-		public String hunger = "hungerValue * 0.7 ^ timesEaten";
+		public String hunger = "hungerValue * power(0.7, timesEaten)";
 
 		@AConfigEntry(
 				comment = "Expression that determines the saturation modifier for a food item",
@@ -135,7 +141,7 @@ public class Config {
 				comment = "Expression that determines the time requited to consume an item, given in ticks",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
-		public String consumeDuration = "consumeDuration * 1.3 ^ timesEaten";
+		public String consumeDuration = "consumeDuration * power(1.3, timesEaten)";
 
 		@AConfigEntry(
 				comment = "Sets the amount of last eaten foods to use for the calculations in this category",

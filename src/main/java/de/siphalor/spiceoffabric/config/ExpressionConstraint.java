@@ -30,6 +30,9 @@ public class ExpressionConstraint implements AnnotationConstraint<String> {
 						.collect(Collectors.toList())
 				);
 			}
+			if (value.contains("^")) {
+				return new Result<>(true, value, Collections.singletonList(Pair.of(Severity.WARN, "The ^ operator is deprecated in Spice of Fabric expressions, use the power() function instead")));
+			}
 			return new Result<>(true, value, Collections.emptyList());
 		} catch (IllegalArgumentException e) {
 			return new Result<>(false, null, ImmutableList.of(
