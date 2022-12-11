@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.polymer;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
+import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import eu.pb4.polymer.api.client.registry.ClientPolymerItem;
 import eu.pb4.polymer.api.item.PolymerItemUtils;
@@ -29,9 +30,15 @@ public class SoFPolymer {
 
 		PolymerRPUtils.addAssetSource(SpiceOfFabric.MOD_ID);
 
-		registerFoodContainer("paper_bag", Items.PAPER, Items.POTATO, 5, ScreenHandlerType.HOPPER);
-		registerFoodContainer("lunch_box", Items.DARK_OAK_BOAT, Items.COOKIE, 9, ScreenHandlerType.GENERIC_3X3);
-		registerFoodContainer("picnic_basket", Items.OAK_BOAT, Items.BREAD, 9, ScreenHandlerType.GENERIC_3X3);
+		if (Config.items.enablePaperBag) {
+			registerFoodContainer("paper_bag", Items.PAPER, Items.POTATO, 5, ScreenHandlerType.HOPPER);
+		}
+		if (Config.items.enableLunchBox) {
+			registerFoodContainer("lunch_box", Items.DARK_OAK_BOAT, Items.COOKIE, 9, ScreenHandlerType.GENERIC_3X3);
+		}
+		if (Config.items.enablePicnicBasket) {
+			registerFoodContainer("picnic_basket", Items.OAK_BOAT, Items.BREAD, 9, ScreenHandlerType.GENERIC_3X3);
+		}
 	}
 
 	public static void registerFoodContainer(String idPath, Item emptyItem, Item filledItem, int slots, ScreenHandlerType<?> screenHandlerType) {
