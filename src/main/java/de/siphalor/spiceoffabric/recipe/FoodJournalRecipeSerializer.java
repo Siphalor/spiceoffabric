@@ -8,6 +8,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
@@ -20,7 +21,7 @@ public class FoodJournalRecipeSerializer implements RecipeSerializer<ShapelessRe
 			ingredients.add(Ingredient.fromJson(ingredientJson));
 		}
 		ItemStack foodJournal = SpiceOfFabric.createFoodJournalStack();
-		return new ShapelessRecipe(id, "", foodJournal, ingredients);
+		return new ShapelessRecipe(id, "", CraftingRecipeCategory.MISC, foodJournal, ingredients);
 	}
 
 	@Override

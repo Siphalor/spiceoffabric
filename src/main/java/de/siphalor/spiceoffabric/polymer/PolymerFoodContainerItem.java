@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.polymer;
 
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
-import eu.pb4.polymer.api.item.PolymerItem;
+import eu.pb4.polymer.core.api.item.PolymerItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandlerType;

@@ -41,25 +41,30 @@ dependencies {
 	shadow(implementation('net.objecthunter:exp4j:0.4.8'))
 
 	// Tweed
-	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.7.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.3.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.2.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.1.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.1.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.1.3+mc22w17a"))
-	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.18+mc22w17a"))
+	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.7.1+mc1.19.3"))
+	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.3.1+mc1.19.3"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.2.1+mc1.19.3"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.1.1+mc1.19.3"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.1.3+mc1.19.3"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.1.3+mc1.19.3") {
+		transitive false
+	})
+	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.19+mc1.19.3") {
+		transitive false
+	})
 
 	// Polymer
 	// Change this to modImplementation for testing server-side-only mode
-	modCompileOnly "eu.pb4:polymer:0.2.0-rc.4.5+1.18.2"
+	modImplementation "eu.pb4:polymer-core:0.3.0+1.19.3"
+	modImplementation "eu.pb4:polymer-resource-pack:0.3.0+1.19.3"
 
 	// AppleSkin
 	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0:api"
 	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0"
 
 	// REI
-	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.528")
-	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:9.1.528")
+	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:10.0.578")
+	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:10.0.578")
 
 	// LazyDFU
 	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")

@@ -4,10 +4,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.Optional;
 
@@ -29,13 +29,13 @@ public class FoodHistoryEntry {
 	}
 
 	public ItemStack getStack() {
-		ItemStack stack = new ItemStack(Registry.ITEM.get(itemId));
+		ItemStack stack = new ItemStack(Registries.ITEM.get(itemId));
 		stack.setNbt(data);
 		return stack;
 	}
 
 	public String getItemStackSerialization() {
-		return "{id:\"" + Registry.ITEM.getId(Registry.ITEM.get(itemId)) + "\",tag:" + data.asString() + ",Count:1}";
+		return "{id:\"" + Registries.ITEM.getId(Registries.ITEM.get(itemId)) + "\",tag:" + data.asString() + ",Count:1}";
 	}
 
 	public static FoodHistoryEntry from(PacketByteBuf buffer) {
@@ -45,24 +45,24 @@ public class FoodHistoryEntry {
 	}
 
 	public NbtCompound write(NbtCompound compoundTag) {
-        compoundTag.putString("item", Registry.ITEM.getId(Registry.ITEM.get(itemId)).toString());
+        compoundTag.putString("item", Registries.ITEM.getId(Registries.ITEM.get(itemId)).toString());
         compoundTag.put("data", data);
 		return compoundTag;
 	}
 
 	public FoodHistoryEntry read(NbtCompound compoundTag) {
-		Optional<Item> item = Registry.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item")));
+		Optional<Item> item = Registries.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item")));
 		if (item.isEmpty()) {
 			return null;
 		}
-		itemId = Registry.ITEM.getRawId(item.get());
+		itemId = Registries.ITEM.getRawId(item.get());
 		data = compoundTag.getCompound("data");
 		return this;
 	}
 
 	public static FoodHistoryEntry fromItemStack(ItemStack stack) {
         FoodHistoryEntry entry = new FoodHistoryEntry();
-        entry.itemId = Registry.ITEM.getRawId(stack.getItem());
+        entry.itemId = Registries.ITEM.getRawId(stack.getItem());
 		return entry;
 	}
 

@@ -11,8 +11,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.ClampedModelPredicateProvider;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.item.UnclampedModelPredicateProvider;
 import net.minecraft.item.Item;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
@@ -46,7 +46,7 @@ public class SoFClient implements ClientModInitializer {
 
 		if (!FabricLoader.getInstance().isModLoaded("polymer")) {
 			if (SpiceOfFabric.foodContainerItems != null) {
-				UnclampedModelPredicateProvider predicateProvider = (stack, world, entity, seed) ->
+				ClampedModelPredicateProvider predicateProvider = (stack, world, entity, seed) ->
 						((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
 				Identifier predicateId = new Identifier(SpiceOfFabric.MOD_ID, "filled");
 				for (Item item : SpiceOfFabric.foodContainerItems) {

@@ -361,7 +361,7 @@ public class FoodContainerItem extends Item {
 		}
 
 		@Override
-		public ItemStack transferSlot(PlayerEntity player, int index) {
+		public ItemStack quickMove(PlayerEntity player, int index) {
 			ItemStack result = ItemStack.EMPTY;
 			Slot slot = this.slots.get(index);
 			if (slot.hasStack()) {

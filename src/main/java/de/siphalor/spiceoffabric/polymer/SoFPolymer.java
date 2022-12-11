@@ -3,19 +3,21 @@ package de.siphalor.spiceoffabric.polymer;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.util.FoodUtils;
-import eu.pb4.polymer.api.client.registry.ClientPolymerItem;
-import eu.pb4.polymer.api.item.PolymerItemUtils;
-import eu.pb4.polymer.api.resourcepack.PolymerModelData;
-import eu.pb4.polymer.api.resourcepack.PolymerRPUtils;
-import eu.pb4.polymer.impl.client.InternalClientRegistry;
+import eu.pb4.polymer.core.api.client.ClientPolymerItem;
+import eu.pb4.polymer.core.api.item.PolymerItemUtils;
+import eu.pb4.polymer.core.impl.client.InternalClientRegistry;
+import eu.pb4.polymer.resourcepack.api.PolymerModelData;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class SoFPolymer {
 	public static void init() {
@@ -28,7 +30,7 @@ public class SoFPolymer {
 			return client;
 		});
 
-		PolymerRPUtils.addAssetSource(SpiceOfFabric.MOD_ID);
+		PolymerResourcePackUtils.addModAssets(SpiceOfFabric.MOD_ID);
 
 		if (Config.items.enablePaperBag) {
 			registerFoodContainer("paper_bag", Items.PAPER, Items.POTATO, 5, ScreenHandlerType.HOPPER);
@@ -43,13 +45,14 @@ public class SoFPolymer {
 
 	public static void registerFoodContainer(String idPath, Item emptyItem, Item filledItem, int slots, ScreenHandlerType<?> screenHandlerType) {
 		Identifier id = new Identifier(SpiceOfFabric.MOD_ID, idPath);
-		PolymerModelData emptyModelData = PolymerRPUtils.requestModel(emptyItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_empty"));
-		PolymerModelData filledModelData = PolymerRPUtils.requestModel(filledItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_filled"));
-		Registry.register(Registry.ITEM, id, new PolymerFoodContainerItem(
-				new Item.Settings().maxCount(1).group(ItemGroup.TOOLS),
+		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_empty"));
+		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_filled"));
+		PolymerFoodContainerItem item = Registry.register(Registries.ITEM, id, new PolymerFoodContainerItem(
+				new Item.Settings().maxCount(1),
 				slots, screenHandlerType,
 				emptyItem, filledItem, emptyModelData.value(), filledModelData.value()
 		));
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> entries.add(item));
 	}
 
 	public static Identifier getPolymerItemId(ItemStack stack) {
