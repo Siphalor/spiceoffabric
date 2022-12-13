@@ -32,7 +32,6 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +64,7 @@ public class FoodContainerItem extends Item {
 
 		var filteredInv = new ArrayList<IndexedValue<ItemStack>>(inventory.size());
 		for (int i = 0; i < inventory.size(); i++) {
-			ItemStack stack = inventory.get(i);
+			ItemStack stack = inventory.getStack(i);
 			if (stack.isEmpty()) {
 				continue;
 			}
@@ -121,7 +120,7 @@ public class FoodContainerItem extends Item {
 	@Override
 	public void onItemEntityDestroyed(ItemEntity entity) {
 		StackInventory inventory = getInventory(entity.getStack());
-		ItemUsage.spawnItemContents(entity, inventory.stream());
+		ItemUsage.spawnItemContents(entity, inventory.stacks.stream());
 	}
 
 	@Override
@@ -261,7 +260,7 @@ public class FoodContainerItem extends Item {
 		player.closeHandledScreen();
 	}
 
-	protected class StackInventory extends AbstractList<ItemStack> implements Inventory {
+	protected class StackInventory implements Inventory {
 		private final ItemStack containerStack;
 		private final DefaultedList<ItemStack> stacks;
 
@@ -284,11 +283,6 @@ public class FoodContainerItem extends Item {
 				}
 			}
 			return true;
-		}
-
-		@Override
-		public ItemStack get(int index) {
-			return stacks.get(index);
 		}
 
 		@Override
