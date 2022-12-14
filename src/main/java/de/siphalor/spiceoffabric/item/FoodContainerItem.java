@@ -307,7 +307,7 @@ public class FoodContainerItem extends Item {
 
 		@Override
 		public boolean isValid(int slot, ItemStack stack) {
-			return stack.isFood();
+			return stack.isFood() && !(stack.getItem() instanceof FoodContainerItem);
 		}
 
 		@Override
