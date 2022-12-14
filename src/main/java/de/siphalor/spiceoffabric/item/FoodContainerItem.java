@@ -166,7 +166,8 @@ public class FoodContainerItem extends Item {
 			openScreen(stackInHand, user, hand == Hand.MAIN_HAND ? user.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT);
 			return TypedActionResult.success(stackInHand);
 		} else if (nextFoodItem.isFood()) {
-			if (user.canConsume(nextFoodItem.getItem().getFoodComponent().isAlwaysEdible())) {
+			FoodComponent foodComponent = nextFoodItem.getItem().getFoodComponent();
+			if (foodComponent != null && user.canConsume(foodComponent.isAlwaysEdible())) {
 				user.setCurrentHand(hand);
 				return TypedActionResult.consume(stackInHand);
 			}
