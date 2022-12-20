@@ -130,7 +130,6 @@ public class SpiceOfFabric implements ModInitializer {
 
 	public static void onEaten(ServerPlayerEntity player, FoodHistory foodHistory, ItemStack stack) {
 		foodHistory.addFood(stack, player);
-		player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
 		if (Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1)) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
