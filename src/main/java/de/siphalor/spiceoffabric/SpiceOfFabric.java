@@ -80,7 +80,7 @@ public class SpiceOfFabric implements ModInitializer {
 
 		Commands.register();
 
-		if (FabricLoader.getInstance().isModLoaded("polymer")) {
+		if (Config.items.usePolymer) {
 			SoFPolymer.init();
 		} else {
 			List<Item> foodContainerItems = new ArrayList<>(4);
