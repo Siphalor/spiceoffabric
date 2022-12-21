@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.client;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
+import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -9,7 +10,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.item.UnclampedModelPredicateProvider;
@@ -44,7 +44,7 @@ public class SoFClient implements ClientModInitializer {
 				((IHungerManager) client.player.getHungerManager()).spiceOfFabric_clearHistory()
 		);
 
-		if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+		if (!Config.items.usePolymer) {
 			if (SpiceOfFabric.foodContainerItems != null) {
 				UnclampedModelPredicateProvider predicateProvider = (stack, world, entity, seed) ->
 						((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;

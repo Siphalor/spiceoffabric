@@ -186,11 +186,17 @@ public class Config {
 					Install the mod "Polymer" if you want to use these items server-side only.
 					You can generate the resource pack with the command "/polymer generate".
 					
-					Otherwise the mod has to be installed on the client as well."""
+					Otherwise the mod has to be installed on the client as well.""",
+			scope = ConfigScope.GAME
 	)
 	public static Items items;
 	@AConfigBackground("textures/block/beehive_end.png")
 	public static class Items {
+		@AConfigEntry(comment = """
+				Whether to use Polymer for server-side only usage.
+				Using Polymer in other scenarios is not recommended.""")
+		public boolean usePolymer = false;
+
 		@AConfigEntry(
 				comment = """
 						Enable a low end food container that can be crafted from paper and holds up to 5 stacks of food."""

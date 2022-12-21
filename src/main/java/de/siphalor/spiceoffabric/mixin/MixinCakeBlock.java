@@ -10,6 +10,7 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldAccess;
@@ -26,8 +27,10 @@ public class MixinCakeBlock {
 		Config.setHungerExpressionValues(foodHistory.getTimesEaten(stack), baseHunger, baseSaturation, stack.getMaxUseTime());
 		hungerManager.add(Config.getHungerValue(), Config.getSaturationValue());
 
-		if (!world.isClient() && player instanceof ServerPlayerEntity) {
-			SpiceOfFabric.onEaten((ServerPlayerEntity) player, foodHistory, stack);
+
+		if (!world.isClient() && player instanceof ServerPlayerEntity serverPlayer) {
+			serverPlayer.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
+			SpiceOfFabric.onEaten(serverPlayer, foodHistory, stack);
 		}
 	}
 }
