@@ -81,6 +81,10 @@ public class SpiceOfFabric implements ModInitializer {
 		Commands.register();
 
 		if (Config.items.usePolymer) {
+			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
+				System.exit(1);
+			}
 			SoFPolymer.init();
 		} else {
 			List<Item> foodContainerItems = new ArrayList<>(4);
