@@ -44,6 +44,8 @@ For everyone who doesn't know the concept:
 
 One starts with a lower than regular amount of hearts and through eating diverse foods you unlock more hearts.
 
+Potato Mode is also avaliable: setting _only-last_ makes only recent food count.
+
 _This too, is highly configurable._
 
 ## Dependencies
