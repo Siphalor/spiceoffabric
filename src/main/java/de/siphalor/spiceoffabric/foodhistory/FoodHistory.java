@@ -261,7 +261,8 @@ public class FoodHistory {
 
 	public int getCarrotHealthOffset(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
+		int uniqueFood = Config.carrot.onlyLast ? history.uniqueElements() : carrotHistory.size();
+		Config.setHealthFormulaExpressionValues(uniqueFood, (int) maxHealthAttr.getBaseValue());
 		return Math.max(1, MathHelper.floor(Config.healthFormulaExpression.evaluate())) - (int) maxHealthAttr.getBaseValue();
 	}
 
