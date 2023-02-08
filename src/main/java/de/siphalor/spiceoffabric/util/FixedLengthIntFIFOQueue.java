@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
 
@@ -141,5 +142,27 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 			}
 		}
 		array = newArray;
+	}
+
+	public int uniqueElements() {
+		if (size < 250) {
+			// O(n^2), but great locality
+			int unique = size;
+			for (int current = start + 1; current < start + size; ++current) {
+				for (int past = start; past < current; ++past) {
+					if (array[current % array.length] == array[past % array.length]) {
+						--unique;
+						break;
+					}
+				}
+			}
+			return unique;
+		} else {
+			HashSet<Integer> all = new HashSet<Integer>();
+			for (int current = start; current < start + size; ++current) {
+				all.add(array[current]);
+			}
+			return all.size();
+		}
 	}
 }

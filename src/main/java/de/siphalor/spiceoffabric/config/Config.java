@@ -177,6 +177,13 @@ public class Config {
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
 		public int maxHealth = -1;
+
+		@AConfigEntry(
+				comment = """
+						Counts only last eaten food for bonuses, like Potato Mode.
+						If enable, do not foreget to buff healthFormula."""
+		)
+		public boolean onlyLast = false;
 	}
 
 	@AConfigEntry(
