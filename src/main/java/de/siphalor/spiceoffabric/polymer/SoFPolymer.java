@@ -9,10 +9,7 @@ import eu.pb4.polymer.core.impl.client.InternalClientRegistry;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -20,6 +17,8 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 
 public class SoFPolymer {
+	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
+
 	public static void init() {
 		PolymerItemUtils.ITEM_CHECK.register(ItemStack::isFood);
 
@@ -48,24 +47,10 @@ public class SoFPolymer {
 		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_empty"));
 		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_filled"));
 		PolymerFoodContainerItem item = Registry.register(Registries.ITEM, id, new PolymerFoodContainerItem(
-				new Item.Settings().maxCount(1),
+				new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT),
 				slots, screenHandlerType,
 				emptyItem, filledItem, emptyModelData.value(), filledModelData.value()
 		));
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> entries.add(item));
-	}
-
-	public static Identifier getPolymerItemId(ItemStack stack) {
-		return PolymerItemUtils.getPolymerIdentifier(stack);
-	}
-
-	@SuppressWarnings("UnstableApiUsage")
-	public static Item getPolymerItem(Identifier id) {
-		ClientPolymerItem clientPolymerItem = InternalClientRegistry.ITEMS.get(id);
-		return clientPolymerItem == null ? null : clientPolymerItem.registryEntry();
-	}
-
-	public static NbtCompound getPolymerTag(NbtCompound nbt) {
-		return nbt.getCompound(PolymerItemUtils.REAL_TAG);
 	}
 }

@@ -4,7 +4,7 @@ plugins {
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '7.0.0'
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
-	id 'com.modrinth.minotaur' version '2.4.5'
+	id 'com.modrinth.minotaur' version '2.5.0'
 	id "com.github.breadmoirai.github-release" version "2.2.12"
 	id 'de.siphalor.modpubup' version '0.1.0'
 }
@@ -54,18 +54,20 @@ dependencies {
 		transitive false
 	})
 
+	// Capsaicin
+	include(modApi("de.siphalor:capsaicin-$minecraft_major_version:1.3.1+mc1.19.3"))
+
 	// Polymer
 	// Change this to modImplementation for testing server-side-only mode
 	modImplementation "eu.pb4:polymer-core:0.3.0+1.19.3"
 	modImplementation "eu.pb4:polymer-resource-pack:0.3.0+1.19.3"
 
 	// AppleSkin
-	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0:api"
-	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0"
+	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19.3-2.4.2:api"
+	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19.3-2.4.2"
 
-	// REI
-	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:10.0.578")
-	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:10.0.578")
+	// Mod Menu
+	modLocalRuntime "com.terraformersmc:modmenu:5.0.2"
 
 	// LazyDFU
 	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
@@ -173,7 +175,6 @@ if (project.hasProperty("curseforgeToken")) {
 				requiredDependency "fabric-api"
 				optionalDependency "appleskin"
 				optionalDependency "polymer"
-				optionalDependency "roughly-enough-items"
 			}
 			mainArtifact(remapJar) {
 				displayName = "[${project.mod_mc_version_specifier}] ${project.mod_version}"
@@ -202,7 +203,6 @@ modrinth {
 		required.project("fabric-api")
 		optional.project("appleskin")
 		optional.project("polymer")
-		optional.project("roughly-enough-items")
 	}
 }
 tasks.modrinth.group = "upload"

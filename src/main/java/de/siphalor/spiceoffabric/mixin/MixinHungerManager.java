@@ -9,8 +9,6 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,8 +18,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Objects;
 
 @Mixin(HungerManager.class)
 public abstract class MixinHungerManager implements IHungerManager {
@@ -58,18 +54,6 @@ public abstract class MixinHungerManager implements IHungerManager {
 	@Override
 	public void spiceOfFabric_setFoodHistory(FoodHistory foodHistory) {
 		spiceOfFabric_foodHistory = foodHistory;
-	}
-
-	@Inject(method = "eat", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"), cancellable = true)
-    public void onItemEat(Item item, ItemStack stack, CallbackInfo callbackInfo) {
-		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), Objects.requireNonNull(item.getFoodComponent()).getHunger(), item.getFoodComponent().getSaturationModifier(), stack.getMaxUseTime());
-		int hunger = Config.getHungerValue();
-		float saturation = Config.getSaturationValue();
-		add(hunger, saturation);
-		if (spiceOfFabric_player != null) {
-			SpiceOfFabric.onEaten(spiceOfFabric_player, spiceOfFabric_foodHistory, stack);
-		}
-		callbackInfo.cancel();
 	}
 
 	@Inject(method = "readNbt", at = @At("RETURN"))
