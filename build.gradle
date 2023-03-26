@@ -199,7 +199,6 @@ modrinth {
 		required.project("fabric-api")
 		optional.project("appleskin")
 		optional.project("polymer")
-		optional.project("roughly-enough-items")
 	}
 }
 tasks.modrinth.group = "upload"
