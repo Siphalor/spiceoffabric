@@ -26,7 +26,7 @@ public class FixedLengthIntFIFOQueueTests {
 		Assertions.assertEquals(2, queue.size());
 		queue.enqueue(1);
 		Assertions.assertEquals(2, queue.size());
-		queue.dequeueInt();
+		queue.dequeue();
 		Assertions.assertEquals(1, queue.size());
 	}
 
@@ -47,53 +47,53 @@ public class FixedLengthIntFIFOQueueTests {
 		Assertions.assertFalse(queue.isEmpty());
 		queue.enqueue(1);
 		Assertions.assertFalse(queue.isEmpty());
-		queue.dequeueInt();
+		queue.dequeue();
 		Assertions.assertFalse(queue.isEmpty());
-		queue.dequeueInt();
+		queue.dequeue();
 		Assertions.assertTrue(queue.isEmpty());
 	}
 
 	@Test
 	public void testEnqueue() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
-		queue.enqueue(1);
-		Assertions.assertEquals(1, queue.firstInt());
-		queue.enqueue(2);
-		Assertions.assertEquals(1, queue.firstInt());
-		queue.enqueue(3);
-		Assertions.assertEquals(2, queue.firstInt());
+		Assertions.assertFalse(queue.enqueue(1));
+		Assertions.assertEquals(1, queue.first());
+		Assertions.assertFalse(queue.enqueue(2));
+		Assertions.assertEquals(1, queue.first());
+		Assertions.assertTrue(queue.enqueue(3));
+		Assertions.assertEquals(2, queue.first());
 	}
 
 	@Test
 	public void testDequeue() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
-		Assertions.assertThrows(NoSuchElementException.class, queue::dequeueInt);
+		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 		queue.enqueue(1);
-		queue.dequeueInt();
+		queue.dequeue();
 		Assertions.assertEquals(0, queue.size());
 		queue.enqueue(2);
 		queue.enqueue(3);
 		queue.enqueue(4);
-		queue.dequeueInt();
+		queue.dequeue();
 		Assertions.assertEquals(1, queue.size());
-		Assertions.assertEquals(4, queue.firstInt());
-		queue.dequeueInt();
+		Assertions.assertEquals(4, queue.first());
+		queue.dequeue();
 		Assertions.assertEquals(0, queue.size());
-		Assertions.assertThrows(NoSuchElementException.class, queue::dequeueInt);
+		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 	}
 
 	@Test
 	public void testFirstInt() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
-		Assertions.assertThrows(NoSuchElementException.class, queue::firstInt);
+		Assertions.assertThrows(NoSuchElementException.class, queue::first);
 		queue.enqueue(1);
-		Assertions.assertEquals(1, queue.firstInt());
+		Assertions.assertEquals(1, queue.first());
 		queue.enqueue(2);
-		Assertions.assertEquals(1, queue.firstInt());
+		Assertions.assertEquals(1, queue.first());
 		queue.enqueue(3);
-		Assertions.assertEquals(2, queue.firstInt());
+		Assertions.assertEquals(2, queue.first());
 		queue.enqueue(4);
-		Assertions.assertEquals(3, queue.firstInt());
+		Assertions.assertEquals(3, queue.first());
 	}
 
 	@Test
@@ -151,11 +151,11 @@ public class FixedLengthIntFIFOQueueTests {
 		Assertions.assertFalse(iterator.hasNext());
 		queue.enqueue(4);
 		queue.enqueue(5);
-		Assertions.assertEquals(2, queue.dequeueInt());
-		Assertions.assertEquals(3, queue.dequeueInt());
-		Assertions.assertEquals(4, queue.dequeueInt());
-		Assertions.assertEquals(5, queue.dequeueInt());
-		Assertions.assertThrows(NoSuchElementException.class, queue::dequeueInt);
+		Assertions.assertEquals(2, queue.dequeue());
+		Assertions.assertEquals(3, queue.dequeue());
+		Assertions.assertEquals(4, queue.dequeue());
+		Assertions.assertEquals(5, queue.dequeue());
+		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 	}
 
 	@Test
@@ -186,9 +186,9 @@ public class FixedLengthIntFIFOQueueTests {
 		Assertions.assertEquals(4, iterator.nextInt());
 		Assertions.assertFalse(iterator.hasNext());
 		queue.enqueue(5);
-		Assertions.assertEquals(3, queue.dequeueInt());
-		Assertions.assertEquals(4, queue.dequeueInt());
-		Assertions.assertEquals(5, queue.dequeueInt());
-		Assertions.assertThrows(NoSuchElementException.class, queue::dequeueInt);
+		Assertions.assertEquals(3, queue.dequeue());
+		Assertions.assertEquals(4, queue.dequeue());
+		Assertions.assertEquals(5, queue.dequeue());
+		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 	}
 }

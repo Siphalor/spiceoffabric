@@ -19,7 +19,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.*;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
@@ -187,7 +190,7 @@ public class FoodHistory {
 		nextId = i;
 		int historySize = history.size();
 		for (int j = 0; j < historySize; j++) {
-			history.enqueue(oldToNewMap.get(history.dequeueInt()));
+			history.enqueue(oldToNewMap.get(history.dequeue()));
 		}
 		Int2IntMap newStats = new Int2IntArrayMap();
 		for (Int2IntMap.Entry entry : stats.int2IntEntrySet()) {
@@ -243,7 +246,9 @@ public class FoodHistory {
 			dictionary.put(id, entry);
 		}
 		history.setLength(Config.food.historyLength);
-		history.enqueue((int) id);
+		if (history.enqueue(id)) {
+			removeLastFood();
+		}
 		while (history.size() > Config.food.historyLength) {
 			removeLastFood();
 		}
@@ -255,7 +260,7 @@ public class FoodHistory {
 	}
 
 	public void removeLastFood() {
-		int id = history.dequeueInt();
+		int id = history.dequeue();
 		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
 	}
 

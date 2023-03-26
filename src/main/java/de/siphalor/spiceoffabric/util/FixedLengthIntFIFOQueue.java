@@ -1,15 +1,13 @@
 package de.siphalor.spiceoffabric.util;
 
 
-import it.unimi.dsi.fastutil.ints.IntComparator;
 import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
 
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
 
-public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
+public class FixedLengthIntFIFOQueue implements IntIterable {
 	protected int[] array;
 	protected int size; // actual length, != array.length
 	protected int start; // inclusive
@@ -25,7 +23,6 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 		return size;
 	}
 
-	@Override
 	public void clear() {
 		size = 0;
 	}
@@ -34,23 +31,24 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 		return size <= 0;
 	}
 
-	@Override
-	public void enqueue(int x) {
+
+	public boolean enqueue(int x) {
 		if (array.length == 0) {
-			return;
+			return false;
 		}
 		if (size == array.length) {
 			array[start] = x;
 			if (++start >= size) {
 				start = 0;
 			}
+			return true;
 		} else {
 			array[(start + size++) % array.length] = x;
+			return false;
 		}
 	}
 
-	@Override
-	public int dequeueInt() {
+	public int dequeue() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
 		}
@@ -62,17 +60,11 @@ public class FixedLengthIntFIFOQueue implements IntPriorityQueue, IntIterable {
 		return x;
 	}
 
-	@Override
-	public int firstInt() {
+	public int first() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
 		}
 		return array[start];
-	}
-
-	@Override
-	public IntComparator comparator() {
-		return null;
 	}
 
 	@Override
