@@ -1,10 +1,12 @@
 package de.siphalor.spiceoffabric.util;
 
+import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.CakeBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -19,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +43,21 @@ public class FoodUtils {
 			return blockItem.getBlock() instanceof CakeBlock;
 		}
 		return false;
+	}
+
+	public static @Nullable ItemStack getFoodStack(FoodContext context) {
+		ItemStack stack = context.stack();
+		if (stack != null) {
+			return stack;
+		}
+		BlockState blockState = context.blockState();
+		if (blockState != null) {
+			Item item = blockState.getBlock().asItem();
+			if (item != null) {
+				return new ItemStack(item);
+			}
+		}
+		return null;
 	}
 
 	public static void appendServerTooltips(PlayerEntity player, ItemStack stack) {
