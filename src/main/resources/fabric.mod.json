@@ -24,9 +24,6 @@
 		"client": [
 			"de.siphalor.spiceoffabric.client.SoFClient"
 		],
-		"rei_client": [
-			"de.siphalor.spiceoffabric.client.compat.REIPlugin"
-		],
 		"tweed4:config": [
 			"de.siphalor.spiceoffabric.config.Config"
 		]

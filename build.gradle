@@ -60,9 +60,8 @@ dependencies {
 	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0:api"
 	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0"
 
-	// REI
-	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.528")
-	modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:9.1.528")
+	// Mod Menu
+	modLocalRuntime "com.terraformersmc:modmenu:4.1.2"
 
 	// LazyDFU
 	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
@@ -170,7 +169,6 @@ if (project.hasProperty("curseforgeToken")) {
 				requiredDependency "fabric-api"
 				optionalDependency "appleskin"
 				optionalDependency "polymer"
-				optionalDependency "roughly-enough-items"
 			}
 			mainArtifact(remapJar) {
 				displayName = "[${project.mod_mc_version_specifier}] ${project.mod_version}"
