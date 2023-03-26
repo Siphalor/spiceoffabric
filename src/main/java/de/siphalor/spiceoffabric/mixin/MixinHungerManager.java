@@ -1,6 +1,5 @@
 package de.siphalor.spiceoffabric.mixin;
 
-import com.mojang.datafixers.util.Pair;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
@@ -9,21 +8,15 @@ import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.HungerManager;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HungerManager.class)
@@ -61,42 +54,6 @@ public abstract class MixinHungerManager implements IHungerManager {
 	@Override
 	public void spiceOfFabric_setFoodHistory(FoodHistory foodHistory) {
 		spiceOfFabric_foodHistory = foodHistory;
-	}
-
-	@ModifyVariable(method = "eat", at = @At("STORE"))
-	public FoodComponent modifyFoodValues(FoodComponent old, Item item, ItemStack stack) {
-		Config.setHungerExpressionValues(spiceOfFabric_foodHistory.getTimesEaten(stack), old.getHunger(), old.getSaturationModifier(), stack.getMaxUseTime());
-		FoodComponent newFoodComponent = setFoodComponentAttributes(old, Config.getHungerValue(), Config.getSaturationValue());
-		if (spiceOfFabric_player != null) {
-			SpiceOfFabric.onEaten(spiceOfFabric_player, spiceOfFabric_foodHistory, stack);
-		}
-		return newFoodComponent;
-	}
-
-	@Unique
-	private static FoodComponent setFoodComponentAttributes(FoodComponent foodComponent, int hunger, float saturation) {
-		if (foodComponent.getHunger() == hunger && foodComponent.getSaturationModifier() == saturation) {
-			return foodComponent;
-		}
-
-		FoodComponent.Builder builder = new FoodComponent.Builder()
-				.hunger(hunger)
-				.saturationModifier(saturation);
-		if (foodComponent.isAlwaysEdible()) {
-			builder.alwaysEdible();
-		}
-		if (!foodComponent.getStatusEffects().isEmpty()) {
-			for (Pair<StatusEffectInstance, Float> statusEffect : foodComponent.getStatusEffects()) {
-				builder.statusEffect(statusEffect.getFirst(), statusEffect.getSecond());
-			}
-		}
-		if (foodComponent.isMeat()) {
-			builder.meat();
-		}
-		if (foodComponent.isSnack()) {
-			builder.snack();
-		}
-		return builder.build();
 	}
 
 	@Inject(method = "readNbt", at = @At("RETURN"))

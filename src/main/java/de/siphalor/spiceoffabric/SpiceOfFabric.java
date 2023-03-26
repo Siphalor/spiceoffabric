@@ -2,12 +2,17 @@ package de.siphalor.spiceoffabric;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import de.siphalor.capsaicin.api.food.FoodContext;
+import de.siphalor.capsaicin.api.food.FoodEvents;
+import de.siphalor.capsaicin.api.food.FoodModifications;
+import de.siphalor.capsaicin.api.food.PlayerFoodModifier;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.polymer.SoFPolymer;
 import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
 import de.siphalor.spiceoffabric.server.Commands;
+import de.siphalor.spiceoffabric.util.FoodUtils;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.tweed4.Tweed;
 import de.siphalor.tweed4.config.ConfigEnvironment;
@@ -23,10 +28,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
@@ -61,6 +64,7 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SpiceOfFabric.class);
+	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
 
 	public static Item[] foodContainerItems;
 
@@ -74,32 +78,79 @@ public class SpiceOfFabric implements ModInitializer {
 
 		Registry.register(Registry.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			syncFoodHistory(handler.player);
-		});
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> syncFoodHistory(handler.player));
 
 		Commands.register();
 
+		// FOOD EVENTS
+
+		FoodEvents.EATEN.on(event -> {
+			FoodContext context = event.context();
+			if (context.user() instanceof ServerPlayerEntity player) {
+				FoodHistory foodHistory = FoodHistory.get(player);
+				ItemStack foodStack = FoodUtils.getFoodStack(context);
+				foodHistory.addFood(foodStack, player);
+				if (Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1)) {
+					SpiceOfFabric.updateMaxHealth(player, true, true);
+				}
+			}
+		});
+
+		FoodModifications.EATING_TIME_MODIFIERS.register((PlayerFoodModifier<Integer>) (eatingTime, context, player) -> {
+			FoodHistory foodHistory = FoodHistory.get(player);
+			if (foodHistory == null) {
+				return eatingTime;
+			}
+
+			Config.setConsumeDurationValues(foodHistory.getTimesEaten(FoodUtils.getFoodStack(context)), context.originalFoodHunger(), context.originalFoodSaturationModifier(), eatingTime);
+			return (int) Config.consumeDurationExpression.evaluate();
+		}, new Identifier(MOD_ID, "config_expression"));
+
+		FoodModifications.PROPERTIES_MODIFIERS.register((foodProperties, context) -> {
+			int timesEaten;
+			if (context.user() instanceof PlayerEntity player) {
+				FoodHistory foodHistory = FoodHistory.get(player);
+				if (foodHistory != null) {
+					timesEaten = foodHistory.getTimesEaten(FoodUtils.getFoodStack(context));
+				} else {
+					timesEaten = 0;
+				}
+			} else {
+				timesEaten = 0;
+			}
+
+			Config.setHungerExpressionValues(timesEaten, foodProperties.getHunger(), foodProperties.getSaturationModifier(), 0);
+			foodProperties.setHunger(Config.getHungerValue());
+			foodProperties.setSaturationModifier(Config.getSaturationValue());
+			return foodProperties;
+		}, new Identifier(MOD_ID, "config_expression"));
+
+		// POLYMER AND FOOD CONTAINERS
+
 		if (Config.items.usePolymer) {
+			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
+				System.exit(1);
+			}
 			SoFPolymer.init();
 		} else {
 			List<Item> foodContainerItems = new ArrayList<>(4);
 			if (Config.items.enablePaperBag) {
 				foodContainerItems.add(Registry.register(
 						Registry.ITEM, new Identifier(MOD_ID, "paper_bag"),
-						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 5, ScreenHandlerType.HOPPER)
+						new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT).group(ItemGroup.FOOD), 5, ScreenHandlerType.HOPPER)
 				));
 			}
 			if (Config.items.enableLunchBox) {
 				foodContainerItems.add(Registry.register(
 						Registry.ITEM, new Identifier(MOD_ID, "lunch_box"),
-						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
+						new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
 				));
 			}
 			if (Config.items.enablePicnicBasket) {
 				foodContainerItems.add(Registry.register(
-						Registry.ITEM, new Identifier(MOD_ID, "picnic_basket"),
-						new FoodContainerItem(new Item.Settings().maxCount(1).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
+						Registry.ITEM, new Identifier(MOD_ID, "picnic_basket"                           ),
+						new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
 				));
 			}
 			SpiceOfFabric.foodContainerItems = foodContainerItems.toArray(new Item[0]);
@@ -126,13 +177,6 @@ public class SpiceOfFabric implements ModInitializer {
 			return false;
 		}
 		return ServerPlayNetworking.canSend(player, SYNC_FOOD_HISTORY_S2C_PACKET);
-	}
-
-	public static void onEaten(ServerPlayerEntity player, FoodHistory foodHistory, ItemStack stack) {
-		foodHistory.addFood(stack, player);
-		if (Config.carrot.enable && (player.getMaxHealth() < Config.carrot.maxHealth || Config.carrot.maxHealth == -1)) {
-			SpiceOfFabric.updateMaxHealth(player, true, true);
-		}
 	}
 
 	public static EntityAttributeModifier createHealthModifier(double amount) {
