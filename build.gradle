@@ -51,7 +51,7 @@ dependencies {
 	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.18+mc1.18.2"))
 
 	// Capsaicin
-	include(modApi("de.siphalor:capsaicin-$minecraft_major_version:1.3.0+mc1.18.2"))
+	include(modApi("de.siphalor:capsaicin-$minecraft_major_version:1.3.1+mc1.18.2"))
 
 	// Polymer
 	modImplementation "eu.pb4:polymer:0.2.0-rc.4.5+1.18.2"
