@@ -105,33 +105,42 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 	}
 
 	public void setLength(int newLength) {
-		if (newLength == size) {
-			return;
+		if (newLength < 0) {
+			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");
 		}
+
+		if (newLength < array.length) {
+			shortenTo(newLength);
+		} else if (newLength > array.length) {
+			extendTo(newLength);
+		}
+	}
+
+	private void shortenTo(int newLength) {
+		int overflow = size - newLength;
+		if (overflow > 0) {
+			// If the queue is overflowing, we need to remove the oldest elements
+			start = (start + overflow) % array.length;
+			size -= overflow;
+		}
+
+		changeSizeTo(newLength);
+	}
+
+	private void extendTo(int newLength) {
+		changeSizeTo(newLength);
+	}
+
+	private void changeSizeTo(int newLength) {
 		int[] newArray = new int[newLength];
-		int toEnd = array.length - start;
-		if (newLength < size) {
-			if (newLength > 0) {
-				int diff = size - newLength;
-				if (size <= toEnd) {
-					System.arraycopy(array, start + diff, newArray, start, newLength);
-				} else {
-					System.arraycopy(array, start, newArray, Math.max(0, start - diff), toEnd);
-					System.arraycopy(array, 0, newArray, 0, size - toEnd);
-				}
-			}
-			size = Math.min(size, newLength);
+		int spaceToEnd = array.length - start;
+		if (size <= spaceToEnd) {
+			System.arraycopy(array, start, newArray, 0, size);
 		} else {
-			if (array.length > 0) {
-				if (size <= toEnd) {
-					System.arraycopy(array, start, newArray, start, toEnd);
-				} else {
-					System.arraycopy(array, start, newArray, 0, toEnd);
-					System.arraycopy(array, 0, newArray, toEnd, size - toEnd);
-					start = 0;
-				}
-			}
+			System.arraycopy(array, start, newArray, 0, spaceToEnd);
+			System.arraycopy(array, 0, newArray, spaceToEnd, size - spaceToEnd);
 		}
+		start = 0;
 		array = newArray;
 	}
 }
