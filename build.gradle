@@ -46,7 +46,8 @@ dependencies {
 	def tweedDeps = [
 	        'base', 'annotated',
 			'data', 'data-hjson',
-			'tailor-screen', 'tailor-coat'
+			'tailor-screen', 'tailor-coat',
+			'tailor-lang-json-descriptions'
 	]
 	tweedDeps.each {
 		include(modApi("de.siphalor.tweed4:tweed4-$it-$minecraft_major_version"))
