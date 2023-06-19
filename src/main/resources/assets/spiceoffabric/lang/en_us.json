@@ -23,6 +23,8 @@
     "tweed4_tailor_screen.screen.spiceoffabric": "Spice of Fabric Config",
     "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips": "Last Eaten Information",
     "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips.description": "Must be set on the server!\nWhether the players will be able to see how many foods ago they ate an item in the tooltip.\nWhen set to SIMPLE, just this information will be shown.\nIf set to EXTENDED, there'll also be information on how many other foods the player needs to eat to restore the nutrition value.\nWith NONE this tooltip is hidden.",
+	"tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command": "Enable Journal Command",
+	"tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command.description": "Allow any player to open the diet journal using a command.\nOtherwise player have to craft the item (book+apple) to access the journal.",
     "tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
     "tweed4_tailor_screen.screen.spiceoffabric.respawn.description": "Edit the expressions that are used for calculating the player stats after respawning.\nExpressions are mathematical terms with the following variables:\n\"hunger\" is the amount of hunger the player had when dying\n\"saturation\" is the amount of hunger the player had when dying",
     "tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Saturation",

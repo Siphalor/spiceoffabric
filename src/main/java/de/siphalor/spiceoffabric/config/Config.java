@@ -71,6 +71,9 @@ public class Config {
 	@AConfigEntry(environment = ConfigEnvironment.SYNCED)
 	public static ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
 
+	@AConfigEntry(scope = ConfigScope.GAME)
+	public static boolean enableJournalCommand = false;
+
 	public enum ItemTipDisplayStyle {
 		NONE, SIMPLE, EXTENDED
 	}
