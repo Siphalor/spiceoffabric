@@ -9,7 +9,7 @@ import java.util.Locale;
 
 public enum FoodJournalView {
 	HISTORY("Least to most recently eaten"),
-	CARROT("All unique foods eaten"),
+	CARROT("All unique foods eaten so far"),
 	CARROT_UNEATEN("Unique foods that have not been eaten yet")
 	;
 
