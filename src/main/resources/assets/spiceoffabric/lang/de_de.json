@@ -1,6 +1,4 @@
 {
-    "spiceoffabric.journal.inside_title": "§8§l§n▶ Ernährungs-Tagebuch ◀§r",
-    "spiceoffabric.journal.line": "§l%s.§r %s",
     "spiceoffabric.item.tooltip.last_eaten.simple": "Zuletzt vor %d Mahlzeiten gegessen",
     "spiceoffabric.item.tooltip.last_eaten.simple.one": "Zuletzt vor einer Mahlzeit gegessen",
     "spiceoffabric.item.tooltip.last_eaten.simple.last": "Zuletzt gegessen",
@@ -60,5 +58,12 @@
     "tweed4_tailor_screen.screen.spiceoffabric.items.enable-paper-bag.description": "Aktiviert einen einfachen Essensbehälter, der aus Papier hergestellt werden kann und Platz für bis zu 5 Stapel Essen hat.",
     "tweed4_tailor_screen.screen.spiceoffabric.items.enable-lunch-box.description": "Aktiviert einen Essensbehälter, der aus Planken und Gold hergestellt werden kann und Platz für bis zu 9 Stapel Essen hat.",
     "tweed4_tailor_screen.screen.spiceoffabric.items.enable-picnic-basket.description": "Aktiviert einen Essensbehälter, der aus Bambus hergestellt werden kann und Platz für bis zu 9 Stapel Essen hat.",
-    "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips.description": "Muss serverseitig aktiviert werden!\nSetzt, ob Spieler in der Kurzinfo von Nahrungsmitteln sehen können, vor wie vielen Mahlzeiten sie dieses zuletzt verzehrt haben.\nWenn diese Option auf SIMPLE gesetzt wird, wird nur diese Information angezeigt.\nBei EXTENDED wird zudem angezeigt, wie viele weitere Mahlzeiten gegessen werden müssen, um den ursprünglichen Nährwert wiederherzustellen.\nBei NONE wird keine solche Kurzinfo angezeigt."
+    "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips.description": "Muss serverseitig aktiviert werden!\nSetzt, ob Spieler in der Kurzinfo von Nahrungsmitteln sehen können, vor wie vielen Mahlzeiten sie dieses zuletzt verzehrt haben.\nWenn diese Option auf SIMPLE gesetzt wird, wird nur diese Information angezeigt.\nBei EXTENDED wird zudem angezeigt, wie viele weitere Mahlzeiten gegessen werden müssen, um den ursprünglichen Nährwert wiederherzustellen.\nBei NONE wird keine solche Kurzinfo angezeigt.",
+    "spiceoffabric.journal.screen.view.carrot_uneaten": "Noch nicht gegessene Nahrungsmittel",
+    "spiceoffabric.journal.screen.view.history": "Zuerst bis zuletzt gegessen",
+    "spiceoffabric.journal.screen.view.carrot": "Alle bisher gegessenen Nahrungsmittel",
+    "tweed4_tailor_screen.screen.spiceoffabric.carrot.uneaten-in-journal": "Ungegessenes im Tagebuch",
+    "tweed4_tailor_screen.screen.spiceoffabric.carrot.uneaten-in-journal.description": "Ob Spieler im Ernährungs-Tagebuch eine Ansicht mit allen noch nicht gegessenen Nahrungsmitteln sehen können.",
+    "tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command": "Befehl für Tagebuch aktivieren",
+    "tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command.description": "Erlaubt allen Spielern ihr Ernährungstagebuch mittels eines Befehls zu öffnen.\nAndernfalls müssen die Spieler das Tagebuch herstellen (Buch+Apfel), um auf das Tagebuch zuzugreifen."
 }
