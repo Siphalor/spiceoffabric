@@ -6,6 +6,7 @@ import de.siphalor.capsaicin.api.food.CamoFoodItem;
 import de.siphalor.capsaicin.api.food.DynamicFoodPropertiesAccess;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import de.siphalor.spiceoffabric.util.IndexedValue;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.ItemEntity;
@@ -164,19 +165,28 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 
 	@Override
 	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-		if (user instanceof PlayerEntity player) {
+		openContainer:
+		if (!world.isClient && user instanceof ServerPlayerEntity player) {
+			// Only open the container if the player hasn't used the item for too long
 			int maxUseTime = getMaxUseTime(stack);
-			if (maxUseTime - remainingUseTicks <= 5) {
-				if (!world.isClient) {
-					PlayerInventory inv = ((PlayerEntity) user).getInventory();
-					for (int i = 0; i < inv.size(); i++) {
-						if (inv.getStack(i) == stack) {
-							openScreen(stack, player, i);
-							break;
-						}
-					}
+			if (maxUseTime - remainingUseTicks > 5) {
+				break openContainer;
+			}
+
+			// Prevent opening the container directly after eating
+			long lastEatTime = ((IServerPlayerEntity) user).spiceOfFabric_getLastContainerEatTime();
+			long currentTime = System.currentTimeMillis();
+			if (currentTime - lastEatTime < 800) {
+				break openContainer;
+			}
+			((IServerPlayerEntity) user).spiceOfFabric_setLastContainerEatTime(currentTime);
+
+			PlayerInventory inv = player.getInventory();
+			for (int i = 0; i < inv.size(); i++) {
+				if (inv.getStack(i) == stack) {
+					openScreen(stack, player, i);
+					return;
 				}
-				return;
 			}
 		}
 		super.onStoppedUsing(stack, world, user, remainingUseTicks);
@@ -326,7 +336,6 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			stacks.clear();
 		}
 	}
-
 
 
 	private class CustomScreenHandler extends ScreenHandler {

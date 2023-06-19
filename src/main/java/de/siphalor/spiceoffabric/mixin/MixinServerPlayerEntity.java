@@ -7,36 +7,55 @@ import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ServerPlayerEntity.class, priority = 1100)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements IServerPlayerEntity {
-	protected boolean spiceOfFabric_foodHistorySync = false;
+	@Shadow public abstract void lookAt(EntityAnchorArgumentType.EntityAnchor anchorPoint, Vec3d target);
 
-	public MixinServerPlayerEntity(World world, BlockPos pos, float yaw, GameProfile profile) {
+	@Unique
+	protected boolean foodHistorySync = false;
+	@Unique
+	protected long lastContainerEatTime;
+
+	protected MixinServerPlayerEntity(World world, BlockPos pos, float yaw, GameProfile profile) {
 		super(world, pos, yaw, profile);
 	}
 
 	@Override
 	public void spiceOfFabric_scheduleFoodHistorySync() {
-		spiceOfFabric_foodHistorySync = true;
+		foodHistorySync = true;
 	}
 
 	@Override
 	public boolean spiceOfFabric_foodHistorySync() {
-		boolean result = spiceOfFabric_foodHistorySync;
-		spiceOfFabric_foodHistorySync = false;
+		boolean result = foodHistorySync;
+		foodHistorySync = false;
 		return result;
+	}
+
+	@Override
+	public long spiceOfFabric_getLastContainerEatTime() {
+		return lastContainerEatTime;
+	}
+
+	@Override
+	public void spiceOfFabric_setLastContainerEatTime(long time) {
+		lastContainerEatTime = time;
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
