@@ -31,6 +31,16 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return size <= 0;
 	}
 
+	public int get(int index) {
+		if (index < 0 || index >= size) {
+			throw new IndexOutOfBoundsException(index + " is out of bounds for fixed FIFO queue (s: " + size + ", l: " + array.length + ")");
+		}
+		index += start;
+		if (index >= array.length) {
+			index -= array.length;
+		}
+		return array[index];
+	}
 
 	public boolean enqueue(int x) {
 		if (array.length == 0) {

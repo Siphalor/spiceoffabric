@@ -2,18 +2,17 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public class FoodHistoryEntry {
+
 	private int itemId;
 	private NbtCompound data;
 
@@ -47,8 +46,8 @@ public class FoodHistoryEntry {
 	}
 
 	public NbtCompound write(NbtCompound compoundTag) {
-        compoundTag.putString("item", Registry.ITEM.getId(Registry.ITEM.get(itemId)).toString());
-        compoundTag.put("data", data);
+		compoundTag.putString("item", Registry.ITEM.getId(Registry.ITEM.get(itemId)).toString());
+		compoundTag.put("data", data);
 		return compoundTag;
 	}
 
@@ -63,16 +62,16 @@ public class FoodHistoryEntry {
 	}
 
 	public static FoodHistoryEntry fromItemStack(ItemStack stack) {
-        FoodHistoryEntry entry = new FoodHistoryEntry();
-        entry.itemId = Registry.ITEM.getRawId(stack.getItem());
+		FoodHistoryEntry entry = new FoodHistoryEntry();
+		entry.itemId = Registry.ITEM.getRawId(stack.getItem());
 		return entry;
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if(other instanceof FoodHistoryEntry)
+		if (other instanceof FoodHistoryEntry)
 			return ((FoodHistoryEntry) other).itemId == itemId && ((FoodHistoryEntry) other).data.equals(data);
-        return super.equals(other);
+		return super.equals(other);
 	}
 
 	@Override

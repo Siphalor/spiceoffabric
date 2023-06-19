@@ -1,4 +1,5 @@
-import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
+package de.siphalor.spiceoffabric.util;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -7,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 
-public class FixedLengthIntFIFOQueueTests {
+public class FixedLengthIntFIFOQueueTest {
 	@Test
 	public void testConstructor() {
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(0));

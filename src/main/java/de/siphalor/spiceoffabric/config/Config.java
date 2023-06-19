@@ -124,6 +124,7 @@ public class Config {
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
 		public int maxHealth = -1;
+		public boolean uneatenInJournal = true;
 	}
 
 	@AConfigEntry(scope = ConfigScope.GAME)

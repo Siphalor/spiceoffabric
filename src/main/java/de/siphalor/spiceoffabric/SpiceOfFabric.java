@@ -105,7 +105,6 @@ public class SpiceOfFabric implements ModInitializer {
 		Commands.register();
 
 		// POLYMER AND FOOD CONTAINERS
-
 		if (Config.items.usePolymer) {
 			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
 				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
@@ -222,6 +221,14 @@ public class SpiceOfFabric implements ModInitializer {
 			((IHungerManager) serverPlayerEntity.getHungerManager()).spiceOfFabric_getFoodHistory().write(buffer);
 			ServerPlayNetworking.send(serverPlayerEntity, SYNC_FOOD_HISTORY_S2C_PACKET, buffer);
 		}
+	}
+
+	public static boolean isFoodJournal(ItemStack stack) {
+		if (stack == null) {
+			return false;
+		}
+		NbtCompound nbt = stack.getNbt();
+		return nbt != null && nbt.contains(FOOD_JOURNAL_FLAG, 1) && nbt.getBoolean(FOOD_JOURNAL_FLAG);
 	}
 
 	public static ItemStack createFoodJournalStack() {

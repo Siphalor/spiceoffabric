@@ -16,11 +16,12 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.HashSet;
@@ -40,12 +41,12 @@ public class FoodHistory {
 		return ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
 	}
 
-	public Set<FoodHistoryEntry> carrotHistory;
+	protected Set<FoodHistoryEntry> carrotHistory;
 
-	public BiMap<Integer, FoodHistoryEntry> dictionary;
+	protected BiMap<Integer, FoodHistoryEntry> dictionary;
 	protected int nextId = 0;
 	protected FixedLengthIntFIFOQueue history;
-	public Int2IntMap stats;
+	protected Int2IntMap stats;
 
 	public FoodHistory() {
 		setup();
@@ -68,6 +69,10 @@ public class FoodHistory {
 		nextId = 0;
 		history.clear();
 		stats.clear();
+	}
+
+	public Set<FoodHistoryEntry> getCarrotHistory() {
+		return carrotHistory;
 	}
 
 	public void resetCarrotHistory() {
@@ -256,9 +261,25 @@ public class FoodHistory {
 		}
 	}
 
+	public int getHistorySize() {
+		return history.size();
+	}
+
+	public ItemStack getStackFromHistory(int index) {
+		if (index < 0 || index >= history.size()) {
+			return null;
+		}
+		return dictionary.get(history.get(index)).getStack();
+	}
+
 	public void removeLastFood() {
 		int id = history.dequeue();
-		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
+		stats.computeIfPresent(id, (_id, count) -> count - 1);
+	}
+
+	public boolean isInCarrotHistory(ItemStack stack) {
+		FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
+		return carrotHistory.contains(entry);
 	}
 
 	public int getCarrotHealthOffset(PlayerEntity player) {
@@ -276,68 +297,5 @@ public class FoodHistory {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
 		return MathHelper.floor(Config.healthFormulaExpression.evaluate());
-	}
-
-	public NbtList genJournalPages(PlayerEntity playerEntity) {
-		boolean hasMod = ServerPlayNetworking.canSend((ServerPlayerEntity) playerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET);
-
-		NbtList pages = new NbtList();
-
-		LiteralText textOnPage = new LiteralText("");
-		textOnPage.append(
-				hasMod
-						? new TranslatableText(SpiceOfFabric.MOD_ID + ".journal.inside_title")
-						: new LiteralText("\u25b6 Diet Journal \u25c0")
-						.setStyle(Style.EMPTY
-								.withColor(Formatting.DARK_GRAY)
-								.withFormatting(Formatting.UNDERLINE)
-								.withBold(true)
-						)
-		);
-		textOnPage.append("\n\n");
-
-		Style numberStyle = Style.EMPTY.withBold(true);
-		Style itemStyle = Style.EMPTY.withColor(Formatting.DARK_GRAY);
-
-		int linesOnPage = 2;
-		int number = 1;
-		for (int foodId : history) {
-			FoodHistoryEntry entry = dictionary.get(foodId);
-			if (hasMod) {
-				textOnPage.append(
-						new TranslatableText(
-								SpiceOfFabric.MOD_ID + ".journal.line",
-								number,
-								entry.getStackName()
-						).setStyle(
-								Style.EMPTY.
-										withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
-												new HoverEvent.ItemStackContent(entry.getStack())))))
-						.append("\n");
-			} else {
-				textOnPage.append(new LiteralText(number + ". ").setStyle(numberStyle))
-						.append(entry.getStackName().setStyle(
-								itemStyle.withHoverEvent(
-										new HoverEvent(
-												HoverEvent.Action.SHOW_ITEM,
-												new HoverEvent.ItemStackContent(entry.getStack())
-										)
-								).withBold(false))
-						).append("\n");
-			}
-			number++;
-			linesOnPage++;
-			if (linesOnPage >= 14) {
-				pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
-				linesOnPage = 0;
-				textOnPage = new LiteralText("");
-			}
-		}
-
-		if (linesOnPage > 0) {
-			pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
-		}
-
-		return pages;
 	}
 }
