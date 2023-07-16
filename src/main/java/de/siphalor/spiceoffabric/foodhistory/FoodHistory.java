@@ -30,6 +30,10 @@ import java.util.Set;
 
 public class FoodHistory {
 
+	protected static final String DICTIONARY_NBT_KEY = "dictionary";
+	protected static final String RECENT_HISTORY_NBT_KEY = "history";
+	protected static final String CARROT_HISTORY_NBT_KEY = "carrotHistory";
+
 	public static FoodHistory get(PlayerEntity player) {
 		if (player == null) {
 			return null;
@@ -126,48 +130,56 @@ public class FoodHistory {
 		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
 			list.add(entry.getKey(), entry.getValue().write(new NbtCompound()));
 		}
-		compoundTag.put("dictionary", list);
+		compoundTag.put(DICTIONARY_NBT_KEY, list);
 		NbtList historyList = new NbtList();
 		for (Integer id : history) {
 			historyList.add(NbtInt.of(id));
 		}
-		compoundTag.put("history", historyList);
+		compoundTag.put(RECENT_HISTORY_NBT_KEY, historyList);
 		NbtList carrotHistoryList = new NbtList();
 		for (FoodHistoryEntry entry : carrotHistory) {
 			carrotHistoryList.add(entry.write(new NbtCompound()));
 		}
-		compoundTag.put("carrotHistory", carrotHistoryList);
+		compoundTag.put(CARROT_HISTORY_NBT_KEY, carrotHistoryList);
 		return compoundTag;
 	}
 
 	public static FoodHistory read(NbtCompound compoundTag) {
 		FoodHistory foodHistory = new FoodHistory();
-		NbtList list = (NbtList) compoundTag.get("dictionary");
-		for (int i = 0; i < list.size(); i++) {
-			FoodHistoryEntry entry = new FoodHistoryEntry().read(list.getCompound(i));
-			if (entry != null) {
-				foodHistory.dictionary.put(i, entry);
+		if (compoundTag.contains(DICTIONARY_NBT_KEY, 9)) {
+			NbtList nbtDictionary = compoundTag.getList(DICTIONARY_NBT_KEY, 10);
+			for (int i = 0; i < nbtDictionary.size(); i++) {
+				FoodHistoryEntry entry = new FoodHistoryEntry().read((NbtCompound) nbtDictionary.get(i));
+				if (entry != null) {
+					foodHistory.dictionary.put(i, entry);
+				}
 			}
 		}
 		foodHistory.nextId = foodHistory.dictionary.size();
-		list = (NbtList) compoundTag.get("history");
-		for (NbtElement tag : list) {
-			foodHistory.history.enqueue(((NbtInt) tag).intValue());
+
+		if (compoundTag.contains(RECENT_HISTORY_NBT_KEY, 9)) {
+			NbtList nbtRecentHistory = compoundTag.getList(RECENT_HISTORY_NBT_KEY, 3);
+
+			for (NbtElement tag : nbtRecentHistory) {
+				foodHistory.history.enqueue(((NbtInt) tag).intValue());
+			}
 		}
+
 		foodHistory.buildStats();
 
-		if (compoundTag.contains("carrotHistory")) {
-			list = (NbtList) compoundTag.get("carrotHistory");
-			if (Config.carrot.enable) {
-				foodHistory.carrotHistory = new HashSet<>(list.size());
-				for (NbtElement tag : list) {
-					FoodHistoryEntry entry = new FoodHistoryEntry().read((NbtCompound) tag);
+		if (compoundTag.contains(CARROT_HISTORY_NBT_KEY, 9)) {
+			NbtList nbtCarrotHistory = compoundTag.getList(CARROT_HISTORY_NBT_KEY, 10);
+			foodHistory.carrotHistory = new HashSet<>(nbtCarrotHistory.size());
+			for (NbtElement tag : nbtCarrotHistory) {
+				if (tag instanceof NbtCompound carrotEntry) {
+					FoodHistoryEntry entry = new FoodHistoryEntry().read(carrotEntry);
 					if (entry != null) {
 						foodHistory.carrotHistory.add(entry);
 					}
 				}
 			}
 		}
+
 		return foodHistory;
 	}
 

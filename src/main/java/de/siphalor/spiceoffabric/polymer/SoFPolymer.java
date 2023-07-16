@@ -14,6 +14,9 @@ import net.minecraft.util.registry.Registry;
 public class SoFPolymer {
 	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
 
+	private SoFPolymer() {
+	}
+
 	public static void init() {
 		PolymerItemUtils.ITEM_CHECK.register(ItemStack::isFood);
 

@@ -69,8 +69,9 @@ public class FoodHistoryEntry {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof FoodHistoryEntry)
-			return ((FoodHistoryEntry) other).itemId == itemId && ((FoodHistoryEntry) other).data.equals(data);
+		if (other instanceof FoodHistoryEntry otherEntry) {
+			return otherEntry.itemId == itemId && otherEntry.data.equals(data);
+		}
 		return super.equals(other);
 	}
 

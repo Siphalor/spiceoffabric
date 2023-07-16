@@ -30,6 +30,9 @@ public class FoodUtils {
 	private static final String LAST_EATEN_BASE_TRANSLATION_KEY = SpiceOfFabric.MOD_ID + ".item.tooltip.last_eaten";
 	private static final TranslatableText NEVER_EATEN_TOOLTIP = new TranslatableText(SpiceOfFabric.MOD_ID + ".item.tooltip.never_eaten");
 
+	private FoodUtils() {
+	}
+
 	public static boolean isFood(ItemStack stack) {
 		Item item = stack.getItem();
 		if (item instanceof FoodContainerItem) {

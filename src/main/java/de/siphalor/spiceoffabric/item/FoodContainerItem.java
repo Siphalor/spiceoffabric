@@ -83,21 +83,27 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				SpiceOfFabric.LOGGER.warn("Non-food stack " + stack + " found in food container " + this);
 				continue;
 			}
-			if (!stack.isEmpty() && player.canConsume(foodComponent.isAlwaysEdible())) {
-				filteredInv.add(new IndexedValue<>(i, Pair.of(stack, foodComponent)));
+			if (stack.isEmpty() || !player.canConsume(foodComponent.isAlwaysEdible())) {
+				continue;
 			}
+
+			filteredInv.add(new IndexedValue<>(i, Pair.of(stack, foodComponent)));
 		}
 		if (filteredInv.isEmpty()) {
 			return NO_STACK;
 		}
 
-		int reqFood = 20 - player.getHungerManager().getFoodLevel();
+		int requiredFood = 20 - player.getHungerManager().getFoodLevel();
+		return findMostAppropriateFood(filteredInv, requiredFood);
+	}
+
+	private IndexedValue<ItemStack> findMostAppropriateFood(List<IndexedValue<Pair<ItemStack, FoodComponent>>> foods, int requiredFood) {
 		var bestStack = NO_STACK;
 		int bestDelta = Integer.MAX_VALUE;
 		int bestConsumeTime = Integer.MAX_VALUE;
-		for (var value : filteredInv) {
+		for (var value : foods) {
 			ItemStack stack = value.value().getFirst();
-			int delta = reqFood - value.value().getSecond().getHunger();
+			int delta = requiredFood - value.value().getSecond().getHunger();
 			int consumeTime = stack.getMaxUseTime();
 			if (delta <= 0) {
 				if (delta > bestDelta || bestDelta > 0 || (delta == bestDelta && consumeTime < bestConsumeTime)) {
@@ -233,20 +239,16 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			@Override
 			public void onSlotUpdate(ScreenHandler handler, int updateSlotId, ItemStack updateStack) {
 				Slot updateSlot = handler.getSlot(updateSlotId);
-				if (user instanceof ServerPlayerEntity serverPlayer) {
-					if (updateSlot.getIndex() == invIndex && updateSlot.inventory == user.getInventory()) {
-						if (updateStack.isEmpty() || !ItemStack.areEqual(updateStack, stack)) {
-							closeScreen(serverPlayer);
-						}
-					} else {
-						if (ItemStack.areEqual(updateStack, stack)) {
-							closeScreen(serverPlayer);
-						}
+				if (!(user instanceof ServerPlayerEntity serverPlayer)) {
+					return;
+				}
+
+				if (updateSlot.getIndex() == invIndex && updateSlot.inventory == user.getInventory()) {
+					if (updateStack.isEmpty() || !ItemStack.areEqual(updateStack, stack)) {
+						closeScreen(serverPlayer);
 					}
-					if (
-							(updateSlot.inventory == user.getInventory() && updateSlot.getIndex() == invIndex && !ItemStack.areEqual(updateStack, stack))
-									|| (updateSlot.getIndex() != invIndex && ItemStack.areEqual(updateStack, stack))
-					) {
+				} else {
+					if (ItemStack.areEqual(updateStack, stack)) {
 						closeScreen(serverPlayer);
 					}
 				}
