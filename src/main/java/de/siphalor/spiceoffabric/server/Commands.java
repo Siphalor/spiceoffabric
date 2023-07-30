@@ -112,9 +112,9 @@ public class Commands {
 		}
 
 		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
-			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
+			commandSource.sendFeedback(() -> Text.translatable("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
 		} else {
-			commandSource.sendFeedback(Text.literal("Cleared food histories of " + players.size() + " players."), true);
+			commandSource.sendFeedback(() -> Text.literal("Cleared food histories of " + players.size() + " players."), true);
 		}
 		return players.size();
 	}
@@ -135,9 +135,9 @@ public class Commands {
 		}
 
 		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
-			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
+			commandSource.sendFeedback(() -> Text.translatable("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
 		} else {
-			commandSource.sendFeedback(Text.literal("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
+			commandSource.sendFeedback(() -> Text.literal("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
 		}
 		return players.size();
 	}
@@ -149,9 +149,9 @@ public class Commands {
 			SpiceOfFabric.updateMaxHealth(player, true, true);
 		}
 		if (sourceHasMod) {
-			commandSource.sendFeedback(Text.translatable("spiceoffabric.command.update_max_health.success", players.size()), false);
+			commandSource.sendFeedback(() -> Text.translatable("spiceoffabric.command.update_max_health.success", players.size()), false);
 		} else {
-			commandSource.sendFeedback(Text.literal("Refreshed the max health of " + players.size() + " players"), false);
+			commandSource.sendFeedback(() -> Text.literal("Refreshed the max health of " + players.size() + " players"), false);
 		}
 		return players.size();
 	}
