@@ -69,9 +69,6 @@ dependencies {
 	// REI
 	modLocalRuntime(modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"))
 
-	// LazyDFU
-	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
-
 	// Testing
 	testImplementation "org.junit.jupiter:junit-jupiter:5+"
 }
