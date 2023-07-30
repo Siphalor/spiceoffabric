@@ -132,7 +132,7 @@ public class SpiceOfFabric implements ModInitializer {
 		}
 		if (Config.items.enablePicnicBasket) {
 			foodContainerItems.add(Registry.register(
-					Registry.ITEM, new Identifier(MOD_ID, "picnic_basket"                           ),
+					Registry.ITEM, new Identifier(MOD_ID, "picnic_basket"),
 					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT).group(ItemGroup.FOOD), 9, ScreenHandlerType.GENERIC_3X3)
 			));
 		}
