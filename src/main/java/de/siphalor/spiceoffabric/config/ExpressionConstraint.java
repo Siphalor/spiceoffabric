@@ -1,6 +1,5 @@
 package de.siphalor.spiceoffabric.config;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import de.siphalor.tweed4.config.constraints.AnnotationConstraint;
 import net.objecthunter.exp4j.Expression;
@@ -9,7 +8,7 @@ import net.objecthunter.exp4j.ValidationResult;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class ExpressionConstraint implements AnnotationConstraint<String> {
 	private String[] variables;
@@ -27,7 +26,7 @@ public class ExpressionConstraint implements AnnotationConstraint<String> {
 			if (!result.isValid()) {
 				return new Result<>(false, null, result.getErrors().stream()
 						.map(error -> Pair.of(Severity.ERROR, error))
-						.collect(Collectors.toList())
+						.toList()
 				);
 			}
 			if (value.contains("^")) {
@@ -35,11 +34,11 @@ public class ExpressionConstraint implements AnnotationConstraint<String> {
 			}
 			return new Result<>(true, value, Collections.emptyList());
 		} catch (IllegalArgumentException e) {
-			return new Result<>(false, null, ImmutableList.of(
+			return new Result<>(false, null, List.of(
 					Pair.of(Severity.ERROR, e.getMessage() + "; in expression: " + value)
 			));
 		} catch (Exception e) {
-			return new Result<>(false, null, ImmutableList.of(
+			return new Result<>(false, null, List.of(
 					Pair.of(Severity.ERROR, "Invalid expression, got " + e.getClass().getSimpleName() + ": " + e.getMessage() + "; in expression: " + value)
 			));
 		}

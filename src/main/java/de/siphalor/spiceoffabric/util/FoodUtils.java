@@ -4,7 +4,6 @@ import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
-import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CakeBlock;
@@ -28,12 +27,28 @@ public class FoodUtils {
 	private static final String LAST_EATEN_BASE_TRANSLATION_KEY = SpiceOfFabric.MOD_ID + ".item.tooltip.last_eaten";
 	private static final Text NEVER_EATEN_TOOLTIP = Text.translatable(SpiceOfFabric.MOD_ID + ".item.tooltip.never_eaten");
 
+	private FoodUtils() {
+	}
+
 	public static boolean isFood(ItemStack stack) {
 		Item item = stack.getItem();
 		if (item instanceof FoodContainerItem) {
 			return false;
 		}
 		if (stack.isFood()) {
+			return true;
+		}
+		if (item instanceof BlockItem blockItem) {
+			return blockItem.getBlock() instanceof CakeBlock;
+		}
+		return false;
+	}
+
+	public static boolean isFood(Item item) {
+		if (item instanceof FoodContainerItem) {
+			return false;
+		}
+		if (item.isFood()) {
 			return true;
 		}
 		if (item instanceof BlockItem blockItem) {
@@ -103,7 +118,7 @@ public class FoodUtils {
 	}
 
 	private static void appendCarrotTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (Config.carrot.enable && !foodHistory.carrotHistory.contains(FoodHistoryEntry.fromItemStack(stack))) {
+		if (Config.carrot.enable && !foodHistory.isInCarrotHistory(stack)) {
 			base.add(NEVER_EATEN_TOOLTIP);
 		}
 	}

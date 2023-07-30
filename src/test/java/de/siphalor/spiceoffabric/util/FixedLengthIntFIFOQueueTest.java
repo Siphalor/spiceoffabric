@@ -1,4 +1,5 @@
-import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
+package de.siphalor.spiceoffabric.util;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -7,9 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 
-public class FixedLengthIntFIFOQueueTests {
+class FixedLengthIntFIFOQueueTest {
 	@Test
-	public void testConstructor() {
+	void testConstructor() {
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(0));
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(1));
 		Assertions.assertDoesNotThrow(() -> new FixedLengthIntFIFOQueue(1000));
@@ -17,7 +18,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testSize() {
+	void testSize() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertEquals(0, queue.size());
 		queue.enqueue(1);
@@ -31,7 +32,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testClear() {
+	void testClear() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		queue.enqueue(1);
 		queue.clear();
@@ -40,7 +41,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testIsEmpty() {
+	void testIsEmpty() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertTrue(queue.isEmpty());
 		queue.enqueue(1);
@@ -54,7 +55,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testEnqueue() {
+	void testEnqueue() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertFalse(queue.enqueue(1));
 		Assertions.assertEquals(1, queue.first());
@@ -65,7 +66,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testDequeue() {
+	void testDequeue() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 		queue.enqueue(1);
@@ -83,7 +84,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testFirstInt() {
+	void testFirstInt() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertThrows(NoSuchElementException.class, queue::first);
 		queue.enqueue(1);
@@ -97,7 +98,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testIterator() {
+	void testIterator() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		queue.enqueue(1);
 		queue.enqueue(2);
@@ -113,7 +114,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testForEach() {
+	void testForEach() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		queue.enqueue(1);
 		queue.enqueue(2);
@@ -125,7 +126,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testSetLengthIncrease() {
+	void testSetLengthIncrease() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(3);
 		queue.enqueue(1);
 		queue.enqueue(2);
@@ -159,7 +160,7 @@ public class FixedLengthIntFIFOQueueTests {
 	}
 
 	@Test
-	public void testSetLengthDecrease() {
+	void testSetLengthDecrease() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(4);
 		queue.enqueue(1);
 		queue.enqueue(2);

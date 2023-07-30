@@ -12,6 +12,7 @@ import net.minecraft.util.Identifier;
 import java.util.Optional;
 
 public class FoodHistoryEntry {
+
 	private int itemId;
 	private NbtCompound data;
 
@@ -45,8 +46,8 @@ public class FoodHistoryEntry {
 	}
 
 	public NbtCompound write(NbtCompound compoundTag) {
-        compoundTag.putString("item", Registries.ITEM.getId(Registries.ITEM.get(itemId)).toString());
-        compoundTag.put("data", data);
+		compoundTag.putString("item", Registries.ITEM.getId(Registries.ITEM.get(itemId)).toString());
+		compoundTag.put("data", data);
 		return compoundTag;
 	}
 
@@ -61,16 +62,17 @@ public class FoodHistoryEntry {
 	}
 
 	public static FoodHistoryEntry fromItemStack(ItemStack stack) {
-        FoodHistoryEntry entry = new FoodHistoryEntry();
-        entry.itemId = Registries.ITEM.getRawId(stack.getItem());
+		FoodHistoryEntry entry = new FoodHistoryEntry();
+		entry.itemId = Registries.ITEM.getRawId(stack.getItem());
 		return entry;
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if(other instanceof FoodHistoryEntry)
-			return ((FoodHistoryEntry) other).itemId == itemId && ((FoodHistoryEntry) other).data.equals(data);
-        return super.equals(other);
+		if (other instanceof FoodHistoryEntry otherEntry) {
+			return otherEntry.itemId == itemId && otherEntry.data.equals(data);
+		}
+		return super.equals(other);
 	}
 
 	@Override

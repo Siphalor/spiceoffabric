@@ -48,171 +48,96 @@ public class Config {
 
 	@AConfigExclude
 	static final Function[] customExpFunctions = new Function[]{
-		new Function("max", 2) {
-			@Override
-			public double apply(double... args) {
-				return Math.max(args[0], args[1]);
+			new Function("max", 2) {
+				@Override
+				public double apply(double... args) {
+					return Math.max(args[0], args[1]);
+				}
+			},
+			new Function("min", 2) {
+				@Override
+				public double apply(double... args) {
+					return Math.min(args[0], args[1]);
+				}
+			},
+			new Function("power", 2) {
+				@Override
+				public double apply(double... args) {
+					return Math.pow(args[0], args[1]);
+				}
 			}
-		},
-		new Function("min", 2) {
-			@Override
-			public double apply(double... args) {
-				return Math.min(args[0], args[1]);
-			}
-		},
-		new Function("power", 2) {
-			@Override
-			public double apply(double... args) {
-				return Math.pow(args[0], args[1]);
-			}
-		}
 	};
 
-	@AConfigEntry(
-			environment = ConfigEnvironment.SYNCED,
-			comment = """
-					Must be set on the server!
-					Whether the players will be able to see how many foods ago they ate an item directly on the item.
-					When set to SIMPLE, just this information will be shown.
-					If set to EXTENDED, there'll also be information on how many other foods the player needs to eat to restore the nutrition value.
-					With NONE this tooltip is hidden."""
-	)
+	@AConfigEntry(environment = ConfigEnvironment.SYNCED)
 	public static ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
+
+	@AConfigEntry(scope = ConfigScope.GAME)
+	public static boolean enableJournalCommand = false;
 
 	public enum ItemTipDisplayStyle {
 		NONE, SIMPLE, EXTENDED
 	}
 
-	@AConfigEntry(
-			comment = """
-					Edit the expressions that are used for calculating the player stats after respawning.
-					Expressions are mathematical terms with the following variables:
-					\thunger is the amount of hunger the player had when dying
-					\tsaturation is the amount of hunger the player had when dying"""
-	)
 	public static Respawn respawn;
+
 	@AConfigBackground("textures/block/red_wool.png")
 	public static class Respawn {
 		@AConfigEntry(
-				comment = "Expression that determines the hunger level after a fresh respawn",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
 		)
 		public String hunger = "max(14, hunger)";
-
 		@AConfigEntry(
-				comment = "Expression that determines the saturation level after a fresh respawn",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
 		)
 		public String saturation = "saturation";
-
-		@AConfigEntry(comment = "Sets whether the food history should be cleaned at death")
 		public boolean resetHistory = false;
-
-		@AConfigEntry(comment = "Sets whether the player's maximum hearts should be reset in carrot mode after death")
 		public boolean resetCarrotMode = false;
 	}
 
-	@AConfigEntry(
-			comment = """
-					Change the expressions used for calculating the various food properties.
-					Expressions are mathematical terms with the following variables:
-					\ttimesEaten is the number of times the current food
-					\thungerValue is the game defined hunger value for the current item
-					\tsaturationValue is the saturation modifier defined for the current item
-					\tconsumeDuration is the time in ticks it takes the player to consume the current item""",
-			environment = ConfigEnvironment.SYNCED
-	)
+	@AConfigEntry(environment = ConfigEnvironment.SYNCED)
 	public static Food food;
+
 	@AConfigBackground("textures/block/melon_side.png")
 	public static class Food {
 		@AConfigEntry(
-				comment = "Expression that determines the food level to restore when eating a food item",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
 		public String hunger = "hungerValue * power(0.7, timesEaten)";
-
 		@AConfigEntry(
-				comment = "Expression that determines the saturation modifier for a food item",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
 		public String saturation = "saturationValue";
-
 		@AConfigEntry(
-				comment = "Expression that determines the time requited to consume an item, given in ticks",
 				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
 		)
 		public String consumeDuration = "consumeDuration * power(1.3, timesEaten)";
-
 		@AConfigEntry(
-				comment = "Sets the amount of last eaten foods to use for the calculations in this category",
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "0..")
 		)
 		public int historyLength = 20;
 	}
 
-	@AConfigEntry(
-			comment = """
-					The good ol' carrot style.
-					Carrot style means, that you start with a certain amount of hearts and gain more by eating unique foods."""
-	)
 	public static Carrot carrot;
+
 	@AConfigBackground("textures/block/orange_terracotta.png")
 	public static class Carrot {
-		@AConfigEntry(comment = "Enables the carrot style module.")
 		public boolean enable = false;
-
-		@AConfigEntry(
-				comment = """
-						Specifies an offset in health points (half hearts) from default health.
-						Default health in vanilla is 20 but that may change through mods like Origins.
-						The resulting value will be floored before use."""
-		)
 		public String healthFormula = "0.6 * baseHealth + max(2 * floor(log2(uniqueFoodsEaten)), 0)";
-
 		@AConfigEntry(
-				comment = """
-						Specifies the maximum number of health points (half hearts) a player can get to through carrot mode.
-						When 0, carrot mode is effectively disabled. (Why would you do this? :P)
-						When -1, you can gain a basically infinite amount of hearts.""",
 				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
 		)
 		public int maxHealth = -1;
+		public boolean uneatenInJournal = true;
 	}
 
-	@AConfigEntry(
-			comment = """
-					Settings concerning the items of this mod.
-					
-					Install the mod "Polymer" if you want to use these items server-side only.
-					You can generate the resource pack with the command "/polymer generate".
-					
-					Otherwise the mod has to be installed on the client as well.""",
-			scope = ConfigScope.GAME
-	)
+	@AConfigEntry(scope = ConfigScope.GAME)
 	public static Items items;
+
 	@AConfigBackground("textures/block/beehive_end.png")
 	public static class Items {
-		@AConfigEntry(comment = """
-				Whether to use Polymer for server-side only usage.
-				Using Polymer in other scenarios is not recommended.""")
 		public boolean usePolymer = false;
-
-		@AConfigEntry(
-				comment = """
-						Enable a low end food container that can be crafted from paper and holds up to 5 stacks of food."""
-		)
 		public boolean enablePaperBag = false;
-
-		@AConfigEntry(
-				comment = """
-						Enable a food container that can be crafted from planks and gold and holds up to 9 stacks of food."""
-		)
 		public boolean enableLunchBox = false;
-
-		@AConfigEntry(
-				comment = """
-						Enable a food container that can be crafted from bamboo and holds up to 9 stacks of food."""
-		)
 		public boolean enablePicnicBasket = false;
 	}
 

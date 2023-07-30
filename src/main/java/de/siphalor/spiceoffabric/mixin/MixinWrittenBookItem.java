@@ -1,13 +1,15 @@
 package de.siphalor.spiceoffabric.mixin;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
-import de.siphalor.spiceoffabric.util.IHungerManager;
+import de.siphalor.spiceoffabric.container.FoodJournalScreenHandler;
+import de.siphalor.spiceoffabric.container.FoodJournalView;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WrittenBookItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,14 +17,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WrittenBookItem.class)
 public class MixinWrittenBookItem {
-	@Inject(method = "resolve", at = @At("HEAD"), cancellable = true)
-	private static void resolve(ItemStack itemStack, ServerCommandSource serverCommandSource, PlayerEntity playerEntity, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		NbtCompound compoundTag = itemStack.getNbt();
-		if(compoundTag != null && compoundTag.getBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG)) {
-			FoodHistory foodHistory = ((IHungerManager) playerEntity.getHungerManager()).spiceOfFabric_getFoodHistory();
-
-            compoundTag.put("pages", foodHistory.genJournalPages(playerEntity));
-            callbackInfoReturnable.setReturnValue(true);
+	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
+	public void onUsed(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+		ItemStack stack = user.getStackInHand(hand);
+		if (!world.isClient && SpiceOfFabric.isFoodJournal(stack)) {
+			FoodJournalView defaultView = FoodJournalView.getDefault();
+			if (defaultView == null) {
+				return;
+			}
+			user.openHandledScreen(new FoodJournalScreenHandler.Factory((ServerPlayerEntity) user, defaultView));
+			cir.setReturnValue(TypedActionResult.success(stack));
 		}
 	}
 }
