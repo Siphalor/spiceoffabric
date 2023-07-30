@@ -47,6 +47,19 @@ One starts with a lower than regular amount of hearts and through eating diverse
 
 _This too, is highly configurable._
 
+## Food containers
+
+Food containers are items that can hold multiple foods at once like a shulker, bundle or backpack.
+
+They allow you to directly eat from the foods by right-clicking just like you would normally eat.
+
+You can enable the following containers in the config:
+- **Paper bag**: Is made from just paper and can store up to five stacks of food.
+- **Lunch box**: Is made from planks and gold and can store up to nine stacks of food.
+- **Picnic basket**: Is made from bamboo and can store up to nine stacks of food.
+
+**Server-side-only installations can enable them by installing Polymer on the server and enabling the `use-polymer` configuration.**
+
 ## Translation status
 
 [![Translation status](https://weblate.siphalor.de/widgets/spice-of-fabric/-/multi-auto.svg)](https://weblate.siphalor.de/engage/spice-of-fabric/)
@@ -55,7 +68,8 @@ Contribute or improve translations [here](https://weblate.siphalor.de/engage/spi
 
 ## Dependencies
 
-**This mod requires [Fabric API](https://modrinth.com/mod/fabric-api) to be installed separately.**
+**This mod requires [Fabric API](https://modrinth.com/mod/fabric-api) to be installed separately.**  
+If you want to use Food containers 
 
 Contains Tweed API. Tweed redistributes [hjson-java](https://github.com/hjson/hjson-java) which is under the [MIT License](https://github.com/hjson/hjson-java/blob/master/LICENSE) currently copyrighted by Christian Zangl. This mod uses the [fork](https://github.com/PersonTheCat/hjson-java) made by [PersonTheCat](https://github.com/PersonTheCat).
 
