@@ -163,8 +163,14 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		ItemStack stackInHand = user.getStackInHand(hand);
 		ItemStack nextFoodItem = getNextFoodStack(stackInHand, user);
 		if (nextFoodItem.isEmpty()) {
-			openScreen(stackInHand, user, hand == Hand.MAIN_HAND ? user.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT);
-			return TypedActionResult.success(stackInHand);
+			// Prevent opening the container directly after eating
+			long currentTime = System.currentTimeMillis();
+			if (user instanceof ServerPlayerEntity player && checkLastEatTime(player, currentTime)) {
+				updateLastEatTime(player, currentTime);
+
+				openScreen(stackInHand, user, hand == Hand.MAIN_HAND ? user.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT);
+				return TypedActionResult.success(stackInHand);
+			}
 		} else if (nextFoodItem.isFood()) {
 			FoodComponent foodComponent = nextFoodItem.getItem().getFoodComponent();
 			if (foodComponent != null && user.canConsume(foodComponent.isAlwaysEdible())) {
@@ -187,12 +193,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			}
 
 			// Prevent opening the container directly after eating
-			long lastEatTime = ((IServerPlayerEntity) user).spiceOfFabric_getLastContainerEatTime();
 			long currentTime = System.currentTimeMillis();
-			if (currentTime - lastEatTime < 800) {
+			if (!checkLastEatTime(player, currentTime)) {
 				break openContainer;
 			}
-			((IServerPlayerEntity) user).spiceOfFabric_setLastContainerEatTime(currentTime);
+			updateLastEatTime(player, currentTime);
 
 			PlayerInventory inv = player.getInventory();
 			for (int i = 0; i < inv.size(); i++) {
@@ -203,6 +208,15 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			}
 		}
 		super.onStoppedUsing(stack, world, user, remainingUseTicks);
+	}
+
+	public boolean checkLastEatTime(ServerPlayerEntity user, long currentTime) {
+		long lastEatTime = ((IServerPlayerEntity) user).spiceOfFabric_getLastContainerEatTime();
+		return currentTime - lastEatTime >= 1000;
+	}
+
+	public void updateLastEatTime(ServerPlayerEntity user, long currentTime) {
+		((IServerPlayerEntity) user).spiceOfFabric_setLastContainerEatTime(currentTime);
 	}
 
 	@Override
@@ -217,6 +231,9 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			return stack;
 		}
 
+		if (player instanceof ServerPlayerEntity) {
+			((IServerPlayerEntity) player).spiceOfFabric_setLastContainerEatTime(System.currentTimeMillis());
+		}
 		ItemStack newStack = foodStack.value().finishUsing(world, user);
 		if (newStack != foodStack.value()) {
 			if (inventory.isValid(foodStack.index(), newStack)) {
