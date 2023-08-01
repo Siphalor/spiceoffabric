@@ -16,14 +16,12 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.HashSet;
@@ -31,6 +29,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class FoodHistory {
+
+	protected static final String DICTIONARY_NBT_KEY = "dictionary";
+	protected static final String RECENT_HISTORY_NBT_KEY = "history";
+	protected static final String CARROT_HISTORY_NBT_KEY = "carrotHistory";
 
 	public static FoodHistory get(PlayerEntity player) {
 		if (player == null) {
@@ -43,12 +45,12 @@ public class FoodHistory {
 		return ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
 	}
 
-	public Set<FoodHistoryEntry> carrotHistory;
+	protected Set<FoodHistoryEntry> carrotHistory;
 
-	public BiMap<Integer, FoodHistoryEntry> dictionary;
+	protected BiMap<Integer, FoodHistoryEntry> dictionary;
 	protected int nextId = 0;
 	protected FixedLengthIntFIFOQueue history;
-	public Int2IntMap stats;
+	protected Int2IntMap stats;
 
 	public FoodHistory() {
 		setup();
@@ -71,6 +73,10 @@ public class FoodHistory {
 		nextId = 0;
 		history.clear();
 		stats.clear();
+	}
+
+	public Set<FoodHistoryEntry> getCarrotHistory() {
+		return carrotHistory;
 	}
 
 	public void resetCarrotHistory() {
@@ -124,48 +130,56 @@ public class FoodHistory {
 		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
 			list.add(entry.getKey(), entry.getValue().write(new NbtCompound()));
 		}
-		compoundTag.put("dictionary", list);
+		compoundTag.put(DICTIONARY_NBT_KEY, list);
 		NbtList historyList = new NbtList();
 		for (Integer id : history) {
 			historyList.add(NbtInt.of(id));
 		}
-		compoundTag.put("history", historyList);
+		compoundTag.put(RECENT_HISTORY_NBT_KEY, historyList);
 		NbtList carrotHistoryList = new NbtList();
 		for (FoodHistoryEntry entry : carrotHistory) {
 			carrotHistoryList.add(entry.write(new NbtCompound()));
 		}
-		compoundTag.put("carrotHistory", carrotHistoryList);
+		compoundTag.put(CARROT_HISTORY_NBT_KEY, carrotHistoryList);
 		return compoundTag;
 	}
 
 	public static FoodHistory read(NbtCompound compoundTag) {
 		FoodHistory foodHistory = new FoodHistory();
-		NbtList list = (NbtList) compoundTag.get("dictionary");
-		for (int i = 0; i < list.size(); i++) {
-			FoodHistoryEntry entry = new FoodHistoryEntry().read(list.getCompound(i));
-			if (entry != null) {
-				foodHistory.dictionary.put(i, entry);
+		if (compoundTag.contains(DICTIONARY_NBT_KEY, 9)) {
+			NbtList nbtDictionary = compoundTag.getList(DICTIONARY_NBT_KEY, 10);
+			for (int i = 0; i < nbtDictionary.size(); i++) {
+				FoodHistoryEntry entry = new FoodHistoryEntry().read((NbtCompound) nbtDictionary.get(i));
+				if (entry != null) {
+					foodHistory.dictionary.put(i, entry);
+				}
 			}
 		}
 		foodHistory.nextId = foodHistory.dictionary.size();
-		list = (NbtList) compoundTag.get("history");
-		for (NbtElement tag : list) {
-			foodHistory.history.enqueue(((NbtInt) tag).intValue());
+
+		if (compoundTag.contains(RECENT_HISTORY_NBT_KEY, 9)) {
+			NbtList nbtRecentHistory = compoundTag.getList(RECENT_HISTORY_NBT_KEY, 3);
+
+			for (NbtElement tag : nbtRecentHistory) {
+				foodHistory.history.enqueue(((NbtInt) tag).intValue());
+			}
 		}
+
 		foodHistory.buildStats();
 
-		if (compoundTag.contains("carrotHistory")) {
-			list = (NbtList) compoundTag.get("carrotHistory");
-			if (Config.carrot.enable) {
-				foodHistory.carrotHistory = new HashSet<>(list.size());
-				for (NbtElement tag : list) {
-					FoodHistoryEntry entry = new FoodHistoryEntry().read((NbtCompound) tag);
+		if (compoundTag.contains(CARROT_HISTORY_NBT_KEY, 9)) {
+			NbtList nbtCarrotHistory = compoundTag.getList(CARROT_HISTORY_NBT_KEY, 10);
+			foodHistory.carrotHistory = new HashSet<>(nbtCarrotHistory.size());
+			for (NbtElement tag : nbtCarrotHistory) {
+				if (tag instanceof NbtCompound carrotEntry) {
+					FoodHistoryEntry entry = new FoodHistoryEntry().read(carrotEntry);
 					if (entry != null) {
 						foodHistory.carrotHistory.add(entry);
 					}
 				}
 			}
 		}
+
 		return foodHistory;
 	}
 
@@ -259,83 +273,41 @@ public class FoodHistory {
 		}
 	}
 
+	public int getHistorySize() {
+		return history.size();
+	}
+
+	public ItemStack getStackFromHistory(int index) {
+		if (index < 0 || index >= history.size()) {
+			return null;
+		}
+		return dictionary.get(history.get(index)).getStack();
+	}
+
 	public void removeLastFood() {
 		int id = history.dequeue();
-		if (stats.containsKey(id)) stats.put(id, stats.get(id) - 1);
+		stats.computeIfPresent(id, (_id, count) -> count - 1);
+	}
+
+	public boolean isInCarrotHistory(ItemStack stack) {
+		FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
+		return carrotHistory.contains(entry);
 	}
 
 	public int getCarrotHealthOffset(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
-		return Math.max(1, MathHelper.floor(Config.healthFormulaExpression.evaluate())) - (int) maxHealthAttr.getBaseValue();
+
+		int newMaxHealth = MathHelper.floor(Config.healthFormulaExpression.evaluate());
+		if (Config.carrot.maxHealth > 0) {
+			newMaxHealth = MathHelper.clamp(newMaxHealth, 1, Config.carrot.maxHealth);
+		}
+		return newMaxHealth - (int) maxHealthAttr.getBaseValue();
 	}
 
 	public int getCarrotMaxHealth(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
 		return MathHelper.floor(Config.healthFormulaExpression.evaluate());
-	}
-
-	public NbtList genJournalPages(PlayerEntity playerEntity) {
-		boolean hasMod = ServerPlayNetworking.canSend((ServerPlayerEntity) playerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET);
-
-		NbtList pages = new NbtList();
-
-		MutableText textOnPage = Text.literal("");
-		textOnPage.append(
-				hasMod
-						? Text.translatable(SpiceOfFabric.MOD_ID + ".journal.inside_title")
-						: Text.literal("\u25b6 Diet Journal \u25c0")
-						.setStyle(Style.EMPTY
-								.withColor(Formatting.DARK_GRAY)
-								.withFormatting(Formatting.UNDERLINE)
-								.withBold(true)
-						)
-		);
-		textOnPage.append("\n\n");
-
-		Style numberStyle = Style.EMPTY.withBold(true);
-		Style itemStyle = Style.EMPTY.withColor(Formatting.DARK_GRAY);
-
-		int linesOnPage = 2;
-		int number = 1;
-		for (int foodId : history) {
-			FoodHistoryEntry entry = dictionary.get(foodId);
-			if (hasMod) {
-				textOnPage.append(
-						Text.translatable(
-								SpiceOfFabric.MOD_ID + ".journal.line",
-								number,
-								entry.getStackName()
-						).setStyle(
-								Style.EMPTY.
-										withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
-												new HoverEvent.ItemStackContent(entry.getStack())))))
-						.append("\n");
-			} else {
-				textOnPage.append(Text.literal(number + ". ").setStyle(numberStyle))
-						.append(entry.getStackName().setStyle(
-								itemStyle.withHoverEvent(
-										new HoverEvent(
-												HoverEvent.Action.SHOW_ITEM,
-												new HoverEvent.ItemStackContent(entry.getStack())
-										)
-								).withBold(false))
-						).append("\n");
-			}
-			number++;
-			linesOnPage++;
-			if (linesOnPage >= 14) {
-				pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
-				linesOnPage = 0;
-				textOnPage = Text.literal("");
-			}
-		}
-
-		if (linesOnPage > 0) {
-			pages.add(NbtString.of(Text.Serializer.toJson(textOnPage)));
-		}
-
-		return pages;
 	}
 }

@@ -13,7 +13,7 @@ sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + '+' + minecraft_version
+version = project.mod_version + '+mc' + minecraft_version
 group = project.maven_group
 
 repositories {
@@ -42,32 +42,44 @@ dependencies {
 	shadow(implementation('net.objecthunter:exp4j:0.4.8'))
 
 	// Tweed
-	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.7.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.3.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.2.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.1.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.1.1+mc22w17a"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.1.3+mc22w17a"))
-	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.18+mc22w17a"))
+	include(modApi(platform("de.siphalor.tweed4:tweed4-bom-$minecraft_major_version:$tweed_version")))
+	def tweedDeps = [
+	        'base', 'annotated',
+			'data', 'data-hjson',
+			'tailor-screen', 'tailor-coat',
+			'tailor-lang-json-descriptions'
+	]
+	tweedDeps.each {
+		include(modApi("de.siphalor.tweed4:tweed4-$it-$minecraft_major_version"))
+	}
+
+	include(modApi("de.siphalor:coat-$minecraft_major_version:$coat_version"))
 
 	// Capsaicin
-	include(modApi("de.siphalor:capsaicin-$minecraft_major_version:1.3.1+mc1.19.3"))
+	include(modApi("de.siphalor:capsaicin-$minecraft_major_version:$capsaicin_version"))
 
 	// Polymer
-	modImplementation "eu.pb4:polymer:0.2.25+1.19.2"
+	modImplementation "eu.pb4:polymer:$polymer_version"
 
 	// AppleSkin
-	modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0:api"
-	modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.19-2.4.0"
-
-	// Mod Menu
-	modLocalRuntime "com.terraformersmc:modmenu:4.1.2"
+	modCompileOnly "squeek.appleskin:appleskin-fabric:$appleskin_version:api"
+	modLocalRuntime("squeek.appleskin:appleskin-fabric:$appleskin_version") {
+		exclude module: "modmenu"
+	}
 
 	// LazyDFU
 	modLocalRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
 
 	// Testing
 	testImplementation "org.junit.jupiter:junit-jupiter:5+"
+}
+
+// Workaround for https://github.com/gradle/gradle/issues/10195
+configurations.include.transitive = true
+configurations.include.dependencies.each {
+	if (!it.name.contains("bom")) {
+		it.transitive = false
+	}
 }
 
 test {

@@ -1,23 +1,18 @@
 {
-	"Diet Journal": "Diet Journal",
-	"spiceoffabric.journal.inside_title": "§8§l§n\u25b6 Diet Journal \u25c0§r",
-	"spiceoffabric.journal.line": "§l%s.§r %s",
-
-	"spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo-nieznanie§r",
-
-	"spiceoffabric.command.clear_history.was_cleared": "Twoja historia jedzenia została skasowana",
-	"spiceoffabric.command.clear_history.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
-
-	"tweed4_tailor_screen.screen.spiceoffabric": "Konfiguracja Spice of Fabric",
-	"tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
-	"tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Nasycenie",
-	"tweed4_tailor_screen.screen.spiceoffabric.respawn.hunger": "Głód",
-	"tweed4_tailor_screen.screen.spiceoffabric.respawn.reset-history": "Skasuj historię jedzenia po każdej śmierci",
-	"tweed4_tailor_screen.screen.spiceoffabric.food": "Jedzenie",
-	"tweed4_tailor_screen.screen.spiceoffabric.food.increase-eating-time": "Wydłuż czas spożywania jedzenia",
-	"tweed4_tailor_screen.screen.spiceoffabric.food.history-length": "Długość historii",
-	"tweed4_tailor_screen.screen.spiceoffabric.food.saturation": "Nasycenie",
-	"tweed4_tailor_screen.screen.spiceoffabric.food.hunger": "Głód",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot": "Tryb marchewki",
-	"tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Włącz tryb marchewki"
+    "Diet Journal": "Diet Journal",
+    "spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo-nieznanie§r",
+    "spiceoffabric.command.clear_history.was_cleared": "Twoja historia jedzenia została skasowana",
+    "spiceoffabric.command.clear_history.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
+    "tweed4_tailor_screen.screen.spiceoffabric": "Konfiguracja Spice of Fabric",
+    "tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
+    "tweed4_tailor_screen.screen.spiceoffabric.respawn.saturation": "Nasycenie",
+    "tweed4_tailor_screen.screen.spiceoffabric.respawn.hunger": "Głód",
+    "tweed4_tailor_screen.screen.spiceoffabric.respawn.reset-history": "Skasuj historię jedzenia po każdej śmierci",
+    "tweed4_tailor_screen.screen.spiceoffabric.food": "Jedzenie",
+    "tweed4_tailor_screen.screen.spiceoffabric.food.increase-eating-time": "Wydłuż czas spożywania jedzenia",
+    "tweed4_tailor_screen.screen.spiceoffabric.food.history-length": "Długość historii",
+    "tweed4_tailor_screen.screen.spiceoffabric.food.saturation": "Nasycenie",
+    "tweed4_tailor_screen.screen.spiceoffabric.food.hunger": "Głód",
+    "tweed4_tailor_screen.screen.spiceoffabric.carrot": "Tryb marchewki",
+    "tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Włącz tryb marchewki"
 }

@@ -1,8 +1,11 @@
 package de.siphalor.spiceoffabric.server;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.container.FoodJournalScreenHandler;
+import de.siphalor.spiceoffabric.container.FoodJournalView;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -20,8 +23,17 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class Commands {
+	private static final String AMOUNT_ARGUMENT = "amount";
+	private static final String TARGETS_ARGUMENT = "targets";
+
+	private Commands() {}
+
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, registryAccess, registrationEnvironment) -> {
+			if (Config.enableJournalCommand) {
+				commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":journal")
+						.executes(context -> openJournal(context.getSource())));
+			}
 			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":clear_history")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context ->
@@ -30,11 +42,11 @@ public class Commands {
 									Collections.singleton(context.getSource().getPlayer())
 							)
 					).then(
-							CommandManager.argument("targets", EntityArgumentType.players())
+							CommandManager.argument(TARGETS_ARGUMENT, EntityArgumentType.players())
 									.executes(context ->
 											clearHistory(
 													context.getSource(),
-													EntityArgumentType.getPlayers(context, "targets")
+													EntityArgumentType.getPlayers(context, TARGETS_ARGUMENT)
 											)
 									)
 					)
@@ -42,25 +54,25 @@ public class Commands {
 			commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":set_base_max_health")
 					.requires(source -> source.hasPermissionLevel(2))
 					.then(
-							CommandManager.argument("targets", EntityArgumentType.players())
+							CommandManager.argument(TARGETS_ARGUMENT, EntityArgumentType.players())
 									.then(
-											CommandManager.argument("amount", IntegerArgumentType.integer(1, 200))
+											CommandManager.argument(AMOUNT_ARGUMENT, IntegerArgumentType.integer(1, 200))
 													.executes(context ->
 															setBaseMaxHealth(
 																	context.getSource(),
-																	EntityArgumentType.getPlayers(context, "targets"),
-																	IntegerArgumentType.getInteger(context, "amount")
+																	EntityArgumentType.getPlayers(context, TARGETS_ARGUMENT),
+																	IntegerArgumentType.getInteger(context, AMOUNT_ARGUMENT)
 															)
 													)
 									)
 					)
 					.then(
-							CommandManager.argument("amount", IntegerArgumentType.integer(1, 200))
+							CommandManager.argument(AMOUNT_ARGUMENT, IntegerArgumentType.integer(1, 200))
 									.executes(context ->
 											setBaseMaxHealth(
 													context.getSource(),
 													Collections.singleton(context.getSource().getPlayer()),
-													IntegerArgumentType.getInteger(context, "amount")
+													IntegerArgumentType.getInteger(context, AMOUNT_ARGUMENT)
 											)
 									)
 					)
@@ -70,13 +82,19 @@ public class Commands {
 					.executes(context ->
 							updateMaxHealth(context.getSource(), Collections.singleton(context.getSource().getPlayer()))
 					).then(
-							CommandManager.argument("targets", EntityArgumentType.players())
+							CommandManager.argument(TARGETS_ARGUMENT, EntityArgumentType.players())
 									.executes(context ->
-											updateMaxHealth(context.getSource(), EntityArgumentType.getPlayers(context, "targets"))
+											updateMaxHealth(context.getSource(), EntityArgumentType.getPlayers(context, TARGETS_ARGUMENT))
 									)
 					)
 			);
 		});
+	}
+
+	private static int openJournal(ServerCommandSource commandSource) throws CommandSyntaxException {
+		ServerPlayerEntity player = commandSource.getPlayer();
+		player.openHandledScreen(new FoodJournalScreenHandler.Factory(player, FoodJournalView.getDefault()));
+		return 1;
 	}
 
 	private static int clearHistory(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {

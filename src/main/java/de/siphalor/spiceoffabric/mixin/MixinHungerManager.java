@@ -66,7 +66,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 						EntityAttributes.GENERIC_MAX_HEALTH
 				);
 				if (healthAttribute == null) {
-					System.err.println("[SOF] Players must have a maximum health!");
+					SpiceOfFabric.LOGGER.error("Players must have a maximum health!");
 					return;
 				}
 				if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
@@ -90,10 +90,6 @@ public abstract class MixinHungerManager implements IHungerManager {
 		if (spiceOfFabric_player != null) {
 			((IServerPlayerEntity) spiceOfFabric_player).spiceOfFabric_scheduleFoodHistorySync();
 		}
-		/*if(Config.carrotEnabled.value && spiceOfFabric_foodHistory.carrotHistory == null) {
-			spiceOfFabric_player.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(Config.startHearts.value * 2);
-			spiceOfFabric_foodHistory.carrotHistory = new HashSet<>();
-		}*/
 	}
 
 	@Inject(method = "writeNbt", at = @At("RETURN"))
