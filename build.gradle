@@ -65,11 +65,7 @@ dependencies {
 	// AppleSkin
 	modCompileOnly "squeek.appleskin:appleskin-fabric:$appleskin_version:api"
 	modLocalRuntime("squeek.appleskin:appleskin-fabric:$appleskin_version") {
-		exclude group: 'net.fabricmc.fabric-api'
-	}
-
-	// REI
-	modLocalRuntime(modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version")) {
+		exclude module: "modmenu"
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
