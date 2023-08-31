@@ -3,6 +3,7 @@ package de.siphalor.spiceoffabric.util;
 
 import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
@@ -19,16 +20,35 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		array = new int[size];
 	}
 
+	/**
+	 * Returns the actual size of the queue that is occupied.
+	 * @return the size
+	 */
 	public int size() {
 		return size;
 	}
 
+	/**
+	 * Clears the queue.
+	 */
 	public void clear() {
 		size = 0;
 	}
 
+	/**
+	 * Returns whether the queue is empty.
+	 * @return whether the queue is empty
+	 */
 	public boolean isEmpty() {
 		return size <= 0;
+	}
+
+	/**
+	 * Returns whether the queue is completely filled.
+	 * @return whether there is no more space left
+	 */
+	public boolean isFull() {
+		return size() == getLength();
 	}
 
 	public int get(int index) {
@@ -42,22 +62,47 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return array[index];
 	}
 
-	public boolean enqueue(int x) {
-		if (array.length == 0) {
-			return false;
+	/**
+	 * Enqueues the given value.
+	 * @param x the value to enqueue
+	 * @throws IllegalStateException if the queue is already completely filled.
+	 * @see #forceEnqueue(int)
+	 */
+	public void enqueue(int x) {
+		if (getLength() == 0) {
+			return;
 		}
-		if (size == array.length) {
-			array[start] = x;
-			if (++start >= size) {
-				start = 0;
-			}
-			return true;
+		if (size == getLength()) {
+			// An override would happen!
+			throw new IllegalStateException("Tried to enqueue more elements than length permits onto fixed FIFO queue");
 		} else {
 			array[(start + size++) % array.length] = x;
-			return false;
 		}
 	}
 
+	/**
+	 * Enqueues the given value. If the queue is already full, old values will be overwritten.
+	 * @param x the value to enqueue
+	 * @return the value that had to be overwritten, or {@code null} if no value was overwritten.
+	 */
+	public Integer forceEnqueue(int x) {
+		if (getLength() == 0) {
+			return null;
+		}
+		if (isFull()) {
+			int overwrite = dequeue();
+			enqueue(x);
+			return overwrite;
+		} else {
+			enqueue(x);
+			return null;
+		}
+	}
+
+	/**
+	 * Dequeues the first element, alias the oldest element.
+	 * @return the first element
+	 */
 	public int dequeue() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -70,6 +115,10 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return x;
 	}
 
+	/**
+	 * Gets the first element, alias the oldest element.
+	 * @return the first element
+	 */
 	public int first() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -78,7 +127,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 	}
 
 	@Override
-	public IntIterator iterator() {
+	public @NotNull IntIterator iterator() {
 		return new IntIterator() {
 			private int offset;
 
@@ -110,6 +159,10 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		}
 	}
 
+	/**
+	 * Returns the length, alias the max size of this queue.
+	 * @return the length
+	 */
 	public int getLength() {
 		return array.length;
 	}

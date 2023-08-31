@@ -25,8 +25,6 @@ class FixedLengthIntFIFOQueueTest {
 		Assertions.assertEquals(1, queue.size());
 		queue.enqueue(1);
 		Assertions.assertEquals(2, queue.size());
-		queue.enqueue(1);
-		Assertions.assertEquals(2, queue.size());
 		queue.dequeue();
 		Assertions.assertEquals(1, queue.size());
 	}
@@ -57,12 +55,26 @@ class FixedLengthIntFIFOQueueTest {
 	@Test
 	void testEnqueue() {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
-		Assertions.assertFalse(queue.enqueue(1));
+		queue.enqueue(1);
 		Assertions.assertEquals(1, queue.first());
-		Assertions.assertFalse(queue.enqueue(2));
+		queue.enqueue(2);
 		Assertions.assertEquals(1, queue.first());
-		Assertions.assertTrue(queue.enqueue(3));
+
+		Assertions.assertThrows(IllegalStateException.class, () -> queue.enqueue(3));
+		Assertions.assertEquals(1, queue.first());
+	}
+
+	@Test
+	void testForceEnqueue() {
+		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
+		Assertions.assertNull(queue.forceEnqueue(1));
+		Assertions.assertEquals(1, queue.first());
+		Assertions.assertNull(queue.forceEnqueue(2));
+		Assertions.assertEquals(1, queue.first());
+		Assertions.assertEquals(1, queue.forceEnqueue(3));
 		Assertions.assertEquals(2, queue.first());
+		Assertions.assertEquals(2, queue.forceEnqueue(4));
+		Assertions.assertEquals(3, queue.first());
 	}
 
 	@Test
@@ -70,15 +82,16 @@ class FixedLengthIntFIFOQueueTest {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 		queue.enqueue(1);
-		queue.dequeue();
+		Assertions.assertEquals(1, queue.dequeue());
 		Assertions.assertEquals(0, queue.size());
 		queue.enqueue(2);
 		queue.enqueue(3);
+		Assertions.assertEquals(2, queue.dequeue());
 		queue.enqueue(4);
-		queue.dequeue();
+		Assertions.assertEquals(3, queue.dequeue());
 		Assertions.assertEquals(1, queue.size());
 		Assertions.assertEquals(4, queue.first());
-		queue.dequeue();
+		Assertions.assertEquals(4, queue.dequeue());
 		Assertions.assertEquals(0, queue.size());
 		Assertions.assertThrows(NoSuchElementException.class, queue::dequeue);
 	}
@@ -91,10 +104,15 @@ class FixedLengthIntFIFOQueueTest {
 		Assertions.assertEquals(1, queue.first());
 		queue.enqueue(2);
 		Assertions.assertEquals(1, queue.first());
+		queue.dequeue();
 		queue.enqueue(3);
 		Assertions.assertEquals(2, queue.first());
+		queue.dequeue();
 		queue.enqueue(4);
 		Assertions.assertEquals(3, queue.first());
+		queue.dequeue();
+		queue.dequeue();
+		Assertions.assertThrows(NoSuchElementException.class, queue::first);
 	}
 
 	@Test
@@ -102,6 +120,7 @@ class FixedLengthIntFIFOQueueTest {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		queue.enqueue(1);
 		queue.enqueue(2);
+		queue.dequeue();
 		queue.enqueue(3);
 
 		IntIterator iterator = queue.iterator();
@@ -118,6 +137,7 @@ class FixedLengthIntFIFOQueueTest {
 		FixedLengthIntFIFOQueue queue = new FixedLengthIntFIFOQueue(2);
 		queue.enqueue(1);
 		queue.enqueue(2);
+		queue.dequeue();
 		queue.enqueue(3);
 
 		IntList data = new IntArrayList(2);
@@ -137,6 +157,7 @@ class FixedLengthIntFIFOQueueTest {
 		queue.enqueue(0);
 		queue.enqueue(1);
 		queue.enqueue(2);
+		queue.dequeue();
 		queue.enqueue(3);
 		testSetLengthIncreaseHelper(queue);
 	}
@@ -150,6 +171,7 @@ class FixedLengthIntFIFOQueueTest {
 		Assertions.assertEquals(2, iterator.nextInt());
 		Assertions.assertEquals(3, iterator.nextInt());
 		Assertions.assertFalse(iterator.hasNext());
+		queue.dequeue();
 		queue.enqueue(4);
 		queue.enqueue(5);
 		Assertions.assertEquals(2, queue.dequeue());
@@ -173,6 +195,7 @@ class FixedLengthIntFIFOQueueTest {
 		queue.enqueue(1);
 		queue.enqueue(2);
 		queue.enqueue(3);
+		queue.dequeue();
 		queue.enqueue(4);
 		testSetLengthDecreaseHelper(queue);
 	}
@@ -186,6 +209,7 @@ class FixedLengthIntFIFOQueueTest {
 		Assertions.assertEquals(3, iterator.nextInt());
 		Assertions.assertEquals(4, iterator.nextInt());
 		Assertions.assertFalse(iterator.hasNext());
+		queue.dequeue();
 		queue.enqueue(5);
 		Assertions.assertEquals(3, queue.dequeue());
 		Assertions.assertEquals(4, queue.dequeue());

@@ -112,7 +112,9 @@ public class FoodHistory {
 			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.from(buffer));
 		}
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
-			history.enqueue(buffer.readVarInt());
+			// Using forceEnqueue here to make sure we're not running out of space and throwing an exception
+			// just because of a small desync of the history length ;)
+			history.forceEnqueue(buffer.readVarInt());
 		}
 		if (buffer.readBoolean()) {
 			final int length = buffer.readVarInt();
@@ -161,7 +163,9 @@ public class FoodHistory {
 			NbtList nbtRecentHistory = compoundTag.getList(RECENT_HISTORY_NBT_KEY, 3);
 
 			for (NbtElement tag : nbtRecentHistory) {
-				foodHistory.history.enqueue(((NbtInt) tag).intValue());
+				// Using forceEnqueue here to make sure we're not running out of space and throwing an exception.
+				// The history length might have changed (decreased) since the last time the player logged in.
+				foodHistory.history.forceEnqueue(((NbtInt) tag).intValue());
 			}
 		}
 
@@ -254,19 +258,29 @@ public class FoodHistory {
 	}
 
 	public void addFood(FoodHistoryEntry entry) {
-		Integer id = dictionary.inverse().get(entry);
-		if (id == null) {
+		Integer boxedId = dictionary.inverse().get(entry);
+		int id;
+		if (boxedId == null) {
 			id = nextId++;
 			dictionary.put(id, entry);
+		} else {
+			id = boxedId;
 		}
-		history.setLength(Config.food.historyLength);
-		if (history.enqueue(id)) {
-			removeLastFood();
+
+		// Make sure the history length is correct, just in case
+		if (history.getLength() != Config.food.historyLength) {
+			history.setLength(Config.food.historyLength);
+			buildStats();
 		}
-		while (history.size() > Config.food.historyLength) {
-			removeLastFood();
+
+		if (history.size() == Config.food.historyLength) {
+			// History is full, overwrite would happen
+			int oldestEntryId = history.dequeue(); // Save the oldest value
+			stats.computeIfPresent(oldestEntryId, (id_, count) -> count - 1); // Remove from stats
 		}
-		stats.put((int) id, stats.getOrDefault((int) id, 0) + 1);
+
+		history.enqueue(id);
+		stats.mergeInt(id, 1, Integer::sum);
 
 		if (Config.carrot.enable) {
 			carrotHistory.add(entry);
@@ -282,11 +296,6 @@ public class FoodHistory {
 			return null;
 		}
 		return dictionary.get(history.get(index)).getStack();
-	}
-
-	public void removeLastFood() {
-		int id = history.dequeue();
-		stats.computeIfPresent(id, (_id, count) -> count - 1);
 	}
 
 	public boolean isInCarrotHistory(ItemStack stack) {
