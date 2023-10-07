@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
 	id 'com.github.johnrengelman.shadow' version '7.0.0'
@@ -80,6 +80,11 @@ configurations.include.transitive = true
 configurations.include.dependencies.each {
 	if (!it.name.contains("bom")) {
 		it.transitive = false
+	}
+}
+configurations.configureEach {
+	resolutionStrategy {
+		force("net.fabricmc:fabric-loader:$loader_version")
 	}
 }
 
