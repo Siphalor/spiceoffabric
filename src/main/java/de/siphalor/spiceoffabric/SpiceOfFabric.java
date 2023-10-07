@@ -157,7 +157,7 @@ public class SpiceOfFabric implements ModInitializer {
 			return eatingTime;
 		}
 
-		Config.setConsumeDurationValues(foodHistory.getTimesEaten(FoodUtils.getFoodStack(context)), context.originalFoodHunger(), context.originalFoodSaturationModifier(), eatingTime);
+		Config.setConsumeDurationValues(foodHistory.getTimesRecentlyEaten(FoodUtils.getFoodStack(context)), context.originalFoodHunger(), context.originalFoodSaturationModifier(), eatingTime);
 		return (int) Config.consumeDurationExpression.evaluate();
 	}
 
@@ -166,7 +166,7 @@ public class SpiceOfFabric implements ModInitializer {
 		if (context.user() instanceof PlayerEntity player) {
 			FoodHistory foodHistory = FoodHistory.get(player);
 			if (foodHistory != null) {
-				timesEaten = foodHistory.getTimesEaten(FoodUtils.getFoodStack(context));
+				timesEaten = foodHistory.getTimesRecentlyEaten(FoodUtils.getFoodStack(context));
 			} else {
 				timesEaten = 0;
 			}

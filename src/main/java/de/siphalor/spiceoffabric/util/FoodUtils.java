@@ -121,7 +121,7 @@ public class FoodUtils {
 	}
 
 	private static void appendCarrotTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (Config.carrot.enable && !foodHistory.isInCarrotHistory(stack)) {
+		if (Config.carrot.enable && !foodHistory.isInUniqueEaten(stack)) {
 			base.add(NEVER_EATEN_TOOLTIP);
 		}
 	}
@@ -130,7 +130,7 @@ public class FoodUtils {
 		if (Config.showLastEatenTips == Config.ItemTipDisplayStyle.NONE || Config.food.historyLength <= 0) {
 			return;
 		}
-		int lastEaten = foodHistory.getLastEaten(stack);
+		int lastEaten = foodHistory.getFoodCountSinceLastEaten(stack);
 		if (lastEaten < 0) {
 			return;
 		}

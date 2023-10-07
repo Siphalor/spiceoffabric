@@ -1,56 +1,35 @@
-package de.siphalor.spiceoffabric.util;
+package de.siphalor.spiceoffabric.util.queue;
 
 
-import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
 
-public class FixedLengthIntFIFOQueue implements IntIterable {
+public class ArrayFixedLengthIntFIFOQueue implements FixedLengthIntFIFOQueue {
 	protected int[] array;
 	protected int size; // actual length, != array.length
 	protected int start; // inclusive
 
-	public FixedLengthIntFIFOQueue(int size) {
+	public ArrayFixedLengthIntFIFOQueue(int size) {
 		if (size < 0) {
 			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");
 		}
 		array = new int[size];
 	}
 
-	/**
-	 * Returns the actual size of the queue that is occupied.
-	 * @return the size
-	 */
+	@Override
 	public int size() {
 		return size;
 	}
 
-	/**
-	 * Clears the queue.
-	 */
+	@Override
 	public void clear() {
 		size = 0;
 	}
 
-	/**
-	 * Returns whether the queue is empty.
-	 * @return whether the queue is empty
-	 */
-	public boolean isEmpty() {
-		return size <= 0;
-	}
-
-	/**
-	 * Returns whether the queue is completely filled.
-	 * @return whether there is no more space left
-	 */
-	public boolean isFull() {
-		return size() == getLength();
-	}
-
+	@Override
 	public int get(int index) {
 		if (index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException(index + " is out of bounds for fixed FIFO queue (s: " + size + ", l: " + array.length + ")");
@@ -62,12 +41,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return array[index];
 	}
 
-	/**
-	 * Enqueues the given value.
-	 * @param x the value to enqueue
-	 * @throws IllegalStateException if the queue is already completely filled.
-	 * @see #forceEnqueue(int)
-	 */
+	@Override
 	public void enqueue(int x) {
 		if (getLength() == 0) {
 			return;
@@ -80,11 +54,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		}
 	}
 
-	/**
-	 * Enqueues the given value. If the queue is already full, old values will be overwritten.
-	 * @param x the value to enqueue
-	 * @return the value that had to be overwritten, or {@code null} if no value was overwritten.
-	 */
+	@Override
 	public Integer forceEnqueue(int x) {
 		if (getLength() == 0) {
 			return null;
@@ -99,10 +69,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		}
 	}
 
-	/**
-	 * Dequeues the first element, alias the oldest element.
-	 * @return the first element
-	 */
+	@Override
 	public int dequeue() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -115,10 +82,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return x;
 	}
 
-	/**
-	 * Gets the first element, alias the oldest element.
-	 * @return the first element
-	 */
+	@Override
 	public int first() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -159,14 +123,12 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		}
 	}
 
-	/**
-	 * Returns the length, alias the max size of this queue.
-	 * @return the length
-	 */
+	@Override
 	public int getLength() {
 		return array.length;
 	}
 
+	@Override
 	public void setLength(int newLength) {
 		if (newLength < 0) {
 			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");

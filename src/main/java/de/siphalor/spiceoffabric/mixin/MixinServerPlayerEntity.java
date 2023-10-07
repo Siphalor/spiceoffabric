@@ -85,7 +85,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 				foodHistory.resetHistory();
 			}
 			if (Config.carrot.enable && Config.respawn.resetCarrotMode) {
-				foodHistory.resetCarrotHistory();
+				foodHistory.resetUniqueFoodsEaten();
 			}
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
