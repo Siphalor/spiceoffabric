@@ -1,7 +1,6 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -48,19 +47,11 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 	private final PaginatedReadOnlyInventory foodJournalInventory;
 	private final Inventory infoInventory;
 
-	public static boolean isHistoryViewVisible() {
-		return Config.food.historyLength > 0;
-	}
-
-	public static boolean isCarrotViewVisible() {
-		return Config.carrot.enable;
-	}
-
 	public FoodJournalScreenHandler(@Nullable ScreenHandlerType<?> type, int syncId, FoodJournalView currentView, ServerPlayerEntity player, FoodHistory foodHistory) {
 		super(type, syncId);
 		this.currentView = currentView;
 		this.player = player;
-		this.clientHasMod = SpiceOfFabric.hasMod(player);
+		this.clientHasMod = SpiceOfFabric.hasClientMod(player);
 
 		this.foodJournalInventory = createFoodJournalInventory(foodHistory, currentView);
 		for (int i = 0; i < JOURNAL_SLOT_COUNT; i++) {
@@ -99,14 +90,14 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 	private PaginatedReadOnlyInventory createFoodJournalInventory(FoodHistory foodHistory, FoodJournalView view) {
 		if (view == FoodJournalView.HISTORY) {
-			int historySize = foodHistory.getHistorySize();
+			int historySize = foodHistory.getRecentlyEatenCount();
 			var stacks = new ArrayList<ItemStack>(historySize);
 			for (int i = 0; i < historySize; i++) {
-				stacks.add(foodHistory.getStackFromHistory(i));
+				stacks.add(foodHistory.getStackFromRecentlyEaten(i));
 			}
 			return new PaginatedReadOnlyInventory(JOURNAL_SLOT_COUNT, stacks);
 		} else if (view == FoodJournalView.CARROT) {
-			var stacks = foodHistory.getCarrotHistory().stream()
+			var stacks = foodHistory.getUniqueFoodsEaten().stream()
 					.map(FoodHistoryEntry::getStack)
 					.sorted(Comparator.comparingInt(stack -> {
 						FoodComponent foodComponent = stack.getItem().getFoodComponent();
@@ -118,7 +109,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 					.toList();
 			return new PaginatedReadOnlyInventory(JOURNAL_SLOT_COUNT, stacks);
 		} else if (view == FoodJournalView.CARROT_UNEATEN) {
-			var eatenItems = foodHistory.getCarrotHistory().stream()
+			var eatenItems = foodHistory.getUniqueFoodsEaten().stream()
 					.map(entry -> entry.getStack().getItem()).collect(Collectors.toUnmodifiableSet());
 			var stacks = Registries.ITEM.stream().parallel()
 					.filter(FoodUtils::isFood)
@@ -208,7 +199,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 		@Override
 		public Text getDisplayName() {
-			if (SpiceOfFabric.hasMod(player)) {
+			if (SpiceOfFabric.hasClientMod(player)) {
 				return view.getTranslatableName();
 			}
 			return Text.literal(view.getLiteralName());

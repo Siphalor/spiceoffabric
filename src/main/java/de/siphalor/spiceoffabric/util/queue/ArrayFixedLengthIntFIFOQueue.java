@@ -1,36 +1,35 @@
-package de.siphalor.spiceoffabric.util;
+package de.siphalor.spiceoffabric.util.queue;
 
 
-import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
 
-public class FixedLengthIntFIFOQueue implements IntIterable {
+public class ArrayFixedLengthIntFIFOQueue implements FixedLengthIntFIFOQueue {
 	protected int[] array;
 	protected int size; // actual length, != array.length
 	protected int start; // inclusive
 
-	public FixedLengthIntFIFOQueue(int size) {
+	public ArrayFixedLengthIntFIFOQueue(int size) {
 		if (size < 0) {
 			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");
 		}
 		array = new int[size];
 	}
 
+	@Override
 	public int size() {
 		return size;
 	}
 
+	@Override
 	public void clear() {
 		size = 0;
 	}
 
-	public boolean isEmpty() {
-		return size <= 0;
-	}
-
+	@Override
 	public int get(int index) {
 		if (index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException(index + " is out of bounds for fixed FIFO queue (s: " + size + ", l: " + array.length + ")");
@@ -42,22 +41,35 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return array[index];
 	}
 
-	public boolean enqueue(int x) {
-		if (array.length == 0) {
-			return false;
+	@Override
+	public void enqueue(int x) {
+		if (getLength() == 0) {
+			return;
 		}
-		if (size == array.length) {
-			array[start] = x;
-			if (++start >= size) {
-				start = 0;
-			}
-			return true;
+		if (size == getLength()) {
+			// An override would happen!
+			throw new IllegalStateException("Tried to enqueue more elements than length permits onto fixed FIFO queue");
 		} else {
 			array[(start + size++) % array.length] = x;
-			return false;
 		}
 	}
 
+	@Override
+	public Integer forceEnqueue(int x) {
+		if (getLength() == 0) {
+			return null;
+		}
+		if (isFull()) {
+			int overwrite = dequeue();
+			enqueue(x);
+			return overwrite;
+		} else {
+			enqueue(x);
+			return null;
+		}
+	}
+
+	@Override
 	public int dequeue() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -70,6 +82,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		return x;
 	}
 
+	@Override
 	public int first() {
 		if (size <= 0) {
 			throw new NoSuchElementException();
@@ -78,7 +91,7 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 	}
 
 	@Override
-	public IntIterator iterator() {
+	public @NotNull IntIterator iterator() {
 		return new IntIterator() {
 			private int offset;
 
@@ -110,10 +123,12 @@ public class FixedLengthIntFIFOQueue implements IntIterable {
 		}
 	}
 
+	@Override
 	public int getLength() {
 		return array.length;
 	}
 
+	@Override
 	public void setLength(int newLength) {
 		if (newLength < 0) {
 			throw new IllegalArgumentException("A fixed length fifo queue must not have a negative length!");
