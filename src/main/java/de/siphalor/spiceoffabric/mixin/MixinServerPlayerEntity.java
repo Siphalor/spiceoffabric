@@ -26,7 +26,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ServerPlayerEntity.class, priority = 1100)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements IServerPlayerEntity {
-	@Shadow public abstract void lookAt(EntityAnchorArgumentType.EntityAnchor anchorPoint, Vec3d target);
+	@Shadow
+	@Override
+	public abstract void lookAt(EntityAnchorArgumentType.EntityAnchor anchorPoint, Vec3d target);
 
 	@Unique
 	protected boolean foodHistorySync = false;
@@ -101,7 +103,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	public void afterReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
 		// Update the max health. This overwrites the base definition in the constructor
 		// and older data that has been read from the player nbt.
-		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
+		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 
 		if (nbt.contains("Health", 99)) {
 			this.setHealth(nbt.getFloat("Health"));

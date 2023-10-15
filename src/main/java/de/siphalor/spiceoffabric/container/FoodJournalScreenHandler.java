@@ -1,7 +1,6 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -49,14 +48,6 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 	private final FoodJournalView currentView;
 	private final PaginatedReadOnlyInventory foodJournalInventory;
 	private final Inventory infoInventory;
-
-	public static boolean isHistoryViewVisible() {
-		return SOFConfig.food.historyLength > 0;
-	}
-
-	public static boolean isCarrotViewVisible() {
-		return SOFConfig.carrot.enable;
-	}
 
 	public FoodJournalScreenHandler(@Nullable ScreenHandlerType<?> type, int syncId, FoodJournalView currentView, ServerPlayerEntity player, FoodHistory foodHistory) {
 		super(type, syncId);
