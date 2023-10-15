@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.polymer;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import eu.pb4.polymer.api.item.PolymerItemUtils;
 import eu.pb4.polymer.api.resourcepack.PolymerModelData;
@@ -11,17 +11,17 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public class SoFPolymer {
+public class SOFPolymer {
 	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
 
-	private SoFPolymer() {
+	private SOFPolymer() {
 	}
 
 	public static void init() {
 		PolymerItemUtils.ITEM_CHECK.register(ItemStack::isFood);
 
 		PolymerItemUtils.ITEM_MODIFICATION_EVENT.register((original, client, player) -> {
-			if (!SpiceOfFabric.hasMod(player)) {
+			if (!SpiceOfFabric.hasClientMod(player)) {
 				FoodUtils.appendServerTooltips(player, client);
 			}
 			return client;
@@ -29,13 +29,13 @@ public class SoFPolymer {
 
 		PolymerRPUtils.addAssetSource(SpiceOfFabric.MOD_ID);
 
-		if (Config.items.enablePaperBag) {
+		if (SOFConfig.items.enablePaperBag) {
 			registerFoodContainer("paper_bag", Items.PAPER, Items.POTATO, 5, ScreenHandlerType.HOPPER);
 		}
-		if (Config.items.enableLunchBox) {
+		if (SOFConfig.items.enableLunchBox) {
 			registerFoodContainer("lunch_box", Items.DARK_OAK_BOAT, Items.COOKIE, 9, ScreenHandlerType.GENERIC_3X3);
 		}
-		if (Config.items.enablePicnicBasket) {
+		if (SOFConfig.items.enablePicnicBasket) {
 			registerFoodContainer("picnic_basket", Items.OAK_BOAT, Items.BREAD, 9, ScreenHandlerType.GENERIC_3X3);
 		}
 	}

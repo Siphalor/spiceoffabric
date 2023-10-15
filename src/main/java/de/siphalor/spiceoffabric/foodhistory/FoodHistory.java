@@ -3,15 +3,14 @@ package de.siphalor.spiceoffabric.foodhistory;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.queue.ArrayFixedLengthIntFIFOQueue;
 import de.siphalor.spiceoffabric.util.queue.FixedLengthIntFIFOQueueWithStats;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
@@ -55,7 +54,7 @@ public class FoodHistory {
 
 	public FoodHistory() {
 		dictionary = HashBiMap.create();
-		recentlyEaten = new FixedLengthIntFIFOQueueWithStats(new ArrayFixedLengthIntFIFOQueue(Config.food.historyLength));
+		recentlyEaten = new FixedLengthIntFIFOQueueWithStats(new ArrayFixedLengthIntFIFOQueue(SOFConfig.food.historyLength));
 		uniqueFoodsEaten = new HashSet<>();
 	}
 
@@ -88,7 +87,7 @@ public class FoodHistory {
 		for (int integer : recentlyEaten) {
 			buffer.writeVarInt(integer);
 		}
-		if (Config.carrot.enable) {
+		if (SOFConfig.carrot.enable) {
 			buffer.writeBoolean(true);
 			buffer.writeVarInt(uniqueFoodsEaten.size());
 			for (FoodHistoryEntry entry : uniqueFoodsEaten) {
@@ -102,7 +101,7 @@ public class FoodHistory {
 	public void read(PacketByteBuf buffer) {
 		dictionary.clear();
 		recentlyEaten.clear();
-		recentlyEaten.setLength(Config.food.historyLength);
+		recentlyEaten.setLength(SOFConfig.food.historyLength);
 
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
 			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.from(buffer));
@@ -226,14 +225,13 @@ public class FoodHistory {
 		return foundI;
 	}
 
-	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {
+	public void addFood(ItemStack stack, ServerPlayerEntity player) {
 		FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
 
-		if (ServerPlayNetworking.canSend(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET)) {
-			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-			entry.write(buffer);
-			ServerPlayNetworking.send(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET, buffer);
+		if (SpiceOfFabric.hasClientMod(player)) {
+			SOFCommonNetworking.sendAddFoodPacket(player, entry);
 		}
+
 		addFood(entry);
 	}
 
@@ -248,13 +246,13 @@ public class FoodHistory {
 		}
 
 		// Make sure the history length is correct, just in case
-		if (recentlyEaten.getLength() != Config.food.historyLength) {
-			recentlyEaten.setLength(Config.food.historyLength);
+		if (recentlyEaten.getLength() != SOFConfig.food.historyLength) {
+			recentlyEaten.setLength(SOFConfig.food.historyLength);
 		}
 
 		recentlyEaten.forceEnqueue(id);
 
-		if (Config.carrot.enable) {
+		if (SOFConfig.carrot.enable) {
 			uniqueFoodsEaten.add(entry);
 		}
 	}
@@ -277,18 +275,18 @@ public class FoodHistory {
 
 	public int getCarrotHealthOffset(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-		Config.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
+		SOFConfig.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
 
-		int newMaxHealth = MathHelper.floor(Config.healthFormulaExpression.evaluate());
-		if (Config.carrot.maxHealth > 0) {
-			newMaxHealth = MathHelper.clamp(newMaxHealth, 1, Config.carrot.maxHealth);
+		int newMaxHealth = MathHelper.floor(SOFConfig.healthFormulaExpression.evaluate());
+		if (SOFConfig.carrot.maxHealth > 0) {
+			newMaxHealth = MathHelper.clamp(newMaxHealth, 1, SOFConfig.carrot.maxHealth);
 		}
 		return newMaxHealth - (int) maxHealthAttr.getBaseValue();
 	}
 
 	public int getCarrotMaxHealth(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-		Config.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
-		return MathHelper.floor(Config.healthFormulaExpression.evaluate());
+		SOFConfig.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
+		return MathHelper.floor(SOFConfig.healthFormulaExpression.evaluate());
 	}
 }

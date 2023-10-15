@@ -3,8 +3,9 @@ package de.siphalor.spiceoffabric.mixin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
@@ -75,22 +76,22 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			setHealth(reference.getHealth());
 		} else { // Respawning
-			Pair<Double, Double> respawnHunger = Config.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
+			Pair<Double, Double> respawnHunger = SOFConfig.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(respawnHunger.getFirst(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) (double) respawnHunger.getSecond());
 
 			FoodHistory foodHistory = ((IHungerManager) reference.getHungerManager()).spiceOfFabric_getFoodHistory();
 
-			if (Config.respawn.resetHistory) {
+			if (SOFConfig.respawn.resetHistory) {
 				foodHistory.resetHistory();
 			}
-			if (Config.carrot.enable && Config.respawn.resetCarrotMode) {
+			if (SOFConfig.carrot.enable && SOFConfig.respawn.resetCarrotMode) {
 				foodHistory.resetUniqueFoodsEaten();
 			}
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
 
-			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity) (Object) this);
+			SOFCommonNetworking.syncFoodHistory((ServerPlayerEntity) (Object) this);
 			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			setHealth(getMaxHealth());
 		}

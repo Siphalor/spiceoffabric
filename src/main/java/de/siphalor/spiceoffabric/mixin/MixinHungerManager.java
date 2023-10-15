@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.mixin;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
@@ -61,7 +61,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 		if(data.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID, 10)) {
 			spiceOfFabric_foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
 
-			if (spiceOfFabric_player != null && Config.carrot.enable) {
+			if (spiceOfFabric_player != null && SOFConfig.carrot.enable) {
 				EntityAttributeInstance healthAttribute = spiceOfFabric_player.getAttributeInstance(
 						EntityAttributes.GENERIC_MAX_HEALTH
 				);

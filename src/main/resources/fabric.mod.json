@@ -22,13 +22,13 @@
 			"de.siphalor.spiceoffabric.SpiceOfFabric"
 		],
 		"client": [
-			"de.siphalor.spiceoffabric.client.SoFClient"
+			"de.siphalor.spiceoffabric.client.SOFClient"
 		],
 		"rei_plugins_v0": [
 			"de.siphalor.spiceoffabric.client.compat.REIPlugin"
 		],
 		"tweed4:config": [
-			"de.siphalor.spiceoffabric.config.Config"
+			"de.siphalor.spiceoffabric.config.SOFConfig"
 		]
 	},
 	"mixins": [

@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -51,18 +51,18 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 	private final Inventory infoInventory;
 
 	public static boolean isHistoryViewVisible() {
-		return Config.food.historyLength > 0;
+		return SOFConfig.food.historyLength > 0;
 	}
 
 	public static boolean isCarrotViewVisible() {
-		return Config.carrot.enable;
+		return SOFConfig.carrot.enable;
 	}
 
 	public FoodJournalScreenHandler(@Nullable ScreenHandlerType<?> type, int syncId, FoodJournalView currentView, ServerPlayerEntity player, FoodHistory foodHistory) {
 		super(type, syncId);
 		this.currentView = currentView;
 		this.player = player;
-		this.clientHasMod = SpiceOfFabric.hasMod(player);
+		this.clientHasMod = SpiceOfFabric.hasClientMod(player);
 
 		this.foodJournalInventory = createFoodJournalInventory(foodHistory, currentView);
 		for (int i = 0; i < JOURNAL_SLOT_COUNT; i++) {
@@ -210,7 +210,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 		@Override
 		public Text getDisplayName() {
-			if (SpiceOfFabric.hasMod(player)) {
+			if (SpiceOfFabric.hasClientMod(player)) {
 				return view.getTranslatableName();
 			}
 			return new LiteralText(view.getLiteralName());
