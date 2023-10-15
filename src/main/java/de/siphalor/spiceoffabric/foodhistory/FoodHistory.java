@@ -3,14 +3,14 @@ package de.siphalor.spiceoffabric.foodhistory;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
-import de.siphalor.spiceoffabric.util.FixedLengthIntFIFOQueue;
+import de.siphalor.spiceoffabric.config.SOFConfig;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import io.netty.buffer.Unpooled;
+import de.siphalor.spiceoffabric.util.queue.ArrayFixedLengthIntFIFOQueue;
+import de.siphalor.spiceoffabric.util.queue.FixedLengthIntFIFOQueueWithStats;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.HungerManager;
@@ -45,42 +45,36 @@ public class FoodHistory {
 		return ((IHungerManager) hungerManager).spiceOfFabric_getFoodHistory();
 	}
 
-	protected Set<FoodHistoryEntry> carrotHistory;
-
-	protected BiMap<Integer, FoodHistoryEntry> dictionary;
+	protected final BiMap<Integer, FoodHistoryEntry> dictionary;
 	protected int nextId = 0;
-	protected FixedLengthIntFIFOQueue history;
-	protected Int2IntMap stats;
+
+	protected final FixedLengthIntFIFOQueueWithStats recentlyEaten;
+
+	protected final Set<FoodHistoryEntry> uniqueFoodsEaten;
 
 	public FoodHistory() {
-		setup();
-	}
-
-	public void setup() {
 		dictionary = HashBiMap.create();
-		history = new FixedLengthIntFIFOQueue(Config.food.historyLength);
-		stats = new Int2IntArrayMap();
-		carrotHistory = new HashSet<>();
+		recentlyEaten = new FixedLengthIntFIFOQueueWithStats(new ArrayFixedLengthIntFIFOQueue(SOFConfig.food.historyLength));
+		uniqueFoodsEaten = new HashSet<>();
 	}
 
 	public void reset() {
 		resetHistory();
-		resetCarrotHistory();
+		resetUniqueFoodsEaten();
 	}
 
 	public void resetHistory() {
 		dictionary.clear();
 		nextId = 0;
-		history.clear();
-		stats.clear();
+		recentlyEaten.clear();
 	}
 
-	public Set<FoodHistoryEntry> getCarrotHistory() {
-		return carrotHistory;
+	public Set<FoodHistoryEntry> getUniqueFoodsEaten() {
+		return uniqueFoodsEaten;
 	}
 
-	public void resetCarrotHistory() {
-		carrotHistory.clear();
+	public void resetUniqueFoodsEaten() {
+		uniqueFoodsEaten.clear();
 	}
 
 	public void write(PacketByteBuf buffer) {
@@ -89,14 +83,14 @@ public class FoodHistory {
 			buffer.writeVarInt(entry.getKey());
 			entry.getValue().write(buffer);
 		}
-		buffer.writeVarInt(history.size());
-		for (int integer : history) {
+		buffer.writeVarInt(recentlyEaten.size());
+		for (int integer : recentlyEaten) {
 			buffer.writeVarInt(integer);
 		}
-		if (Config.carrot.enable) {
+		if (SOFConfig.carrot.enable) {
 			buffer.writeBoolean(true);
-			buffer.writeVarInt(carrotHistory.size());
-			for (FoodHistoryEntry entry : carrotHistory) {
+			buffer.writeVarInt(uniqueFoodsEaten.size());
+			for (FoodHistoryEntry entry : uniqueFoodsEaten) {
 				entry.write(buffer);
 			}
 		} else {
@@ -106,22 +100,26 @@ public class FoodHistory {
 
 	public void read(PacketByteBuf buffer) {
 		dictionary.clear();
-		history.clear();
-		history.setLength(Config.food.historyLength);
+		recentlyEaten.clear();
+		recentlyEaten.setLength(SOFConfig.food.historyLength);
+
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
 			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.from(buffer));
 		}
 		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
-			history.enqueue(buffer.readVarInt());
+			// Using forceEnqueue here to make sure we're not running out of space and throwing an exception
+			// just because of a small desync of the history length ;)
+			recentlyEaten.forceEnqueue(buffer.readVarInt());
 		}
+
+		uniqueFoodsEaten.clear();
+
 		if (buffer.readBoolean()) {
 			final int length = buffer.readVarInt();
-			carrotHistory = new HashSet<>(length);
 			for (int i = 0; i < length; i++) {
-				carrotHistory.add(FoodHistoryEntry.from(buffer));
+				uniqueFoodsEaten.add(FoodHistoryEntry.from(buffer));
 			}
 		}
-		buildStats();
 	}
 
 	public NbtCompound write(NbtCompound compoundTag) {
@@ -132,12 +130,12 @@ public class FoodHistory {
 		}
 		compoundTag.put(DICTIONARY_NBT_KEY, list);
 		NbtList historyList = new NbtList();
-		for (Integer id : history) {
+		for (Integer id : recentlyEaten) {
 			historyList.add(NbtInt.of(id));
 		}
 		compoundTag.put(RECENT_HISTORY_NBT_KEY, historyList);
 		NbtList carrotHistoryList = new NbtList();
-		for (FoodHistoryEntry entry : carrotHistory) {
+		for (FoodHistoryEntry entry : uniqueFoodsEaten) {
 			carrotHistoryList.add(entry.write(new NbtCompound()));
 		}
 		compoundTag.put(CARROT_HISTORY_NBT_KEY, carrotHistoryList);
@@ -161,37 +159,26 @@ public class FoodHistory {
 			NbtList nbtRecentHistory = compoundTag.getList(RECENT_HISTORY_NBT_KEY, 3);
 
 			for (NbtElement tag : nbtRecentHistory) {
-				foodHistory.history.enqueue(((NbtInt) tag).intValue());
+				// Using forceEnqueue here to make sure we're not running out of space and throwing an exception.
+				// The history length might have changed (decreased) since the last time the player logged in.
+				foodHistory.recentlyEaten.forceEnqueue(((NbtInt) tag).intValue());
 			}
 		}
 
-		foodHistory.buildStats();
-
 		if (compoundTag.contains(CARROT_HISTORY_NBT_KEY, 9)) {
 			NbtList nbtCarrotHistory = compoundTag.getList(CARROT_HISTORY_NBT_KEY, 10);
-			foodHistory.carrotHistory = new HashSet<>(nbtCarrotHistory.size());
 			for (NbtElement tag : nbtCarrotHistory) {
-				if (tag instanceof NbtCompound carrotEntry) {
-					FoodHistoryEntry entry = new FoodHistoryEntry().read(carrotEntry);
-					if (entry != null) {
-						foodHistory.carrotHistory.add(entry);
-					}
+				if (!(tag instanceof NbtCompound carrotEntry)) {
+					continue;
+				}
+				FoodHistoryEntry entry = new FoodHistoryEntry().read(carrotEntry);
+				if (entry != null) {
+					foodHistory.uniqueFoodsEaten.add(entry);
 				}
 			}
 		}
 
 		return foodHistory;
-	}
-
-	public void buildStats() {
-		stats.clear();
-		history.forEach(id -> {
-			if (stats.containsKey(id)) {
-				stats.put(id, stats.get(id) + 1);
-			} else {
-				stats.put(id, 1);
-			}
-		});
 	}
 
 	public void defragmentDictionary() {
@@ -202,36 +189,32 @@ public class FoodHistory {
 			i++;
 		}
 		nextId = i;
-		int historySize = history.size();
+		int historySize = recentlyEaten.size();
 		for (int j = 0; j < historySize; j++) {
-			history.enqueue(oldToNewMap.get(history.dequeue()));
+			recentlyEaten.enqueue(oldToNewMap.get(recentlyEaten.dequeue()));
 		}
-		Int2IntMap newStats = new Int2IntArrayMap();
-		for (Int2IntMap.Entry entry : stats.int2IntEntrySet()) {
-			newStats.put(oldToNewMap.get(entry.getIntKey()), entry.getIntValue());
-		}
-		stats = newStats;
 		BiMap<Integer, FoodHistoryEntry> newDictionary = HashBiMap.create();
 		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
 			newDictionary.put(oldToNewMap.get((int) entry.getKey()), entry.getValue());
 		}
-		dictionary = newDictionary;
+		dictionary.clear();
+		dictionary.putAll(newDictionary);
 	}
 
-	public int getTimesEaten(ItemStack stack) {
+	public int getTimesRecentlyEaten(ItemStack stack) {
 		Integer id = dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack));
 		if (id == null) {
 			return 0;
 		}
-		return stats.getOrDefault((int) id, 0);
+		return recentlyEaten.getStats().getOrDefault((int) id, 0);
 	}
 
-	public int getLastEaten(ItemStack stack) {
+	public int getFoodCountSinceLastEaten(ItemStack stack) {
 		Integer id = dictionary.inverse().get(FoodHistoryEntry.fromItemStack(stack));
 		if (id == null) {
 			return -1;
 		}
-		IntIterator iterator = history.iterator();
+		IntIterator iterator = recentlyEaten.iterator();
 		int foundI = Integer.MIN_VALUE;
 		while (iterator.hasNext()) {
 			foundI++;
@@ -242,72 +225,68 @@ public class FoodHistory {
 		return foundI;
 	}
 
-	public void addFood(ItemStack stack, ServerPlayerEntity serverPlayerEntity) {
+	public void addFood(ItemStack stack, ServerPlayerEntity player) {
 		FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
 
-		if (ServerPlayNetworking.canSend(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET)) {
-			PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-			entry.write(buffer);
-			ServerPlayNetworking.send(serverPlayerEntity, SpiceOfFabric.ADD_FOOD_S2C_PACKET, buffer);
+		if (SpiceOfFabric.hasClientMod(player)) {
+			SOFCommonNetworking.sendAddFoodPacket(player, entry);
 		}
+
 		addFood(entry);
 	}
 
 	public void addFood(FoodHistoryEntry entry) {
-		Integer id = dictionary.inverse().get(entry);
-		if (id == null) {
+		Integer boxedId = dictionary.inverse().get(entry);
+		int id;
+		if (boxedId == null) {
 			id = nextId++;
 			dictionary.put(id, entry);
+		} else {
+			id = boxedId;
 		}
-		history.setLength(Config.food.historyLength);
-		if (history.enqueue(id)) {
-			removeLastFood();
-		}
-		while (history.size() > Config.food.historyLength) {
-			removeLastFood();
-		}
-		stats.put((int) id, stats.getOrDefault((int) id, 0) + 1);
 
-		if (Config.carrot.enable) {
-			carrotHistory.add(entry);
+		// Make sure the history length is correct, just in case
+		if (recentlyEaten.getLength() != SOFConfig.food.historyLength) {
+			recentlyEaten.setLength(SOFConfig.food.historyLength);
+		}
+
+		recentlyEaten.forceEnqueue(id);
+
+		if (SOFConfig.carrot.enable) {
+			uniqueFoodsEaten.add(entry);
 		}
 	}
 
-	public int getHistorySize() {
-		return history.size();
+	public int getRecentlyEatenCount() {
+		return recentlyEaten.size();
 	}
 
-	public ItemStack getStackFromHistory(int index) {
-		if (index < 0 || index >= history.size()) {
+	public ItemStack getStackFromRecentlyEaten(int index) {
+		if (index < 0 || index >= recentlyEaten.size()) {
 			return null;
 		}
-		return dictionary.get(history.get(index)).getStack();
+		return dictionary.get(recentlyEaten.get(index)).getStack();
 	}
 
-	public void removeLastFood() {
-		int id = history.dequeue();
-		stats.computeIfPresent(id, (_id, count) -> count - 1);
-	}
-
-	public boolean isInCarrotHistory(ItemStack stack) {
+	public boolean isInUniqueEaten(ItemStack stack) {
 		FoodHistoryEntry entry = FoodHistoryEntry.fromItemStack(stack);
-		return carrotHistory.contains(entry);
+		return uniqueFoodsEaten.contains(entry);
 	}
 
 	public int getCarrotHealthOffset(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
+		SOFConfig.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
 
-		int newMaxHealth = MathHelper.floor(Config.healthFormulaExpression.evaluate());
-		if (Config.carrot.maxHealth > 0) {
-			newMaxHealth = MathHelper.clamp(newMaxHealth, 1, Config.carrot.maxHealth);
+		int newMaxHealth = MathHelper.floor(SOFConfig.healthFormulaExpression.evaluate());
+		if (SOFConfig.carrot.maxHealth > 0) {
+			newMaxHealth = MathHelper.clamp(newMaxHealth, 1, SOFConfig.carrot.maxHealth);
 		}
 		return newMaxHealth - (int) maxHealthAttr.getBaseValue();
 	}
 
 	public int getCarrotMaxHealth(PlayerEntity player) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-		Config.setHealthFormulaExpressionValues(carrotHistory.size(), (int) maxHealthAttr.getBaseValue());
-		return MathHelper.floor(Config.healthFormulaExpression.evaluate());
+		SOFConfig.setHealthFormulaExpressionValues(uniqueFoodsEaten.size(), (int) maxHealthAttr.getBaseValue());
+		return MathHelper.floor(SOFConfig.healthFormulaExpression.evaluate());
 	}
 }
