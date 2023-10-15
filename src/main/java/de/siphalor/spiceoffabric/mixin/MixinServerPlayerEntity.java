@@ -3,8 +3,9 @@ package de.siphalor.spiceoffabric.mixin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
@@ -26,7 +27,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ServerPlayerEntity.class, priority = 1100)
 public abstract class MixinServerPlayerEntity extends PlayerEntity implements IServerPlayerEntity {
-	@Shadow public abstract void lookAt(EntityAnchorArgumentType.EntityAnchor anchorPoint, Vec3d target);
+	@Shadow
+	@Override
+	public abstract void lookAt(EntityAnchorArgumentType.EntityAnchor anchorPoint, Vec3d target);
 
 	@Unique
 	protected boolean foodHistorySync = false;
@@ -76,22 +79,22 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			setHealth(reference.getHealth());
 		} else { // Respawning
-			Pair<Double, Double> respawnHunger = Config.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
+			Pair<Double, Double> respawnHunger = SOFConfig.getRespawnHunger(reference.getHungerManager().getFoodLevel(), reference.getHungerManager().getSaturationLevel());
 			hungerManager.setFoodLevel((int) Math.max(respawnHunger.getFirst(), reference.getHungerManager().getFoodLevel()));
 			((IHungerManager) hungerManager).spiceOfFabric_setSaturationLevel((float) (double) respawnHunger.getSecond());
 
 			FoodHistory foodHistory = ((IHungerManager) reference.getHungerManager()).spiceOfFabric_getFoodHistory();
 
-			if (Config.respawn.resetHistory) {
+			if (SOFConfig.respawn.resetHistory) {
 				foodHistory.resetHistory();
 			}
-			if (Config.carrot.enable && Config.respawn.resetCarrotMode) {
-				foodHistory.resetCarrotHistory();
+			if (SOFConfig.carrot.enable && SOFConfig.respawn.resetCarrotMode) {
+				foodHistory.resetUniqueFoodsEaten();
 			}
 
 			((IHungerManager) hungerManager).spiceOfFabric_setFoodHistory(foodHistory);
 
-			SpiceOfFabric.syncFoodHistory((ServerPlayerEntity) (Object) this);
+			SOFCommonNetworking.syncFoodHistory((ServerPlayerEntity) (Object) this);
 			SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 			setHealth(getMaxHealth());
 		}
@@ -101,7 +104,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	public void afterReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
 		// Update the max health. This overwrites the base definition in the constructor
 		// and older data that has been read from the player nbt.
-		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity)(Object) this, false, false);
+		SpiceOfFabric.updateMaxHealth((ServerPlayerEntity) (Object) this, false, false);
 
 		if (nbt.contains("Health", 99)) {
 			this.setHealth(nbt.getFloat("Health"));

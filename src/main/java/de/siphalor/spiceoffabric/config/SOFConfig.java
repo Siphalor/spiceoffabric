@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 		casing = CaseFormat.LOWER_HYPHEN,
 		tailors = "tweed4:coat"
 )
-public class Config {
+public class SOFConfig {
 	@AConfigExclude
 	private static final String ITEM_VARIABLES_JOINED = "timesEaten,hungerValue,saturationValue,consumeDuration";
 	@AConfigExclude

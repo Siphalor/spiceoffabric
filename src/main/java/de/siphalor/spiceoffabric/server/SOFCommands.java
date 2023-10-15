@@ -3,17 +3,15 @@ package de.siphalor.spiceoffabric.server;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.container.FoodJournalScreenHandler;
 import de.siphalor.spiceoffabric.container.FoodJournalView;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,15 +20,15 @@ import net.minecraft.text.Text;
 import java.util.Collection;
 import java.util.Collections;
 
-public class Commands {
+public class SOFCommands {
 	private static final String AMOUNT_ARGUMENT = "amount";
 	private static final String TARGETS_ARGUMENT = "targets";
 
-	private Commands() {}
+	private SOFCommands() {}
 
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, registryAccess, registrationEnvironment) -> {
-			if (Config.enableJournalCommand) {
+			if (SOFConfig.enableJournalCommand) {
 				commandDispatcher.register(CommandManager.literal(SpiceOfFabric.MOD_ID + ":journal")
 						.executes(context -> openJournal(context.getSource())));
 			}
@@ -100,18 +98,18 @@ public class Commands {
 	private static int clearHistory(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
 		for (ServerPlayerEntity player : players) {
 			((IHungerManager) player.getHungerManager()).spiceOfFabric_clearHistory();
-			if (Config.carrot.enable) {
+			if (SOFConfig.carrot.enable) {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
-			if (ServerPlayNetworking.canSend(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET)) {
-				ServerPlayNetworking.send(player, SpiceOfFabric.CLEAR_FOODS_S2C_PACKET, new PacketByteBuf(Unpooled.buffer()));
+			if (SpiceOfFabric.hasClientMod(player)) {
+				SOFCommonNetworking.sendClearFoodsPacket(player);
 				player.sendMessage(Text.translatable("spiceoffabric.command.clear_history.was_cleared"), false);
 			} else {
 				player.sendMessage(Text.literal("Your food history has been cleared"), false);
 			}
 		}
 
-		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasClientMod(commandSource.getPlayer())) {
 			commandSource.sendFeedback(() -> Text.translatable("spiceoffabric.command.clear_history.cleared_players", players.size()), true);
 		} else {
 			commandSource.sendFeedback(() -> Text.literal("Cleared food histories of " + players.size() + " players."), true);
@@ -124,17 +122,17 @@ public class Commands {
 			EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 			//noinspection ConstantConditions
 			maxHealthAttr.setBaseValue(amount);
-			if (Config.carrot.enable) {
+			if (SOFConfig.carrot.enable) {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
-			if (SpiceOfFabric.hasMod(player)) {
+			if (SpiceOfFabric.hasClientMod(player)) {
 				player.sendMessage(Text.translatable("spiceoffabric.command.set_base_max_health.target"), false);
 			} else {
 				player.sendMessage(Text.literal("Your health has been adjusted"), false);
 			}
 		}
 
-		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer())) {
+		if (commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasClientMod(commandSource.getPlayer())) {
 			commandSource.sendFeedback(() -> Text.translatable("spiceoffabric.command.set_base_max_health.executor", players.size(), amount, amount / 2D), false);
 		} else {
 			commandSource.sendFeedback(() -> Text.literal("Set base health of %d players to %d (%s hearts)".formatted(players.size(), amount, amount / 2D)), false);
@@ -143,7 +141,7 @@ public class Commands {
 	}
 
 	private static int updateMaxHealth(ServerCommandSource commandSource, Collection<ServerPlayerEntity> players) {
-		boolean sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasMod(commandSource.getPlayer());
+		boolean sourceHasMod = commandSource.getEntity() instanceof ServerPlayerEntity && SpiceOfFabric.hasClientMod(commandSource.getPlayer());
 
 		for (ServerPlayerEntity player : players) {
 			SpiceOfFabric.updateMaxHealth(player, true, true);

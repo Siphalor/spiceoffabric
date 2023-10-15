@@ -2,7 +2,7 @@ package de.siphalor.spiceoffabric.util;
 
 import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import net.minecraft.block.BlockState;
@@ -118,16 +118,16 @@ public class FoodUtils {
 	}
 
 	private static void appendCarrotTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (Config.carrot.enable && !foodHistory.isInCarrotHistory(stack)) {
+		if (SOFConfig.carrot.enable && !foodHistory.isInUniqueEaten(stack)) {
 			base.add(NEVER_EATEN_TOOLTIP);
 		}
 	}
 
 	private static void appendLastEatenTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (Config.showLastEatenTips == Config.ItemTipDisplayStyle.NONE || Config.food.historyLength <= 0) {
+		if (SOFConfig.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.NONE || SOFConfig.food.historyLength <= 0) {
 			return;
 		}
-		int lastEaten = foodHistory.getLastEaten(stack);
+		int lastEaten = foodHistory.getFoodCountSinceLastEaten(stack);
 		if (lastEaten < 0) {
 			return;
 		}
@@ -141,12 +141,12 @@ public class FoodUtils {
 			text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
 		}
 
-		if (Config.showLastEatenTips == Config.ItemTipDisplayStyle.EXTENDED) {
-			int left = Config.food.historyLength - lastEaten;
+		if (SOFConfig.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.EXTENDED) {
+			int left = SOFConfig.food.historyLength - lastEaten;
 			if (left == 1) {
-				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, Config.food.historyLength - lastEaten);
+				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, SOFConfig.food.historyLength - lastEaten);
 			} else {
-				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, Config.food.historyLength - lastEaten);
+				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, SOFConfig.food.historyLength - lastEaten);
 			}
 		}
 
