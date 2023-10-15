@@ -4,7 +4,7 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,7 +18,11 @@ public class SOFCommonNetworking {
 	protected static final Identifier CLEAR_FOODS_S2C_PACKET = new Identifier(SpiceOfFabric.MOD_ID, "clear_foods");
 
 	public static void init() {
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> SOFCommonNetworking.syncFoodHistory(handler.player));
+		S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
+			if (channels.contains(SYNC_FOOD_HISTORY_S2C_PACKET)) {
+				server.submit(() -> syncFoodHistory(handler.player));
+			}
+		});
 	}
 
 	public static boolean hasClientMod(ServerPlayerEntity player) {
