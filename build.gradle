@@ -68,6 +68,9 @@ dependencies {
 		exclude module: "modmenu"
 		exclude group: 'net.fabricmc.fabric-api'
 	}
+	// Transitive dependencies for AppleSkin
+	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version"
+
 
 	// Testing
 	testImplementation "org.junit.jupiter:junit-jupiter:5+"

@@ -19,7 +19,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
@@ -97,7 +97,11 @@ public class SpiceOfFabric implements ModInitializer {
 		Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
 
 		// NETWORKING
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> syncFoodHistory(handler.player));
+		S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
+			if (channels.contains(SYNC_FOOD_HISTORY_S2C_PACKET)) {
+				syncFoodHistory(handler.player);
+			}
+		});
 
 		// FOOD EVENTS
 		FoodEvents.EATEN.on(SpiceOfFabric::onFoodEaten);

@@ -10,6 +10,7 @@ import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -59,7 +60,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity implements IS
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo ci) {
+	public void onConstruct(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions, CallbackInfo ci) {
 		((IHungerManager) hungerManager).spiceOfFabric_setPlayer((ServerPlayerEntity) (Object) this);
 
 		// Set the max health and health for new players
