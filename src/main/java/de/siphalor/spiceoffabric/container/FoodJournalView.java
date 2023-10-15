@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import net.minecraft.text.Text;
 
 import java.util.Locale;
@@ -41,9 +41,9 @@ public enum FoodJournalView {
 
 	public boolean isAvailable() {
 		return switch (this) {
-			case HISTORY -> Config.food.historyLength > 0;
-			case CARROT -> Config.carrot.enable;
-			case CARROT_UNEATEN -> Config.carrot.enable && Config.carrot.uneatenInJournal;
+			case HISTORY -> SOFConfig.food.historyLength > 0;
+			case CARROT -> SOFConfig.carrot.enable;
+			case CARROT_UNEATEN -> SOFConfig.carrot.enable && SOFConfig.carrot.uneatenInJournal;
 		};
 	}
 }

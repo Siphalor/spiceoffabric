@@ -21,7 +21,7 @@ public class ExpressionConstraint implements AnnotationConstraint<String> {
 	@Override
 	public Result<String> apply(String value) {
 		try {
-			Expression expression = new ExpressionBuilder(value).functions(Config.customExpFunctions).variables(variables).build();
+			Expression expression = new ExpressionBuilder(value).functions(SOFConfig.customExpFunctions).variables(variables).build();
 			ValidationResult result = expression.validate(false);
 			if (!result.isValid()) {
 				return new Result<>(false, null, result.getErrors().stream()

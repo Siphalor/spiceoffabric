@@ -1,7 +1,7 @@
 package de.siphalor.spiceoffabric.mixin;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.Config;
+import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -22,23 +23,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HungerManager.class)
 public abstract class MixinHungerManager implements IHungerManager {
 
-	@Nullable
-	protected ServerPlayerEntity spiceOfFabric_player = null;
-
 	@Shadow public abstract void add(int int_1, float float_1);
 
 	@Shadow private float saturationLevel;
 
-	protected FoodHistory spiceOfFabric_foodHistory = new FoodHistory();
+	@Unique
+	@Nullable
+	protected ServerPlayerEntity player = null;
+
+	@Unique
+	protected FoodHistory foodHistory = new FoodHistory();
 
 	@Override
 	public void spiceOfFabric_setPlayer(ServerPlayerEntity serverPlayerEntity) {
-		spiceOfFabric_player = serverPlayerEntity;
+		player = serverPlayerEntity;
 	}
 
 	@Override
 	public void spiceOfFabric_clearHistory() {
-		spiceOfFabric_foodHistory.reset();
+		foodHistory.reset();
 	}
 
 	@Override
@@ -48,21 +51,21 @@ public abstract class MixinHungerManager implements IHungerManager {
 
 	@Override
 	public FoodHistory spiceOfFabric_getFoodHistory() {
-		return spiceOfFabric_foodHistory;
+		return foodHistory;
 	}
 
 	@Override
 	public void spiceOfFabric_setFoodHistory(FoodHistory foodHistory) {
-		spiceOfFabric_foodHistory = foodHistory;
+		this.foodHistory = foodHistory;
 	}
 
 	@Inject(method = "readNbt", at = @At("RETURN"))
 	public void onDeserialize(NbtCompound data, CallbackInfo callbackInfo) {
 		if(data.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID, 10)) {
-			spiceOfFabric_foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
+			foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
 
-			if (spiceOfFabric_player != null && Config.carrot.enable) {
-				EntityAttributeInstance healthAttribute = spiceOfFabric_player.getAttributeInstance(
+			if (player != null && SOFConfig.carrot.enable) {
+				EntityAttributeInstance healthAttribute = player.getAttributeInstance(
 						EntityAttributes.GENERIC_MAX_HEALTH
 				);
 				if (healthAttribute == null) {
@@ -72,7 +75,7 @@ public abstract class MixinHungerManager implements IHungerManager {
 				if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
 					EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
 					if (modifier == null) {
-						SpiceOfFabric.updateMaxHealth(spiceOfFabric_player, false, false);
+						SpiceOfFabric.updateMaxHealth(player, false, false);
 					}
 				} else { // Migrate from old system
 					healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
@@ -80,21 +83,21 @@ public abstract class MixinHungerManager implements IHungerManager {
 					healthAttribute.addPersistentModifier(new EntityAttributeModifier(
 							SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID,
 							SpiceOfFabric.MOD_ID,
-							spiceOfFabric_foodHistory.getCarrotHealthOffset(spiceOfFabric_player),
+							foodHistory.getCarrotHealthOffset(player),
 							EntityAttributeModifier.Operation.ADDITION
 					));
 				}
 			}
 		}
 
-		if (spiceOfFabric_player != null) {
-			((IServerPlayerEntity) spiceOfFabric_player).spiceOfFabric_scheduleFoodHistorySync();
+		if (player != null) {
+			((IServerPlayerEntity) player).spiceOfFabric_scheduleFoodHistorySync();
 		}
 	}
 
 	@Inject(method = "writeNbt", at = @At("RETURN"))
 	public void onSerialize(NbtCompound data, CallbackInfo callbackInfo) {
-		data.put(SpiceOfFabric.NBT_FOOD_HISTORY_ID, spiceOfFabric_foodHistory.write(new NbtCompound()));
+		data.put(SpiceOfFabric.NBT_FOOD_HISTORY_ID, foodHistory.write(new NbtCompound()));
 		data.put(SpiceOfFabric.NBT_VERSION_ID, NbtInt.of(SpiceOfFabric.NBT_VERSION));
 	}
 }

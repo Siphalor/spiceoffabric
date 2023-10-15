@@ -1,11 +1,11 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'maven-publish'
 	id 'java-library'
-	id 'com.github.johnrengelman.shadow' version '7.0.0'
+	id 'com.github.johnrengelman.shadow' version '8.1.1'
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
 	id 'com.modrinth.minotaur' version '2.5.0'
-	id "com.github.breadmoirai.github-release" version "2.2.12"
+	id 'com.github.breadmoirai.github-release' version '2.4.1'
 	id 'de.siphalor.modpubup' version '0.1.0'
 }
 
@@ -80,6 +80,11 @@ configurations.include.transitive = true
 configurations.include.dependencies.each {
 	if (!it.name.contains("bom")) {
 		it.transitive = false
+	}
+}
+configurations.configureEach {
+	resolutionStrategy {
+		force("net.fabricmc:fabric-loader:$loader_version")
 	}
 }
 
