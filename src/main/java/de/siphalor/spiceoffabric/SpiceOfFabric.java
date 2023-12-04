@@ -53,6 +53,7 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final String NBT_VERSION_ID = "spiceOfFabric_version";
 	public static final int NBT_VERSION = 1;
 	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
+	private static final String POLYMER_MOD_ID = "polymer-core";
 
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
@@ -76,7 +77,7 @@ public class SpiceOfFabric implements ModInitializer {
 		initFoodEvents();
 
 		if (SOFConfig.items.usePolymer) {
-			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+			if (!FabricLoader.getInstance().isModLoaded(POLYMER_MOD_ID)) {
 				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
 				System.exit(1);
 			}
