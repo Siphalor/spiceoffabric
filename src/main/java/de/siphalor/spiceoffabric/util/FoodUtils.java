@@ -97,7 +97,7 @@ public class FoodUtils {
 		}
 
 		for (Text addition : additions) {
-			loreNbt.add(NbtString.of(Text.Serializer.toJson(addition)));
+			loreNbt.add(NbtString.of(Text.Serialization.toJsonString(addition)));
 		}
 	}
 
