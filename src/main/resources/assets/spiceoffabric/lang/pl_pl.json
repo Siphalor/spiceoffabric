@@ -1,7 +1,7 @@
 {
-    "Diet Journal": "Diet Journal",
-    "spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo-nieznanie§r",
-    "spiceoffabric.command.clear_history.was_cleared": "Twoja historia jedzenia została skasowana",
+    "Diet Journal": "Dziennik Dietowy",
+    "spiceoffabric.item.tooltip.never_eaten": "§3§oTo pachnie tajemniczo nieznanie§r",
+    "spiceoffabric.command.clear_history.was_cleared": "Twoja historia jedzenia została zresetowana",
     "spiceoffabric.command.clear_history.cleared_players": "Wyczyszczono historię jedzenia %s graczy",
     "tweed4_tailor_screen.screen.spiceoffabric": "Konfiguracja Spice of Fabric",
     "tweed4_tailor_screen.screen.spiceoffabric.respawn": "Respawn",
@@ -14,5 +14,13 @@
     "tweed4_tailor_screen.screen.spiceoffabric.food.saturation": "Nasycenie",
     "tweed4_tailor_screen.screen.spiceoffabric.food.hunger": "Głód",
     "tweed4_tailor_screen.screen.spiceoffabric.carrot": "Tryb marchewki",
-    "tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Włącz tryb marchewki"
+    "tweed4_tailor_screen.screen.spiceoffabric.carrot.enable": "Włącz tryb marchewki",
+    "spiceoffabric.journal.screen.view.carrot_uneaten": "Żywność która nie została jeszcze zjedzona",
+    "spiceoffabric.item.tooltip.last_eaten.simple": "Ostatnio jedzona %d żywność",
+    "item.spiceoffabric.lunch_box": "Śniadaniówka",
+    "item.spiceoffabric.picnic_basket": "Koszyk Piknikowy",
+    "spiceoffabric.food_container.lore.empty": "Pusto",
+    "spiceoffabric.command.set_base_max_health.target": "Twoje zdrowie zostało dopasowane",
+    "spiceoffabric.journal.screen.view.carrot": "Każda nietypowa żywność zjedzona dotychczas",
+    "spiceoffabric.item.tooltip.last_eaten.simple.last": "Właśnie zjedzone"
 }
