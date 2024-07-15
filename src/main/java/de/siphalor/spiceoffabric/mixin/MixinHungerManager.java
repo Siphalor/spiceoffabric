@@ -73,18 +73,17 @@ public abstract class MixinHungerManager implements IHungerManager {
 					return;
 				}
 				if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
-					EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+					EntityAttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER);
 					if (modifier == null) {
 						SpiceOfFabric.updateMaxHealth(player, false, false);
 					}
 				} else { // Migrate from old system
-					healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+					healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER);
 					healthAttribute.setBaseValue(20D);
 					healthAttribute.addPersistentModifier(new EntityAttributeModifier(
-							SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID,
-							SpiceOfFabric.MOD_ID,
+							SpiceOfFabric.PLAYER_HEALTH_MODIFIER,
 							foodHistory.getCarrotHealthOffset(player),
-							EntityAttributeModifier.Operation.ADDITION
+							EntityAttributeModifier.Operation.ADD_VALUE
 					));
 				}
 			}

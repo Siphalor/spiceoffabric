@@ -10,9 +10,10 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ClampedModelPredicateProvider;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -29,7 +30,7 @@ public class SOFClient implements ClientModInitializer {
 		initRendering();
 	}
 
-	private static void itemTooltipCallback(ItemStack stack, TooltipContext context, List<Text> lines) {
+	private static void itemTooltipCallback(ItemStack stack, TooltipContext context, TooltipType tooltipType, List<Text> lines) {
 		lines.addAll(1, FoodUtils.getClientTooltipAdditions(MinecraftClient.getInstance().player, stack));
 	}
 
@@ -42,7 +43,7 @@ public class SOFClient implements ClientModInitializer {
 	private static void registerModelPredicateProviders() {
 		ClampedModelPredicateProvider predicateProvider = (stack, world, entity, seed) ->
 				((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
-		Identifier predicateId = new Identifier(SpiceOfFabric.MOD_ID, "filled");
+		Identifier predicateId = Identifier.of(SpiceOfFabric.MOD_ID, "filled");
 		for (Item item : SpiceOfFabric.foodContainerItems) {
 			ModelPredicateProviderRegistry.register(item, predicateId, predicateProvider);
 		}

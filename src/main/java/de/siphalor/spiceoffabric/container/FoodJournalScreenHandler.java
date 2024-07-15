@@ -5,11 +5,13 @@ import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -34,9 +36,9 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 	static {
 		PREV_STACK = new ItemStack(Items.FEATHER);
-		PREV_STACK.setCustomName(Text.translatable("createWorld.customize.custom.prev").styled(style -> style.withItalic(false)));
+		PREV_STACK.set(DataComponentTypes.CUSTOM_NAME, Text.translatable("createWorld.customize.custom.prev").styled(style -> style.withItalic(false)));
 		NEXT_STACK = new ItemStack(Items.FLINT);
-		NEXT_STACK.setCustomName(Text.translatable("createWorld.customize.custom.next").styled(style -> style.withItalic(false)));
+		NEXT_STACK.set(DataComponentTypes.CUSTOM_NAME, Text.translatable("createWorld.customize.custom.next").styled(style -> style.withItalic(false)));
 	}
 
 	private static final int JOURNAL_SLOT_COUNT = 9 * 5;
@@ -100,11 +102,11 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 			var stacks = foodHistory.getUniqueFoodsEaten().stream()
 					.map(FoodHistoryEntry::getStack)
 					.sorted(Comparator.comparingInt(stack -> {
-						FoodComponent foodComponent = stack.getItem().getFoodComponent();
+						FoodComponent foodComponent = stack.get(DataComponentTypes.FOOD);
 						if (foodComponent == null) {
 							return 0;
 						}
-						return foodComponent.getHunger();
+						return foodComponent.nutrition();
 					}))
 					.toList();
 			return new PaginatedReadOnlyInventory(JOURNAL_SLOT_COUNT, stacks);
@@ -115,11 +117,11 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 					.filter(FoodUtils::isFood)
 					.filter(item -> !eatenItems.contains(item))
 					.sorted(Comparator.comparingInt(item -> {
-						FoodComponent foodComponent = item.getFoodComponent();
+						FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
 						if (foodComponent == null) {
 							return 0;
 						}
-						return foodComponent.getHunger();
+						return foodComponent.nutrition();
 					}))
 					.map(ItemStack::new)
 					.toList();
@@ -131,7 +133,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 	private ItemStack createPageIndicatorStack() {
 		var stack = new ItemStack(PAGE_INDICATOR_ITEM);
-		stack.setCustomName(
+		stack.set(DataComponentTypes.CUSTOM_NAME,
 				Text.translatable(PAGE_INDICATOR_TEXT_KEY, foodJournalInventory.getPage() + 1, foodJournalInventory.getPageCount())
 						.styled(style -> style.withItalic(false))
 		);
@@ -142,12 +144,14 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 		if (this.currentView == view || !view.isAvailable()) {
 			return ItemStack.EMPTY;
 		}
-		return new ItemStack(itemRepresentation)
-				.setCustomName(
+		ItemStack itemStack = new ItemStack(itemRepresentation);
+		itemStack
+				.set(DataComponentTypes.CUSTOM_NAME,
 						clientHasMod
 								? view.getTranslatableName()
 								: Text.literal(view.getLiteralName()).styled(style -> style.withItalic(false))
 				);
+		return itemStack;
 	}
 
 	private Runnable getViewCallback(FoodJournalView view) {

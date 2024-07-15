@@ -9,6 +9,7 @@ import eu.pb4.polymer.core.impl.client.InternalClientRegistry;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -46,9 +47,9 @@ public class SOFPolymer {
 	}
 
 	public static void registerFoodContainer(String idPath, Item emptyItem, Item filledItem, int slots, ScreenHandlerType<?> screenHandlerType) {
-		Identifier id = new Identifier(SpiceOfFabric.MOD_ID, idPath);
-		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_empty"));
-		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, new Identifier(id.getNamespace(), "item/" + id.getPath() + "_filled"));
+		Identifier id = Identifier.of(SpiceOfFabric.MOD_ID, idPath);
+		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, Identifier.of(id.getNamespace(), "item/" + id.getPath() + "_empty"));
+		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, Identifier.of(id.getNamespace(), "item/" + id.getPath() + "_filled"));
 		PolymerFoodContainerItem item = Registry.register(Registries.ITEM, id, new PolymerFoodContainerItem(
 				new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT),
 				slots, screenHandlerType,

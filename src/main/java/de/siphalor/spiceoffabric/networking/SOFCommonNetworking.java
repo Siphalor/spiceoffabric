@@ -13,9 +13,9 @@ import net.minecraft.util.Identifier;
 public class SOFCommonNetworking {
 	SOFCommonNetworking() {}
 
-	protected static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = new Identifier(SpiceOfFabric.MOD_ID, "sync_food_history");
-	protected static final Identifier ADD_FOOD_S2C_PACKET = new Identifier(SpiceOfFabric.MOD_ID, "add_food");
-	protected static final Identifier CLEAR_FOODS_S2C_PACKET = new Identifier(SpiceOfFabric.MOD_ID, "clear_foods");
+	protected static final Identifier SYNC_FOOD_HISTORY_S2C_PACKET = Identifier.of(SpiceOfFabric.MOD_ID, "sync_food_history");
+	protected static final Identifier ADD_FOOD_S2C_PACKET = Identifier.of(SpiceOfFabric.MOD_ID, "add_food");
+	protected static final Identifier CLEAR_FOODS_S2C_PACKET = Identifier.of(SpiceOfFabric.MOD_ID, "clear_foods");
 
 	public static void init() {
 		S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {

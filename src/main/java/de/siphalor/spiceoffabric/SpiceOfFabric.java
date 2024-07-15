@@ -21,6 +21,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -40,11 +41,9 @@ import net.minecraft.util.JsonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class SpiceOfFabric implements ModInitializer {
 
@@ -54,7 +53,7 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final int NBT_VERSION = 1;
 	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
 
-	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
+	public static final Identifier PLAYER_HEALTH_MODIFIER = Identifier.of(MOD_ID, "player_health");
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SpiceOfFabric.class);
 	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
@@ -76,7 +75,7 @@ public class SpiceOfFabric implements ModInitializer {
 		initFoodEvents();
 
 		if (SOFConfig.items.usePolymer) {
-			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+			if (!FabricLoader.getInstance().isModLoaded("polymer-core")) {
 				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
 				System.exit(1);
 			}
@@ -98,14 +97,14 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	private static void initResourceConditions() {
-		ResourceConditions.register(new Identifier(MOD_ID, "registry_populated"), optionsJson -> {
+		ResourceConditions.register(Identifier.of(MOD_ID, "registry_populated"), optionsJson -> {
 			Identifier id = new Identifier(JsonHelper.getString(optionsJson, "registry"));
 			Registry<?> registry = Registries.REGISTRIES.get(id);
 			if (registry == null) {
 				throw new JsonSyntaxException(id + " is not a valid registry!");
 			}
 			for (JsonElement elementJson : JsonHelper.getArray(optionsJson, "ids")) {
-				Identifier elementId = new Identifier(JsonHelper.asString(elementJson, "id"));
+				Identifier elementId = Identifier.of(JsonHelper.asString(elementJson, "id"));
 				if (!registry.containsId(elementId)) {
 					return false;
 				}
@@ -115,26 +114,26 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	private static void initRecipes() {
-		Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
+		Registry.register(Registries.RECIPE_SERIALIZER, Identifier.of(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
 	}
 
 	private static void initNativeFoodContainerItems() {
 		List<Item> foodContainerItems = new ArrayList<>(4);
 		if (SOFConfig.items.enablePaperBag) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "paper_bag"),
+					Registries.ITEM, Identifier.of(MOD_ID, "paper_bag"),
 					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 5, ScreenHandlerType.HOPPER)
 			));
 		}
 		if (SOFConfig.items.enableLunchBox) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "lunch_box"),
+					Registries.ITEM, Identifier.of(MOD_ID, "lunch_box"),
 					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 9, ScreenHandlerType.GENERIC_3X3)
 			));
 		}
 		if (SOFConfig.items.enablePicnicBasket) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "picnic_basket"),
+					Registries.ITEM, Identifier.of(MOD_ID, "picnic_basket"),
 					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 9, ScreenHandlerType.GENERIC_3X3)
 			));
 		}
@@ -153,8 +152,8 @@ public class SpiceOfFabric implements ModInitializer {
 
 	private static void initFoodEvents() {
 		FoodEvents.EATEN.on(SpiceOfFabric::onFoodEaten);
-		FoodModifications.EATING_TIME_MODIFIERS.register((PlayerFoodModifier<Integer>) SpiceOfFabric::modifyEatingTime, new Identifier(MOD_ID, "config_expression"));
-		FoodModifications.PROPERTIES_MODIFIERS.register(SpiceOfFabric::modifyFoodProperties, new Identifier(MOD_ID, "config_expression"));
+		FoodModifications.EATING_TIME_MODIFIERS.register((PlayerFoodModifier<Integer>) SpiceOfFabric::modifyEatingTime, Identifier.of(MOD_ID, "config_expression"));
+		FoodModifications.PROPERTIES_MODIFIERS.register(SpiceOfFabric::modifyFoodProperties, Identifier.of(MOD_ID, "config_expression"));
 	}
 
 
@@ -205,17 +204,16 @@ public class SpiceOfFabric implements ModInitializer {
 
 	public static EntityAttributeModifier createHealthModifier(double amount) {
 		return new EntityAttributeModifier(
-				PLAYER_HEALTH_MODIFIER_UUID,
-				MOD_ID,
+				PLAYER_HEALTH_MODIFIER,
 				amount,
-				EntityAttributeModifier.Operation.ADDITION
+				EntityAttributeModifier.Operation.ADD_VALUE
 		);
 	}
 
 	public static void updateMaxHealth(ServerPlayerEntity player, boolean sync, boolean announce) {
 		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		double oldValue = maxHealthAttr.getValue();
-		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
+		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER);
 
 		if (SOFConfig.carrot.enable) {
 			FoodHistory foodHistory = ((IHungerManager) player.getHungerManager()).spiceOfFabric_getFoodHistory();

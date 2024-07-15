@@ -1,6 +1,8 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
@@ -9,16 +11,14 @@ import net.minecraft.util.collection.DefaultedList;
 
 public class ItemStackInventory implements Inventory {
 	private final ItemStack containerStack;
-	private final String nbtKey;
 	private final int size;
 	private final DefaultedList<ItemStack> stacks;
 
-	public ItemStackInventory(ItemStack containerStack, String nbtKey, int size) {
-		this.nbtKey = nbtKey;
+	public ItemStackInventory(ItemStack containerStack, int size) {
 		this.size = size;
 		this.containerStack = containerStack;
 		stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
-		Inventories.readNbt(containerStack.getOrCreateSubNbt(nbtKey), stacks);
+		containerStack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).copyTo(stacks);
 	}
 
 	public DefaultedList<ItemStack> getContainedStacks() {
@@ -62,7 +62,7 @@ public class ItemStackInventory implements Inventory {
 
 	@Override
 	public boolean isValid(int slot, ItemStack stack) {
-		return stack.isFood() && !(stack.getItem() instanceof FoodContainerItem);
+		return stack.contains(DataComponentTypes.FOOD) && !(stack.getItem() instanceof FoodContainerItem);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class ItemStackInventory implements Inventory {
 
 	@Override
 	public void markDirty() {
-		Inventories.writeNbt(containerStack.getOrCreateSubNbt(nbtKey), stacks);
+		containerStack.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(stacks));
 	}
 
 	@Override

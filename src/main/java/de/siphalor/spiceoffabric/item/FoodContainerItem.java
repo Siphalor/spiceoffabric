@@ -10,15 +10,16 @@ import de.siphalor.spiceoffabric.container.ItemStackInventory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import de.siphalor.spiceoffabric.util.IndexedValue;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsage;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.ScreenHandlerType;
@@ -37,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FoodContainerItem extends Item implements CamoFoodItem {
-	private static final String INVENTORY_NBT_KEY = "inventory";
 	private static final Style LORE_STYLE = Style.EMPTY.withColor(Formatting.GRAY).withItalic(false);
 	private static final Text LORE_EMPTY = Text.translatable(SpiceOfFabric.MOD_ID + ".food_container.lore.empty").setStyle(LORE_STYLE);
 	private static final String LORE_GENERAL_KEY = SpiceOfFabric.MOD_ID + ".food_container.lore.general";
@@ -82,7 +82,7 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				SpiceOfFabric.LOGGER.warn("Non-food stack " + stack + " found in food container " + this);
 				continue;
 			}
-			if (stack.isEmpty() || !player.canConsume(foodComponent.isAlwaysEdible())) {
+			if (stack.isEmpty() || !player.canConsume(foodComponent.canAlwaysEat())) {
 				continue;
 			}
 
@@ -93,17 +93,17 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		}
 
 		int requiredFood = 20 - player.getHungerManager().getFoodLevel();
-		return findMostAppropriateFood(filteredInv, requiredFood);
+		return findMostAppropriateFood(filteredInv, requiredFood, player);
 	}
 
-	private IndexedValue<ItemStack> findMostAppropriateFood(List<IndexedValue<Pair<ItemStack, FoodComponent>>> foods, int requiredFood) {
+	private IndexedValue<ItemStack> findMostAppropriateFood(List<IndexedValue<Pair<ItemStack, FoodComponent>>> foods, int requiredFood, PlayerEntity player) {
 		var bestStack = NO_STACK;
 		int bestDelta = Integer.MAX_VALUE;
 		int bestConsumeTime = Integer.MAX_VALUE;
 		for (var value : foods) {
 			ItemStack stack = value.value().getFirst();
-			int delta = requiredFood - value.value().getSecond().getHunger();
-			int consumeTime = stack.getMaxUseTime();
+			int delta = requiredFood - value.value().getSecond().nutrition();
+			int consumeTime = stack.getMaxUseTime(player);
 			if (delta <= 0) {
 				if (delta > bestDelta || bestDelta > 0 || (delta == bestDelta && consumeTime < bestConsumeTime)) {
 					bestDelta = delta;
@@ -124,17 +124,17 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 	}
 
 	public ItemStackInventory getInventory(ItemStack stack) {
-		return new ItemStackInventory(stack, INVENTORY_NBT_KEY, size);
+		return new ItemStackInventory(stack, size);
 	}
 
 	@Override
 	public void onItemEntityDestroyed(ItemEntity entity) {
 		ItemStackInventory inventory = getInventory(entity.getStack());
-		ItemUsage.spawnItemContents(entity, inventory.getContainedStacks().stream());
+		ItemUsage.spawnItemContents(entity, inventory.getContainedStacks());
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
 		ItemStackInventory inventory = getInventory(stack);
 		if (inventory.isEmpty()) {
 			tooltip.add(LORE_EMPTY);
@@ -153,11 +153,6 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 	}
 
 	@Override
-	public boolean isFood() {
-		return true;
-	}
-
-	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack stackInHand = user.getStackInHand(hand);
 		ItemStack nextFoodItem = getNextFoodStack(stackInHand, user);
@@ -170,9 +165,9 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				openScreen(stackInHand, user, hand == Hand.MAIN_HAND ? user.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT);
 				return TypedActionResult.success(stackInHand);
 			}
-		} else if (nextFoodItem.isFood()) {
-			FoodComponent foodComponent = nextFoodItem.getItem().getFoodComponent();
-			if (foodComponent != null && user.canConsume(foodComponent.isAlwaysEdible())) {
+		} else if (nextFoodItem.contains(DataComponentTypes.FOOD)) {
+			FoodComponent foodComponent = nextFoodItem.get(DataComponentTypes.FOOD);
+			if (foodComponent != null && user.canConsume(foodComponent.canAlwaysEat())) {
 				user.setCurrentHand(hand);
 				return TypedActionResult.consume(stackInHand);
 			}
@@ -186,7 +181,7 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		openContainer:
 		if (!world.isClient && user instanceof ServerPlayerEntity player) {
 			// Only open the container if the player hasn't used the item for too long
-			int maxUseTime = getMaxUseTime(stack);
+			int maxUseTime = getMaxUseTime(stack, player);
 			if (maxUseTime - remainingUseTicks > 5) {
 				break openContainer;
 			}

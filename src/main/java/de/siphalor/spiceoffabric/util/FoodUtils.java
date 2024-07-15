@@ -7,6 +7,7 @@ import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CakeBlock;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -35,7 +36,7 @@ public class FoodUtils {
 		if (item instanceof FoodContainerItem) {
 			return false;
 		}
-		if (stack.isFood()) {
+		if (stack.contains(DataComponentTypes.FOOD)) {
 			return true;
 		}
 		if (item instanceof BlockItem blockItem) {
@@ -48,7 +49,7 @@ public class FoodUtils {
 		if (item instanceof FoodContainerItem) {
 			return false;
 		}
-		if (item.isFood()) {
+		if (item.getComponents().contains(DataComponentTypes.FOOD)) {
 			return true;
 		}
 		if (item instanceof BlockItem blockItem) {
