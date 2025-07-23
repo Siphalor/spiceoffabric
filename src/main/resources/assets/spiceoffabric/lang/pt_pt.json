@@ -1,1 +1,27 @@
-{}
+{
+    "spiceoffabric.journal.screen.view.carrot": "Todas as refeições únicas consumidas até agora",
+    "spiceoffabric.journal.screen.view.carrot_uneaten": "Comidas por provar",
+    "spiceoffabric.item.tooltip.last_eaten.simple": "Comido pela última vez há %d refeições atrás",
+    "spiceoffabric.item.tooltip.last_eaten.simple.one": "Comido pela última vez há uma refeição atrás",
+    "spiceoffabric.item.tooltip.last_eaten.extended.one": "%s,\nfaz uma refeição diferente\npara repor o valor nutritivo.",
+    "spiceoffabric.item.tooltip.last_eaten.simple.last": "Acabou de ser provado",
+    "item.spiceoffabric.paper_bag": "Saco de Papel",
+    "item.spiceoffabric.lunch_box": "Lancheira",
+    "item.spiceoffabric.picnic_basket": "Cesto de Piquenique",
+    "spiceoffabric.food_container.lore.empty": "Vazio",
+    "spiceoffabric.food_container.lore.general": "Contém %1$s/%2$s (%3$s refeições)",
+    "spiceoffabric.command.clear_history.cleared_players": "Foram apagados os históricos de refeições de %s jogadores",
+    "spiceoffabric.command.set_base_max_health.target": "O teu HP máximo foi ajustado",
+    "spiceoffabric.command.set_base_max_health.executor": "O HP base de %d jogadores foi ajustado para %d (%s corações)",
+    "spiceoffabric.command.update_max_health.success": "A vida de %d jogadores foi recarregada",
+    "spiceoffabric.commands.carrot_not_enabled": "\"Modo Cenoura\" está desativado!",
+    "tweed4_tailor_screen.screen.spiceoffabric.show-last-eaten-tips": "Informação das Ultimas Refeições",
+    "tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command": "Ativar Registo por Comando",
+    "spiceoffabric.item.tooltip.never_eaten": "§3§oO cheiro disto não é familiar. Estranho...§r",
+    "tweed4_tailor_screen.screen.spiceoffabric": "Configuração do Spice of Fabric",
+    "tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command.description": "Permite qualquer jogador abrir o Registo de Refeições através de\num comando. \nSe desativado, os jogadores terão de construír o Registo (Livro + Maçã) para\no poder ler.",
+    "spiceoffabric.journal.screen.view.history": "Menos ao mais recentemente comido",
+    "spiceoffabric.command.clear_history.was_cleared": "O teu histórico de refeições foi apagado",
+    "Diet Journal": "Registo de Dieta",
+    "spiceoffabric.item.tooltip.last_eaten.extended": "%s,\nfaz %d refeições diferentes\npara repôr por completo o valor nutritivo."
+}
