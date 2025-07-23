@@ -1,1 +1,11 @@
-{}
+{
+    "Diet Journal": "食事の記録",
+    "spiceoffabric.journal.screen.view.carrot": "食べたことのある食品",
+    "spiceoffabric.journal.screen.view.carrot_uneaten": "まだ食べたことのない食品",
+    "spiceoffabric.item.tooltip.never_eaten": "§3§o不思議となじみのない匂いがする§r",
+    "spiceoffabric.item.tooltip.last_eaten.simple": "最後に食べたのは %d 回前",
+    "spiceoffabric.item.tooltip.last_eaten.simple.last": "直前に食べた",
+    "spiceoffabric.food_container.lore.empty": "空",
+    "spiceoffabric.journal.screen.view.history": "最近食べた食品",
+    "spiceoffabric.item.tooltip.last_eaten.simple.one": "最後に食べたのは前回"
+}
