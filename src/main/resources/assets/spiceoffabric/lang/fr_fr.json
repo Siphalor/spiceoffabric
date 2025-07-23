@@ -1,1 +1,18 @@
-{}
+{
+    "spiceoffabric.journal.screen.view.carrot": "toutes les nourritures uniques mangée jusqu'à présent",
+    "spiceoffabric.journal.screen.view.carrot_uneaten": "nourritures pas encore découverte",
+    "spiceoffabric.item.tooltip.never_eaten": "§3§oCeci sent mystèrieusement peu familier§r",
+    "spiceoffabric.item.tooltip.last_eaten.simple.last": "vient tout juste d'être mangé",
+    "item.spiceoffabric.paper_bag": "sac en papier",
+    "item.spiceoffabric.lunch_box": "boite à gouter",
+    "item.spiceoffabric.picnic_basket": "panier picnic",
+    "spiceoffabric.food_container.lore.empty": "vide",
+    "spiceoffabric.command.set_base_max_health.target": "Ta barre de vie a été ajusté",
+    "spiceoffabric.commands.carrot_not_enabled": "Le mod carrot n'est pas activé!",
+    "tweed4_tailor_screen.screen.spiceoffabric": "configuration de Spice of Fabric",
+    "tweed4_tailor_screen.screen.spiceoffabric.enable-journal-command": "Activer les commandes du journal",
+    "Diet Journal": "journal de régime",
+    "spiceoffabric.journal.screen.view.history": "du premier jusqu'au plus récemment manger",
+    "spiceoffabric.item.tooltip.last_eaten.simple.one": "Le dernier aliment mangé il y a un repas de cela",
+    "spiceoffabric.command.clear_history.was_cleared": "Ton historique de nourriture a été réinitialiser"
+}
