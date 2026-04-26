@@ -82,6 +82,9 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final int NBT_VERSION = 1;
 	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
 
+	//# if MC_VERSION_NUMBER >= 12100
+	public static final ResourceLocation PLAYER_HEALTH_MODIFIER_ID = createId("main");
+	//# end
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SpiceOfFabric.class);
@@ -266,8 +269,12 @@ public class SpiceOfFabric implements ModInitializer {
 
 	public static AttributeModifier createHealthModifier(double amount) {
 		return new AttributeModifier(
-				PLAYER_HEALTH_MODIFIER_UUID,
-				MOD_ID,
+				//# if MC_VERSION_NUMBER >= 12100
+				PLAYER_HEALTH_MODIFIER_ID,
+				//# else
+				//- PLAYER_HEALTH_MODIFIER_UUID,
+				//- MOD_ID,
+				//# end
 				amount,
 				//# if MC_VERSION_NUMBER >= 12006
 				AttributeModifier.Operation.ADD_VALUE
@@ -280,7 +287,11 @@ public class SpiceOfFabric implements ModInitializer {
 	public static void updateMaxHealth(ServerPlayer player, boolean sync, boolean announce) {
 		AttributeInstance maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
 		double oldValue = maxHealthAttr.getValue();
-		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
+		//# if MC_VERSION_NUMBER >= 12100
+		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_ID);
+		//# else
+		//- maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
+		//# end
 
 		if (config.carrot.enable) {
 			FoodHistory foodHistory = ((IHungerManager) player.getFoodData()).spiceOfFabric_getFoodHistory();
@@ -334,6 +345,10 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	public static ResourceLocation createId(String path) {
-		return new ResourceLocation(MOD_ID, path);
+		//# if MC_VERSION_NUMBER >= 12100
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+		//# else
+		//- return new ResourceLocation(MOD_ID, path);
+		//# end
 	}
 }

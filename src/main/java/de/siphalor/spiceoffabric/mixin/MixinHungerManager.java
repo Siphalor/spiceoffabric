@@ -7,9 +7,10 @@ import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+//- import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodData;
 import org.jetbrains.annotations.Nullable;
@@ -72,18 +73,26 @@ public abstract class MixinHungerManager implements IHungerManager {
 					SpiceOfFabric.LOGGER.error("Players must have a maximum health!");
 					return;
 				}
-				if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
-					AttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
-					if (modifier == null) {
-						SpiceOfFabric.updateMaxHealth(player, false, false);
-					}
-				} else { // Migrate from old system
-					healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
-					healthAttribute.setBaseValue(20D);
-					healthAttribute.addPermanentModifier(SpiceOfFabric.createHealthModifier(
-							foodHistory.getCarrotHealthOffset(player)
-					));
+				//# if MC_VERSION_NUMBER >= 12100
+				if (healthAttribute.removeModifier(ResourceLocation.withDefaultNamespace(
+						SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID.toString()
+				))) {
+					SpiceOfFabric.updateMaxHealth(player, false, false);
 				}
+				//# else
+				//- if (data.contains(SpiceOfFabric.NBT_VERSION_ID)) {
+				//- 	AttributeModifier modifier = healthAttribute.getModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+				//- 	if (modifier == null) {
+				//- 		SpiceOfFabric.updateMaxHealth(player, false, false);
+				//- 	}
+				//- } else { // Migrate from old system
+				//- 	healthAttribute.removeModifier(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID);
+				//- 	healthAttribute.setBaseValue(20D);
+				//- 	healthAttribute.addPermanentModifier(SpiceOfFabric.createHealthModifier(
+				//- 			foodHistory.getCarrotHealthOffset(player)
+				//- 	));
+				//- }
+				//# end
 			}
 		}
 

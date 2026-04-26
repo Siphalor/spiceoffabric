@@ -1,0 +1,55 @@
+[versions]
+appleskin = "mc1.21-3.0.6"
+capsaicin = "1.4.1"
+clothConfig = "15.0.140"
+coat = "1.1.1"
+fabric-api = "0.116.11+1.21.1"
+java = "17"
+minecraft = "1.21.1"
+modmenu = "11.0.4"
+parchment = "2024.11.17"
+polymer = "0.9.19+1.21.1"
+rei = "16.0.799"
+tweed = "0.8.1"
+
+[libraries]
+appleskin = { group = "squeek.appleskin", name = "appleskin-fabric", version.ref = "appleskin" }
+clothConfig = { group = "me.shedaniel.cloth", name = "cloth-config-fabric", version.ref = "clothConfig" }
+capsaicin = { group = "de.siphalor.capsaicin", name = "capsaicin-mc1.21.1", version.ref = "capsaicin" }
+coat = { group = "de.siphalor.coat", name = "coat-mc1.21.1", version.ref = "coat" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
+minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
+modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu" }
+parchment = { group = "org.parchmentmc.data", name = "parchment-1.21.1", version.ref = "parchment" }
+polymer-core = { group = "eu.pb4", name = "polymer-core", version.ref = "polymer" }
+polymer-resource-pack = { group = "eu.pb4", name = "polymer-resource-pack", version.ref = "polymer" }
+rei-api = { group = "me.shedaniel", name = "RoughlyEnoughItems-api-fabric", version.ref = "rei" }
+tweed-bundle = { group = "de.siphalor.tweed5.minecraft", name = "tweed5-bundle", version.ref = "tweed" }
+tweed-bundle-pojoWeaving = { group = "de.siphalor.tweed5.minecraft", name = "tweed5-bundle-pojo-weaving", version.ref = "tweed" }
+tweed-coatBridge = { group = "de.siphalor.tweed5.minecraft.tweed5-coat-bridge", name = "tweed5-coat-bridge-mc1.21.10", version.ref = "tweed" }
+tweed-comment-loader = { group = "de.siphalor.tweed5.minecraft", name = "tweed5-comment-loader-extension", version.ref = "tweed" }
+tweed-fabricHelper = { group = "de.siphalor.tweed5.minecraft.tweed5-fabric-helper", name = "tweed5-fabric-helper-mc1.21.10", version.ref = "tweed" }
+tweed-networking = { group = "de.siphalor.tweed5.minecraft.tweed5-networking", name = "tweed5-networking-mc1.21.10", version.ref = "tweed" }
+tweed-serde-gson = { group = "de.siphalor.tweed5.minecraft", name = "tweed5-serde-gson", version.ref = "tweed" }
+tweed-serde-hjson = { group = "de.siphalor.tweed5.minecraft", name = "tweed5-serde-hjson", version.ref = "tweed" }
+
+[bundles]
+config = [
+    "coat",
+    "tweed-bundle",
+    "tweed-bundle-pojoWeaving",
+    "tweed-coatBridge",
+    "tweed-comment-loader",
+    "tweed-fabricHelper",
+    "tweed-networking",
+    "tweed-serde-gson",
+    "tweed-serde-hjson",
+]
+compatibilityCheck = [
+    "appleskin",
+    "clothConfig",
+]
+polymer = [
+    "polymer-core",
+    "polymer-resource-pack",
+]

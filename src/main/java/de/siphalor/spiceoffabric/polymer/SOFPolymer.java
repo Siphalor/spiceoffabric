@@ -49,9 +49,9 @@ public class SOFPolymer {
 	}
 
 	public static void registerFoodContainer(String idPath, Item emptyItem, Item filledItem, int slots, MenuType<?> screenHandlerType) {
-		ResourceLocation id = new ResourceLocation(SpiceOfFabric.MOD_ID, idPath);
-		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, new ResourceLocation(id.getNamespace(), "item/" + id.getPath() + "_empty"));
-		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, new ResourceLocation(id.getNamespace(), "item/" + id.getPath() + "_filled"));
+		ResourceLocation id = SpiceOfFabric.createId(idPath);
+		PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, SpiceOfFabric.createId("item/" + id.getPath() + "_empty"));
+		PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, SpiceOfFabric.createId("item/" + id.getPath() + "_filled"));
 		PolymerFoodContainerItem item = Registry.register(BuiltInRegistries.ITEM, id, new PolymerFoodContainerItem(
 				new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT),
 				slots, screenHandlerType,
