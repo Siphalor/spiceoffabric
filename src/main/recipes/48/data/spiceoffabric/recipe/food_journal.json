@@ -1,0 +1,11 @@
+{
+	"type": "spiceoffabric:food_journal",
+	"ingredients": [
+		{
+			"item": "minecraft:writable_book"
+		},
+		{
+			"item": "minecraft:apple"
+		}
+	]
+}

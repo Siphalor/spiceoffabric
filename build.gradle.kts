@@ -58,6 +58,14 @@ smcmtk {
 	createModConfigurations(listOf(sourceSets.main.get()))
 }
 
+sourceSets {
+	main {
+		resources {
+			srcDirs("src/main/recipes/${smcmtk.mcProps.getting("recipes.version").get()}")
+		}
+	}
+}
+
 dependencies {
 	annotationProcessor(libs.lombok)
 	compileOnly(libs.lombok)
