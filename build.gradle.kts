@@ -8,7 +8,6 @@ plugins {
 	alias(libs.plugins.shadow)
 	alias(libs.plugins.jcyo)
 	alias(libs.plugins.modPublisher)
-
 }
 
 val minecraftVersionDescriptor = project.properties["minecraft.version.descriptor"] as String
