@@ -6,13 +6,11 @@ jcyo = "0.6.1"
 jspecify = "1.0.0"
 junit = "5.12.0"
 lombok = "1.18.38"
-loom = "1.15-SNAPSHOT"
 modPublisher = "2.1.8"
 shadow = "9.3.0"
 
 [plugins]
 jcyo = { id = "de.siphalor.jcyo", version.ref = "jcyo" }
-loom = { id = "fabric-loom", version.ref = "loom" }
 modPublisher = { id = "com.hypherionmc.modutils.modpublisher", version.ref = "modPublisher" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 

@@ -1,11 +1,10 @@
 import de.siphalor.jcyo.gradle.JcyoTask
-import java.util.*
 
 plugins {
-	alias(libs.plugins.loom)
 	java
 	`maven-publish`
 	alias(mcLibs.plugins.smcmtk)
+	alias(mcLibs.plugins.fabric.loom)
 	alias(libs.plugins.shadow)
 	alias(libs.plugins.jcyo)
 	alias(libs.plugins.modPublisher)
@@ -13,10 +12,6 @@ plugins {
 }
 
 val minecraftVersionDescriptor = project.properties["minecraft.version.descriptor"] as String
-val mcProps = Properties().apply {
-	val propFile = project.layout.settingsDirectory.file("gradle/mc-${minecraftVersionDescriptor}/gradle.properties")
-	load(propFile.asFile.inputStream())
-}
 
 group = "de.siphalor.${project.name}"
 val archivesBaseName = "${project.name}-mc${minecraftVersionDescriptor}"
@@ -59,7 +54,10 @@ repositories {
 	mavenLocal()
 }
 
-loom {}
+smcmtk {
+	useMojangMappings()
+	createModConfigurations(listOf(sourceSets.main.get()))
+}
 
 dependencies {
 	annotationProcessor(libs.lombok)
@@ -68,12 +66,6 @@ dependencies {
 	compileOnly(libs.autoService)
 
 	minecraft(mcLibs.minecraft)
-  	mappings(loom.layered {
-  		officialMojangMappings()
-  		parchment(variantOf(mcLibs.parchment) {
-  			artifactType("zip")
-  		})
-  	})
 	modImplementation(libs.fabric.loader)
 
 	compileOnly(libs.jspecify)
