@@ -94,7 +94,7 @@ public class SpiceOfFabric implements ModInitializer {
 	public static SOFConfig globalConfig;
 	public static SOFConfig config;
 
-	public static Item[] foodContainerItems;
+	public static Item[] foodContainerItems = {};
 
 	@Override
 	public void onInitialize() {
