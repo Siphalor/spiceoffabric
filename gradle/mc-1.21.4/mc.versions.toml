@@ -1,26 +1,26 @@
 [versions]
 appleskin = "mc1.21.3-3.0.6"
 capsaicin = "1.4.1"
-clothConfig = "16.0.143"
+clothConfig = "17.0.144"
 coat = "1.1.1"
-fabric-api = "0.114.1+1.21.3"
+fabric-api = "0.119.4+1.21.4"
 java = "17"
-minecraft = "1.21.3"
-modmenu = "12.0.1"
-parchment = "2024.12.07"
-polymer = "0.10.2+1.21.3"
-rei = "17.0.807"
+minecraft = "1.21.4"
+modmenu = "13.0.4"
+parchment = "2025.03.23"
+polymer = "0.11.8+1.21.4"
+rei = "18.0.808"
 tweed = "0.8.1"
 
 [libraries]
 appleskin = { group = "squeek.appleskin", name = "appleskin-fabric", version.ref = "appleskin" }
 clothConfig = { group = "me.shedaniel.cloth", name = "cloth-config-fabric", version.ref = "clothConfig" }
 capsaicin = { group = "de.siphalor.capsaicin", name = "capsaicin-mc1.21.3", version.ref = "capsaicin" }
-coat = { group = "de.siphalor.coat", name = "coat-mc1.21.3", version.ref = "coat" }
+coat = { group = "de.siphalor.coat", name = "coat-mc1.21.4", version.ref = "coat" }
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
 modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu" }
-parchment = { group = "org.parchmentmc.data", name = "parchment-1.21.3", version.ref = "parchment" }
+parchment = { group = "org.parchmentmc.data", name = "parchment-1.21.4", version.ref = "parchment" }
 polymer-bundled = { group = "eu.pb4", name = "polymer-bundled", version.ref = "polymer" }
 polymer-core = { group = "eu.pb4", name = "polymer-core", version.ref = "polymer" }
 polymer-resource-pack = { group = "eu.pb4", name = "polymer-resource-pack", version.ref = "polymer" }

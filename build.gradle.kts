@@ -62,10 +62,12 @@ smcmtk {
 sourceSets {
 	main {
 		resources {
-			val dataVersion = smcmtk.mcProps.getting("data.version").get().toInt()
+			val dataVersion = smcmtk.mcProps.getting("minecraft.data.version").get().toInt()
+			val resourcesVersion = smcmtk.mcProps.getting("minecraft.resources.version").get().toInt()
 			srcDirs(
 				resolveDataDir(dataVersion, "src/main/recipes"),
 				resolveDataDir(dataVersion, "src/main/advancements"),
+				resolveDataDir(resourcesVersion, "src/main/item_models"),
 			)
 		}
 	}
