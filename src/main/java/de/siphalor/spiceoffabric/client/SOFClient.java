@@ -2,26 +2,41 @@ package de.siphalor.spiceoffabric.client;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
+import de.siphalor.spiceoffabric.config.SOFExpression;
+import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.networking.SOFClientNetworking;
+import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.FoodUtils;
+import de.siphalor.tweed5.attributesextension.api.serde.filter.AttributesReadWriteFilterExtension;
+import de.siphalor.tweed5.coat.bridge.api.ConfigScreenCreateParams;
+import de.siphalor.tweed5.coat.bridge.api.TweedCoatBridgeExtension;
+import de.siphalor.tweed5.coat.bridge.api.TweedCoatMappers;
+import de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.ClampedModelPredicateProvider;
-import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+//- import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Stream;
+
+import static de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension.presetValue;
 
 public class SOFClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		SOFCommonNetworking.init();
 		SOFClientNetworking.init();
 
 		ItemTooltipCallback.EVENT.register(SOFClient::itemTooltipCallback);
@@ -29,22 +44,76 @@ public class SOFClient implements ClientModInitializer {
 		initRendering();
 	}
 
-	private static void itemTooltipCallback(ItemStack stack, TooltipContext context, List<Text> lines) {
-		lines.addAll(1, FoodUtils.getClientTooltipAdditions(MinecraftClient.getInstance().player, stack));
+	//# if MC_VERSION_NUMBER >= 12005
+	private static void itemTooltipCallback(ItemStack stack, Item.TooltipContext ctx, TooltipFlag flag, List<Component> lines) {
+	//# else
+	//- private static void itemTooltipCallback(ItemStack stack, TooltipFlag flag, List<Component> lines) {
+	//# end
+		lines.addAll(1, FoodUtils.getClientTooltipAdditions(Minecraft.getInstance().player, stack));
 	}
 
 	private static void initRendering() {
-		if (!SOFConfig.items.usePolymer && SpiceOfFabric.foodContainerItems != null) {
+		if (!SpiceOfFabric.config.items.usePolymer && SpiceOfFabric.foodContainerItems != null) {
 			registerModelPredicateProviders();
 		}
 	}
 
 	private static void registerModelPredicateProviders() {
-		ClampedModelPredicateProvider predicateProvider = (stack, world, entity, seed) ->
-				((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
-		Identifier predicateId = new Identifier(SpiceOfFabric.MOD_ID, "filled");
+		ClampedItemPropertyFunction predicateProvider = (stack, world, entity, seed) ->
+				//# if MC_VERSION_NUMBER >= 12006
+				{
+					HolderLookup.Provider registryAccess;
+					if (world != null) {
+						registryAccess = world.registryAccess();
+					} else if (entity != null) {
+						registryAccess = entity.level().registryAccess();
+					} else {
+						return 0;
+					}
+					return ((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack, registryAccess) ? 0 : 1;
+				};
+				//# else
+				//- ((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
+				//# end
+		ResourceLocation predicateId = SpiceOfFabric.createId("filled");
 		for (Item item : SpiceOfFabric.foodContainerItems) {
-			ModelPredicateProviderRegistry.register(item, predicateId, predicateProvider);
+			ItemProperties.register(item, predicateId, predicateProvider);
 		}
+	}
+
+	public static Screen createConfigScreen() {
+		TweedCoatBridgeExtension coatBridge = SpiceOfFabric.configContainerHelper.configContainer()
+				.extension(TweedCoatBridgeExtension.class)
+				.orElseThrow(() -> new IllegalStateException("Failed to get TweedCoatBridgeExtension"));
+
+		Stream.of(
+				TweedCoatMappers.booleanCheckboxMapper(),
+				TweedCoatMappers.integerTextMapper(),
+				TweedCoatMappers.enumCycleButtonMapper(),
+				TweedCoatMappers.compoundCategoryMapper(),
+				TweedCoatMappers.serdeTextMapper(SOFExpression.class)
+		).forEach(coatBridge::addMapper);
+
+		SOFConfig defaultValue = SpiceOfFabric.configContainerHelper.configContainer().rootEntry()
+				.call(presetValue(PresetsExtension.DEFAULT_PRESET_NAME));
+
+		return coatBridge.createConfigScreen(ConfigScreenCreateParams.<SOFConfig>builder()
+				.rootEntry(SpiceOfFabric.configContainerHelper.configContainer().rootEntry())
+				.currentValue(SpiceOfFabric.globalConfig)
+				.defaultValue(defaultValue)
+				.title(Component.translatable(SpiceOfFabric.MOD_ID + ".config"))
+				.translationKeyPrefix(SpiceOfFabric.MOD_ID + "mousewheelie.config")
+				.saveHandler(value -> {
+					SpiceOfFabric.configContainerHelper.writeConfigInConfigDirectory(value);
+
+					AttributesReadWriteFilterExtension filterExtension = SpiceOfFabric.configContainerHelper
+							.configContainer()
+							.extension(AttributesReadWriteFilterExtension.class)
+							.orElseThrow(IllegalStateException::new);
+					SpiceOfFabric.configContainerHelper.readPartialConfigInConfigDirectory(SpiceOfFabric.config, context ->
+							filterExtension.addFilter(context, SOFTweedAttributes.SCOPE, SOFTweedAttributes.SCOPE_ANY)
+					);
+				})
+				.build());
 	}
 }

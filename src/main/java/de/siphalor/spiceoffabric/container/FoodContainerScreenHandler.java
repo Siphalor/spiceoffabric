@@ -1,24 +1,36 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class FoodContainerScreenHandler extends ScreenHandler {
+public class FoodContainerScreenHandler extends AbstractContainerMenu {
 	private final FoodContainerItem foodContainerItem;
 
-	public FoodContainerScreenHandler(FoodContainerItem foodContainerItem, int syncId, PlayerInventory playerInventory, ItemStack containerStack) {
+	public FoodContainerScreenHandler(
+			FoodContainerItem foodContainerItem,
+			int syncId,
+			Inventory playerInventory,
+			ItemStack containerStack
+	) {
 		super(foodContainerItem.getScreenHandlerType(), syncId);
 		this.foodContainerItem = foodContainerItem;
 
-		ItemStackInventory inventory = foodContainerItem.getInventory(containerStack);
+		//# if MC_VERSION_NUMBER >= 12006
+		ItemStackInventory inventory = foodContainerItem.getInventory(
+				containerStack,
+				playerInventory.player.registryAccess()
+		);
+		//# else
+		//- ItemStackInventory inventory = foodContainerItem.getInventory(containerStack);
+		//# end
 		for (int i = 0; i < foodContainerItem.getSize(); i++) {
 			addSlot(new FoodSlot(inventory, i, 0, 0));
 		}
@@ -31,47 +43,47 @@ public class FoodContainerScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int index) {
+	public ItemStack quickMoveStack(Player player, int index) {
 		ItemStack result = ItemStack.EMPTY;
 		Slot slot = this.slots.get(index);
-		if (slot.hasStack()) {
-			ItemStack moveStack = slot.getStack();
+		if (slot.hasItem()) {
+			ItemStack moveStack = slot.getItem();
 			result = moveStack.copy();
 			if (index < foodContainerItem.getSize()) {
-				if (!this.insertItem(moveStack, foodContainerItem.getSize(), this.slots.size(), true)) {
+				if (!this.moveItemStackTo(moveStack, foodContainerItem.getSize(), this.slots.size(), true)) {
 					return ItemStack.EMPTY;
 				}
 			} else {
-				if (!this.insertItem(moveStack, 0, foodContainerItem.getSize(), false)) {
+				if (!this.moveItemStackTo(moveStack, 0, foodContainerItem.getSize(), false)) {
 					return ItemStack.EMPTY;
 				}
 			}
 			if (moveStack.isEmpty()) {
-				slot.setStack(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY);
 			} else {
-				slot.markDirty();
+				slot.setChanged();
 			}
 		}
 		return result;
 	}
 
 	private static class FoodSlot extends Slot {
-		public FoodSlot(Inventory inventory, int index, int x, int y) {
+		public FoodSlot(Container inventory, int index, int x, int y) {
 			super(inventory, index, x, y);
 		}
 
 		@Override
-		public boolean canInsert(ItemStack stack) {
-			return inventory.isValid(this.getIndex(), stack);
+		public boolean mayPlace(ItemStack stack) {
+			return container.canPlaceItem(this.getContainerSlot(), stack);
 		}
 	}
 
-	public static class Factory implements NamedScreenHandlerFactory {
+	public static class Factory implements MenuProvider {
 		private final ItemStack containerStack;
 		private final FoodContainerItem foodContainerItem;
 
@@ -81,13 +93,13 @@ public class FoodContainerScreenHandler extends ScreenHandler {
 		}
 
 		@Override
-		public Text getDisplayName() {
-			return containerStack.getName();
+		public Component getDisplayName() {
+			return containerStack.getHoverName();
 		}
 
 		@Nullable
 		@Override
-		public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+		public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
 			return new FoodContainerScreenHandler(foodContainerItem, syncId, playerInventory, containerStack);
 		}
 	}

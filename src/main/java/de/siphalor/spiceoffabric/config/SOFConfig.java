@@ -1,139 +1,175 @@
 package de.siphalor.spiceoffabric.config;
 
-import com.google.common.base.CaseFormat;
-import com.mojang.datafixers.util.Pair;
-import de.siphalor.tweed4.annotated.*;
-import de.siphalor.tweed4.config.ConfigEnvironment;
-import de.siphalor.tweed4.config.ConfigScope;
-import de.siphalor.tweed4.config.constraints.RangeConstraint;
-import de.siphalor.tweed4.data.DataList;
-import de.siphalor.tweed4.data.DataObject;
-import de.siphalor.tweed4.data.DataValue;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
-import net.objecthunter.exp4j.function.Function;
-import org.apache.commons.lang3.StringUtils;
+import de.siphalor.tweed5.coat.bridge.api.TweedCoatAttributes;
+import de.siphalor.tweed5.commentloaderextension.api.CommentLoaderExtension;
+import de.siphalor.tweed5.defaultextensions.patch.api.PatchExtension;
+import de.siphalor.tweed5.fabric.helper.api.DefaultTweedMinecraftWeaving;
+import de.siphalor.tweed5.weaver.pojo.api.annotation.CompoundWeaving;
+import de.siphalor.tweed5.weaver.pojo.api.annotation.TweedExtension;
+import de.siphalor.tweed5.weaver.pojoext.attributes.api.Attribute;
+import de.siphalor.tweed5.weaver.pojoext.attributes.api.AttributeDefault;
+import de.siphalor.tweed5.weaver.pojoext.serde.api.EntryReadWriteConfig;
+import de.siphalor.tweed5.weaver.pojoext.validation.api.Validator;
+import de.siphalor.tweed5.weaver.pojoext.validation.api.validators.WeavableNumberRangeValidator;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@ATweedConfig(
-		scope = ConfigScope.SMALLEST,
-		environment = ConfigEnvironment.SERVER,
-		casing = CaseFormat.LOWER_HYPHEN,
-		tailors = "tweed4:coat"
-)
+@DefaultTweedMinecraftWeaving
+@TweedExtension(PatchExtension.class)
+@TweedExtension(CommentLoaderExtension.class)
+@CompoundWeaving(namingFormat = "kebab_case")
+@AttributeDefault(key = TweedCoatAttributes.BACKGROUND_TEXTURE, defaultValue = "textures/block/green_concrete_powder.png")
+@AttributeDefault(key = SOFTweedAttributes.SCOPE, defaultValue = SOFTweedAttributes.SCOPE_ANY)
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class SOFConfig {
-	@AConfigExclude
-	private static final String ITEM_VARIABLES_JOINED = "timesEaten,hungerValue,saturationValue,consumeDuration";
-	@AConfigExclude
-	private static final String[] itemVariables = StringUtils.split(ITEM_VARIABLES_JOINED, ',');
-	@AConfigExclude
-	public static Expression hungerExpression;
-	@AConfigExclude
-	public static Expression saturationExpression;
-	@AConfigExclude
-	public static Expression consumeDurationExpression;
+	@Attribute(key = SOFTweedAttributes.SYNCED, value = SOFTweedAttributes.SYNCED_S2C)
+	public ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
 
-	@AConfigExclude
-	private static final String AFTER_DEATH_VARIABLES_JOINED = "hunger,saturation";
-	@AConfigExclude
-	static final String[] afterDeathVariables = StringUtils.split(AFTER_DEATH_VARIABLES_JOINED, ',');
-	@AConfigExclude
-	public static Expression hungerAfterDeathExpression;
-	@AConfigExclude
-	public static Expression saturationAfterDeathExpression;
-
-	@AConfigExclude
-	static final String[] healthFormulaVariables = new String[]{"uniqueFoodsEaten", "baseHealth"};
-	@AConfigExclude
-	public static Expression healthFormulaExpression;
-
-	@AConfigExclude
-	static final Function[] customExpFunctions = new Function[]{
-			new Function("max", 2) {
-				@Override
-				public double apply(double... args) {
-					return Math.max(args[0], args[1]);
-				}
-			},
-			new Function("min", 2) {
-				@Override
-				public double apply(double... args) {
-					return Math.min(args[0], args[1]);
-				}
-			},
-			new Function("power", 2) {
-				@Override
-				public double apply(double... args) {
-					return Math.pow(args[0], args[1]);
-				}
-			}
-	};
-
-	@AConfigEntry(environment = ConfigEnvironment.SYNCED)
-	public static ItemTipDisplayStyle showLastEatenTips = ItemTipDisplayStyle.NONE;
-
-	@AConfigEntry(scope = ConfigScope.GAME)
-	public static boolean enableJournalCommand = false;
+	@Attribute(key = SOFTweedAttributes.SCOPE, value = SOFTweedAttributes.SCOPE_GAME)
+	public boolean enableJournalCommand = false;
 
 	public enum ItemTipDisplayStyle {
 		NONE, SIMPLE, EXTENDED
 	}
 
-	public static Respawn respawn;
+	@CompoundWeaving
+	@Attribute(key = TweedCoatAttributes.BACKGROUND_TEXTURE, value = "textures/block/red_wool.png")
+	public Respawn respawn = new Respawn();
 
-	@AConfigBackground("textures/block/red_wool.png")
 	public static class Respawn {
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
-		)
-		public String hunger = "max(14, hunger)";
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = AFTER_DEATH_VARIABLES_JOINED)
-		)
-		public String saturation = "saturation";
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.AFTER_DEATH_NAME)
+		public SOFExpression hunger = SOFExpression.parse("max(14, hunger)", SOFExpression.Config.AFTER_DEATH);
+
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.AFTER_DEATH_NAME)
+		public SOFExpression saturation = SOFExpression.parse("saturation", SOFExpression.Config.AFTER_DEATH);
+
 		public boolean resetHistory = false;
+
 		public boolean resetCarrotMode = false;
+
+		public void prepareExpressions(int hunger, float saturation) {
+			this.hunger.setVariable("hunger", hunger);
+			this.hunger.setVariable("saturation", saturation);
+
+			this.saturation.setVariable("hunger", hunger);
+			this.saturation.setVariable("saturation", saturation);
+		}
 	}
 
-	@AConfigEntry(environment = ConfigEnvironment.SYNCED)
-	public static Food food;
+	@CompoundWeaving
+	@Attribute(key = TweedCoatAttributes.BACKGROUND_TEXTURE, value = "textures/block/melon_side.png")
+	@AttributeDefault(key = SOFTweedAttributes.SYNCED, defaultValue = SOFTweedAttributes.SYNCED_S2C)
+	public Food food = new Food();
 
-	@AConfigBackground("textures/block/melon_side.png")
 	public static class Food {
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
-		)
-		public String hunger = "hungerValue * power(0.7, timesEaten)";
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
-		)
-		public String saturation = "saturationValue";
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = ExpressionConstraint.class, param = ITEM_VARIABLES_JOINED)
-		)
-		public String consumeDuration = "consumeDuration * power(1.3, timesEaten)";
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "0..")
-		)
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.ITEM_NAME)
+		public SOFExpression hunger = SOFExpression.parse(
+				"hungerValue * power(0.7, timesEaten)",
+				SOFExpression.Config.ITEM
+		);
+
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.ITEM_NAME)
+		public SOFExpression saturation = SOFExpression.parse("saturationValue", SOFExpression.Config.ITEM);
+
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.ITEM_NAME)
+		public SOFExpression consumeDuration = SOFExpression.parse(
+				"consumeDuration * power(1.3, timesEaten)",
+				SOFExpression.Config.ITEM
+		);
+
+		@Validator(value = WeavableNumberRangeValidator.class, config = "0=..")
 		public int historyLength = 20;
+
+		public void prepareHungerExpressions(
+				int timesEaten,
+				int hungerValue,
+				float saturationValue,
+				int consumeDuration
+		) {
+			this.hunger.setVariable("timesEaten", timesEaten);
+			this.hunger.setVariable("hungerValue", hungerValue);
+			this.hunger.setVariable("saturationValue", saturationValue);
+			this.hunger.setVariable("consumeDuration", consumeDuration);
+
+			this.saturation.setVariable("timesEaten", timesEaten);
+			this.saturation.setVariable("hungerValue", hungerValue);
+			this.saturation.setVariable("saturationValue", saturationValue);
+			this.saturation.setVariable("consumeDuration", consumeDuration);
+		}
+
+		public int evaluateHungerExpression() {
+			return (int) Math.max(Math.round(hunger.evaluate()), 0L);
+		}
+
+		public float evaluateSaturationExpression() {
+			return (float) Math.max(saturation.evaluate(), 0D);
+		}
+
+		public void prepareConsumeDurationExpression(
+				int timesEaten,
+				int hungerValue,
+				float saturationValue,
+				//# if MC_VERSION_NUMBER >= 12006
+				float consumeDuration
+				//# else
+				//- int consumeDuration
+				//# end
+		) {
+			this.consumeDuration.setVariable("timesEaten", timesEaten);
+			this.consumeDuration.setVariable("hungerValue", hungerValue);
+			this.consumeDuration.setVariable("saturationValue", saturationValue);
+			this.consumeDuration.setVariable("consumeDuration", consumeDuration);
+		}
+
+		//# if MC_VERSION_NUMBER >= 12006
+		public float evaluateConsumeDurationExpression() {
+			return (float) consumeDuration.evaluate();
+		}
+		//# else
+		//- public int evaluateConsumeDurationExpression() {
+		//- 	return (int) Math.max(Math.round(consumeDuration.evaluate()), 0L);
+		//- }
+		//# end
 	}
 
-	public static Carrot carrot;
+	@CompoundWeaving
+	@Attribute(key = TweedCoatAttributes.BACKGROUND_TEXTURE, value = "textures/block/orange_terracotta.png")
+	public Carrot carrot = new Carrot();
 
-	@AConfigBackground("textures/block/orange_terracotta.png")
 	public static class Carrot {
 		public boolean enable = false;
-		public String healthFormula = "0.6 * baseHealth + max(2 * floor(log2(uniqueFoodsEaten)), 0)";
-		@AConfigEntry(
-				constraints = @AConfigConstraint(value = RangeConstraint.class, param = "-1..200")
-		)
+
+		@Validator(SOFExpression.Validator.class)
+		@EntryReadWriteConfig(SOFExpression.ReaderWriter.HEALTH_FORMULA_NAME)
+		public SOFExpression healthFormula = SOFExpression.parse(
+				"0.6 * baseHealth + max(2 * floor(log2(uniqueFoodsEaten)), 0)",
+				SOFExpression.Config.HEALTH_FORMULA
+		);
+
+		@Validator(value = WeavableNumberRangeValidator.class, config = "-1=..=200")
 		public int maxHealth = -1;
+
 		public boolean uneatenInJournal = true;
+
+		public void prepareExpressions(int uniqueFoods, int baseHealth) {
+			this.healthFormula.setVariable("uniqueFoodsEaten", uniqueFoods);
+			this.healthFormula.setVariable("baseHealth", baseHealth);
+		}
 	}
 
-	@AConfigEntry(scope = ConfigScope.GAME)
-	public static Items items;
+	@CompoundWeaving
+	@Attribute(key = TweedCoatAttributes.BACKGROUND_TEXTURE, value = "textures/block/beehive_end.png")
+	@AttributeDefault(key = SOFTweedAttributes.SCOPE, defaultValue = SOFTweedAttributes.SCOPE_GAME)
+	public Items items = new Items();
 
-	@AConfigBackground("textures/block/beehive_end.png")
 	public static class Items {
 		public boolean usePolymer = false;
 		public boolean enablePaperBag = false;
@@ -141,18 +177,7 @@ public class SOFConfig {
 		public boolean enablePicnicBasket = false;
 	}
 
-	@AConfigListener
-	public static void reload() {
-		hungerExpression = new ExpressionBuilder(food.hunger).variables(itemVariables).functions(customExpFunctions).build();
-		saturationExpression = new ExpressionBuilder(food.saturation).variables(itemVariables).functions(customExpFunctions).build();
-		consumeDurationExpression = new ExpressionBuilder(food.consumeDuration).variables(itemVariables).functions(customExpFunctions).build();
-
-		hungerAfterDeathExpression = new ExpressionBuilder(respawn.hunger).variables(afterDeathVariables).functions(customExpFunctions).build();
-		saturationAfterDeathExpression = new ExpressionBuilder(respawn.saturation).variables(afterDeathVariables).functions(customExpFunctions).build();
-
-		healthFormulaExpression = new ExpressionBuilder(carrot.healthFormula).variables(healthFormulaVariables).functions(customExpFunctions).build();
-	}
-
+	/*
 	@AConfigFixer("food")
 	public static <V extends DataValue<V, L, O>, L extends DataList<V, L, O>, O extends DataObject<V, L, O>>
 	void fixFood(O foodObject, O root) {
@@ -196,46 +221,5 @@ public class SOFConfig {
 			System.err.println("[Spice of Fabric] Found old carrot configuration! You'll need to fix the config manually since formulas changed drastically");
 		}
 	}
-
-	public static void setHungerExpressionValues(int timesEaten, int hungerValue, float saturationValue, int consumeDuration) {
-		hungerExpression.setVariable("timesEaten", timesEaten);
-		hungerExpression.setVariable("hungerValue", hungerValue);
-		hungerExpression.setVariable("saturationValue", saturationValue);
-		hungerExpression.setVariable("consumeDuration", consumeDuration);
-
-		saturationExpression.setVariable("timesEaten", timesEaten);
-		saturationExpression.setVariable("hungerValue", hungerValue);
-		saturationExpression.setVariable("saturationValue", saturationValue);
-		saturationExpression.setVariable("consumeDuration", consumeDuration);
-	}
-
-	public static void setConsumeDurationValues(int timesEaten, int hungerValue, float saturationValue, int consumeDuration) {
-		consumeDurationExpression.setVariable("timesEaten", timesEaten);
-		consumeDurationExpression.setVariable("hungerValue", hungerValue);
-		consumeDurationExpression.setVariable("saturationValue", saturationValue);
-		consumeDurationExpression.setVariable("consumeDuration", consumeDuration);
-	}
-
-	public static Pair<Double, Double> getRespawnHunger(int hunger, float saturation) {
-		hungerAfterDeathExpression.setVariable("hunger", hunger);
-		hungerAfterDeathExpression.setVariable("saturation", saturation);
-
-		saturationAfterDeathExpression.setVariable("hunger", hunger);
-		saturationAfterDeathExpression.setVariable("saturation", saturation);
-
-		return Pair.of(hungerAfterDeathExpression.evaluate(), saturationAfterDeathExpression.evaluate());
-	}
-
-	public static void setHealthFormulaExpressionValues(int uniqueFoods, int baseHealth) {
-		healthFormulaExpression.setVariable("uniqueFoodsEaten", uniqueFoods);
-		healthFormulaExpression.setVariable("baseHealth", baseHealth);
-	}
-
-	public static int getHungerValue() {
-		return (int) Math.max(Math.round(hungerExpression.evaluate()), 0L);
-	}
-
-	public static float getSaturationValue() {
-		return (float) Math.max(saturationExpression.evaluate(), 0D);
-	}
+	 */
 }

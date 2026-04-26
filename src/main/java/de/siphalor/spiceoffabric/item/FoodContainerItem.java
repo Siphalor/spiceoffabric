@@ -10,49 +10,53 @@ import de.siphalor.spiceoffabric.container.ItemStackInventory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import de.siphalor.spiceoffabric.util.IndexedValue;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsage;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerListener;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+//- import net.minecraft.world.entity.Entity;
+
 public class FoodContainerItem extends Item implements CamoFoodItem {
 	private static final String INVENTORY_NBT_KEY = "inventory";
-	private static final Style LORE_STYLE = Style.EMPTY.withColor(Formatting.GRAY).withItalic(false);
-	private static final Text LORE_EMPTY = Text.translatable(SpiceOfFabric.MOD_ID + ".food_container.lore.empty").setStyle(LORE_STYLE);
+	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false);
+	private static final Component LORE_EMPTY = Component.translatable(SpiceOfFabric.MOD_ID + ".food_container.lore.empty").setStyle(LORE_STYLE);
 	private static final String LORE_GENERAL_KEY = SpiceOfFabric.MOD_ID + ".food_container.lore.general";
 	private static final IndexedValue<ItemStack> NO_STACK = new IndexedValue<>(-1, ItemStack.EMPTY);
 
-	private final ScreenHandlerType<?> screenHandlerType;
+	private final MenuType<?> screenHandlerType;
 	private final int size;
 
-	public FoodContainerItem(Settings settings, int size, ScreenHandlerType<?> screenHandlerType) {
+	public FoodContainerItem(Properties settings, int size, MenuType<?> screenHandlerType) {
 		super(settings);
 		this.screenHandlerType = screenHandlerType;
 		this.size = size;
 	}
 
-	public ScreenHandlerType<?> getScreenHandlerType() {
+	public MenuType<?> getScreenHandlerType() {
 		return screenHandlerType;
 	}
 
@@ -60,29 +64,33 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		return size;
 	}
 
-	public ItemStack getNextFoodStack(ItemStack stack, PlayerEntity player) {
-		return getNextFoodStack(getInventory(stack), player).value();
+	public ItemStack getNextFoodStack(ItemStack stack, Player player) {
+		//# if MC_VERSION_NUMBER >= 12006
+		return getNextFoodStack(getInventory(stack, player.registryAccess()), player).value();
+		//# else
+		//- return getNextFoodStack(getInventory(stack), player).value();
+		//# end
 	}
 
-	private IndexedValue<ItemStack> getNextFoodStack(ItemStackInventory inventory, PlayerEntity player) {
+	private IndexedValue<ItemStack> getNextFoodStack(ItemStackInventory inventory, Player player) {
 		FoodHistory foodHistory = FoodHistory.get(player);
 		if (foodHistory == null) {
 			return NO_STACK;
 		}
 
-		var filteredInv = new ArrayList<IndexedValue<Pair<ItemStack, FoodComponent>>>(inventory.size());
+		var filteredInv = new ArrayList<IndexedValue<Pair<ItemStack, FoodProperties>>>(inventory.getContainerSize());
 		var foodPropertiesAccess = DynamicFoodPropertiesAccess.create();
-		for (int i = 0; i < inventory.size(); i++) {
-			ItemStack stack = inventory.getStack(i);
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
 			if (stack.isEmpty()) {
 				continue;
 			}
-			FoodComponent foodComponent = foodPropertiesAccess.withStack(stack).getModifiedFoodComponent();
+			FoodProperties foodComponent = foodPropertiesAccess.withStack(stack).getModifiedFoodComponent();
 			if (foodComponent == null) {
 				SpiceOfFabric.LOGGER.warn("Non-food stack " + stack + " found in food container " + this);
 				continue;
 			}
-			if (stack.isEmpty() || !player.canConsume(foodComponent.isAlwaysEdible())) {
+			if (stack.isEmpty() || !player.canEat(foodComponent.canAlwaysEat())) {
 				continue;
 			}
 
@@ -92,18 +100,18 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			return NO_STACK;
 		}
 
-		int requiredFood = 20 - player.getHungerManager().getFoodLevel();
+		int requiredFood = 20 - player.getFoodData().getFoodLevel();
 		return findMostAppropriateFood(filteredInv, requiredFood);
 	}
 
-	private IndexedValue<ItemStack> findMostAppropriateFood(List<IndexedValue<Pair<ItemStack, FoodComponent>>> foods, int requiredFood) {
+	private IndexedValue<ItemStack> findMostAppropriateFood(List<IndexedValue<Pair<ItemStack, FoodProperties>>> foods, int requiredFood) {
 		var bestStack = NO_STACK;
 		int bestDelta = Integer.MAX_VALUE;
 		int bestConsumeTime = Integer.MAX_VALUE;
 		for (var value : foods) {
 			ItemStack stack = value.value().getFirst();
-			int delta = requiredFood - value.value().getSecond().getHunger();
-			int consumeTime = stack.getMaxUseTime();
+			int delta = requiredFood - value.value().getSecond().nutrition();
+			int consumeTime = stack.getUseDuration();
 			if (delta <= 0) {
 				if (delta > bestDelta || bestDelta > 0 || (delta == bestDelta && consumeTime < bestConsumeTime)) {
 					bestDelta = delta;
@@ -119,74 +127,101 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		return bestStack;
 	}
 
-	public boolean isInventoryEmpty(ItemStack stack) {
-		return getInventory(stack).isEmpty();
+	//# if MC_VERSION_NUMBER >= 12006
+	public boolean isInventoryEmpty(ItemStack stack, HolderLookup.Provider levelRegistry) {
+		return getInventory(stack, levelRegistry).isEmpty();
 	}
 
-	public ItemStackInventory getInventory(ItemStack stack) {
-		return new ItemStackInventory(stack, INVENTORY_NBT_KEY, size);
+	public ItemStackInventory getInventory(ItemStack stack, HolderLookup.Provider levelRegistry) {
+		return ItemStackInventory.fromStack(stack, INVENTORY_NBT_KEY, size, levelRegistry);
+	}
+	//# else
+	//- public boolean isInventoryEmpty(ItemStack stack) {
+	//- 	return getInventory(stack).isEmpty();
+	//- }
+
+	//- public ItemStackInventory getInventory(ItemStack stack) {
+	//- 	return ItemStackInventory.fromStack(stack, INVENTORY_NBT_KEY, size);
+	//- }
+	//# end
+
+	@Override
+	public void onDestroyed(ItemEntity entity) {
+		//# if MC_VERSION_NUMBER >= 12006
+		ItemStackInventory inventory = getInventory(entity.getItem(), entity.registryAccess());
+		//# else
+		//- ItemStackInventory inventory = getInventory(entity.getItem());
+		//# end
+		ItemUtils.onContainerDestroyed(entity, inventory.getContainedStacks().stream().toList());
 	}
 
 	@Override
-	public void onItemEntityDestroyed(ItemEntity entity) {
-		ItemStackInventory inventory = getInventory(entity.getStack());
-		ItemUsage.spawnItemContents(entity, inventory.getContainedStacks().stream());
-	}
-
-	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-		ItemStackInventory inventory = getInventory(stack);
+	public void appendHoverText(
+			ItemStack stack,
+			TooltipContext context,
+			List<Component> tooltip,
+			TooltipFlag tooltipFlag
+	) {
+		//# if MC_VERSION_NUMBER >= 12006
+		ItemStackInventory inventory = getInventory(stack, context.registries());
+		//# else
+		//- ItemStackInventory inventory = getInventory(stack);
+		//# end
 		if (inventory.isEmpty()) {
 			tooltip.add(LORE_EMPTY);
 		} else {
 			int count = 0;
 			int filled = 0;
-			for (int i = 0; i < inventory.size(); i++) {
-				ItemStack invStack = inventory.getStack(i);
+			for (int i = 0; i < inventory.getContainerSize(); i++) {
+				ItemStack invStack = inventory.getItem(i);
 				if (!invStack.isEmpty()) {
 					count += invStack.getCount();
 					filled++;
 				}
 			}
-			tooltip.add(Text.translatable(LORE_GENERAL_KEY, filled, size, count).setStyle(LORE_STYLE));
+			tooltip.add(Component.translatable(LORE_GENERAL_KEY, filled, size, count).setStyle(LORE_STYLE));
 		}
 	}
 
-	@Override
-	public boolean isFood() {
-		return true;
-	}
+	//# if MC_VERSION_NUMBER < 12006
+	//- @Override
+	//- public boolean isEdible() {
+	//- 	return true;
+	//- }
+	//# end
 
 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-		ItemStack stackInHand = user.getStackInHand(hand);
+	public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+		ItemStack stackInHand = user.getItemInHand(hand);
 		ItemStack nextFoodItem = getNextFoodStack(stackInHand, user);
 		if (nextFoodItem.isEmpty()) {
 			// Prevent opening the container directly after eating
 			long currentTime = System.currentTimeMillis();
-			if (user instanceof ServerPlayerEntity player && checkLastEatTime(player, currentTime)) {
+			if (user instanceof ServerPlayer player && checkLastEatTime(player, currentTime)) {
 				updateLastEatTime(player, currentTime);
 
-				openScreen(stackInHand, user, hand == Hand.MAIN_HAND ? user.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT);
-				return TypedActionResult.success(stackInHand);
+				openScreen(stackInHand, user, hand == InteractionHand.MAIN_HAND ? user.getInventory().selected : Inventory.SLOT_OFFHAND);
+				return InteractionResultHolder.success(stackInHand);
 			}
-		} else if (nextFoodItem.isFood()) {
-			FoodComponent foodComponent = nextFoodItem.getItem().getFoodComponent();
-			if (foodComponent != null && user.canConsume(foodComponent.isAlwaysEdible())) {
-				user.setCurrentHand(hand);
-				return TypedActionResult.consume(stackInHand);
+		} else {
+			FoodProperties foodComponent = nextFoodItem.get(DataComponents.FOOD);
+			if (foodComponent != null) {
+				if (user.canEat(foodComponent.canAlwaysEat())) {
+					user.startUsingItem(hand);
+					return InteractionResultHolder.consume(stackInHand);
+				}
+				return InteractionResultHolder.fail(stackInHand);
 			}
-			return TypedActionResult.fail(stackInHand);
 		}
-		return TypedActionResult.pass(stackInHand);
+		return InteractionResultHolder.pass(stackInHand);
 	}
 
 	@Override
-	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+	public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
 		openContainer:
-		if (!world.isClient && user instanceof ServerPlayerEntity player) {
+		if (!world.isClientSide && user instanceof ServerPlayer player) {
 			// Only open the container if the player hasn't used the item for too long
-			int maxUseTime = getMaxUseTime(stack);
+			int maxUseTime = getUseDuration(stack);
 			if (maxUseTime - remainingUseTicks > 5) {
 				break openContainer;
 			}
@@ -198,92 +233,96 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			}
 			updateLastEatTime(player, currentTime);
 
-			PlayerInventory inv = player.getInventory();
-			for (int i = 0; i < inv.size(); i++) {
-				if (inv.getStack(i) == stack) {
+			Inventory inv = player.getInventory();
+			for (int i = 0; i < inv.getContainerSize(); i++) {
+				if (inv.getItem(i) == stack) {
 					openScreen(stack, player, i);
 					return;
 				}
 			}
 		}
-		super.onStoppedUsing(stack, world, user, remainingUseTicks);
+		super.releaseUsing(stack, world, user, remainingUseTicks);
 	}
 
-	public boolean checkLastEatTime(ServerPlayerEntity user, long currentTime) {
+	public boolean checkLastEatTime(ServerPlayer user, long currentTime) {
 		long lastEatTime = ((IServerPlayerEntity) user).spiceOfFabric_getLastContainerEatTime();
 		return currentTime - lastEatTime >= 1000;
 	}
 
-	public void updateLastEatTime(ServerPlayerEntity user, long currentTime) {
+	public void updateLastEatTime(ServerPlayer user, long currentTime) {
 		((IServerPlayerEntity) user).spiceOfFabric_setLastContainerEatTime(currentTime);
 	}
 
 	@Override
-	public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-		if (!(user instanceof PlayerEntity player)) {
+	public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+		if (!(user instanceof Player player)) {
 			return stack;
 		}
 
-		ItemStackInventory inventory = getInventory(stack);
+		//# if MC_VERSION_NUMBER >= 12006
+		ItemStackInventory inventory = getInventory(stack, world.registryAccess());
+		//# else
+		//- ItemStackInventory inventory = getInventory(stack);
+		//# end
 		var foodStack = getNextFoodStack(inventory, player);
 		if (foodStack.value().isEmpty()) {
 			return stack;
 		}
 
-		if (player instanceof ServerPlayerEntity) {
+		if (player instanceof ServerPlayer) {
 			((IServerPlayerEntity) player).spiceOfFabric_setLastContainerEatTime(System.currentTimeMillis());
 		}
-		ItemStack newStack = foodStack.value().finishUsing(world, user);
+		ItemStack newStack = foodStack.value().finishUsingItem(world, user);
 		if (newStack != foodStack.value()) {
-			if (inventory.isValid(foodStack.index(), newStack)) {
-				inventory.setStack(foodStack.index(), newStack);
+			if (inventory.canPlaceItem(foodStack.index(), newStack)) {
+				inventory.setItem(foodStack.index(), newStack);
 			} else {
-				player.getInventory().offerOrDrop(newStack);
-				inventory.removeStack(foodStack.index());
+				player.getInventory().placeItemBackInInventory(newStack);
+				inventory.removeItemNoUpdate(foodStack.index());
 			}
 		} else {
-			inventory.markDirty();
+			inventory.setChanged();
 		}
 
 		return stack;
 	}
 
-	protected void openScreen(ItemStack stack, PlayerEntity user, int invIndex) {
-		user.clearActiveItem();
-		user.openHandledScreen(new FoodContainerScreenHandler.Factory(this, stack));
-		user.currentScreenHandler.addListener(new ScreenHandlerListener() {
+	protected void openScreen(ItemStack stack, Player user, int invIndex) {
+		user.stopUsingItem();
+		user.openMenu(new FoodContainerScreenHandler.Factory(this, stack));
+		user.containerMenu.addSlotListener(new ContainerListener() {
 			@Override
-			public void onSlotUpdate(ScreenHandler handler, int updateSlotId, ItemStack updateStack) {
+			public void slotChanged(AbstractContainerMenu handler, int updateSlotId, ItemStack updateStack) {
 				Slot updateSlot = handler.getSlot(updateSlotId);
-				if (!(user instanceof ServerPlayerEntity serverPlayer)) {
+				if (!(user instanceof ServerPlayer serverPlayer)) {
 					return;
 				}
 
-				if (updateSlot.getIndex() == invIndex && updateSlot.inventory == user.getInventory()) {
-					if (updateStack.isEmpty() || !ItemStack.areEqual(updateStack, stack)) {
+				if (updateSlot.getContainerSlot() == invIndex && updateSlot.container == user.getInventory()) {
+					if (updateStack.isEmpty() || !ItemStack.matches(updateStack, stack)) {
 						closeScreen(serverPlayer);
 					}
 				} else {
-					if (ItemStack.areEqual(updateStack, stack)) {
+					if (ItemStack.matches(updateStack, stack)) {
 						closeScreen(serverPlayer);
 					}
 				}
 			}
 
 			@Override
-			public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+			public void dataChanged(AbstractContainerMenu handler, int property, int value) {
 				// N/A
 			}
 		});
 	}
 
-	private static void closeScreen(ServerPlayerEntity player) {
-		player.closeHandledScreen();
+	private static void closeScreen(ServerPlayer player) {
+		player.closeContainer();
 	}
 
 	@Override
 	public @Nullable ItemStack getCamoFoodStack(@NotNull ItemStack stack, CamoFoodContext context) {
-		if (context.user() instanceof PlayerEntity player) {
+		if (context.user() instanceof Player player) {
 			return getNextFoodStack(stack, player);
 		}
 		return stack;

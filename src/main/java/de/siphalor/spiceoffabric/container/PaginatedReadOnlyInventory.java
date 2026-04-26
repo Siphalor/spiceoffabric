@@ -1,12 +1,12 @@
 package de.siphalor.spiceoffabric.container;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class PaginatedReadOnlyInventory implements Inventory {
+public class PaginatedReadOnlyInventory implements Container {
 	private final List<ItemStack> stacks;
 	private final int viewSize;
 	private int page;
@@ -17,7 +17,7 @@ public class PaginatedReadOnlyInventory implements Inventory {
 	}
 
 	public int getPageCount() {
-		int count = (stacks.size() - 1) / size() + 1;
+		int count = (stacks.size() - 1) / getContainerSize() + 1;
 		if (count <= 0) {
 			return 1;
 		}
@@ -33,7 +33,7 @@ public class PaginatedReadOnlyInventory implements Inventory {
 	}
 
 	@Override
-	public int size() {
+	public int getContainerSize() {
 		return viewSize;
 	}
 
@@ -43,8 +43,8 @@ public class PaginatedReadOnlyInventory implements Inventory {
 	}
 
 	@Override
-	public ItemStack getStack(int slot) {
-		int index = page * size() + slot;
+	public ItemStack getItem(int slot) {
+		int index = page * getContainerSize() + slot;
 		if (index < 0 || index >= stacks.size()) {
 			return ItemStack.EMPTY;
 		}
@@ -52,32 +52,32 @@ public class PaginatedReadOnlyInventory implements Inventory {
 	}
 
 	@Override
-	public ItemStack removeStack(int slot, int amount) {
+	public ItemStack removeItem(int slot, int amount) {
 		return ItemStack.EMPTY; // N/A
 	}
 
 	@Override
-	public ItemStack removeStack(int slot) {
+	public ItemStack removeItemNoUpdate(int slot) {
 		return ItemStack.EMPTY; // N/A
 	}
 
 	@Override
-	public void setStack(int slot, ItemStack stack) {
+	public void setItem(int slot, ItemStack stack) {
 		// N/A
 	}
 
 	@Override
-	public void markDirty() {
+	public void setChanged() {
 		// N/A
 	}
 
 	@Override
-	public boolean canPlayerUse(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
 	@Override
-	public void clear() {
+	public void clearContent() {
 		// N/A
 	}
 }

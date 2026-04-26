@@ -1,42 +1,68 @@
 package de.siphalor.spiceoffabric;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
-import de.siphalor.capsaicin.api.food.*;
+//- import com.google.gson.JsonElement;
+//- import com.google.gson.JsonSyntaxException;
+//- import com.mojang.serialization.Codec;
+//- import com.mojang.serialization.MapCodec;
+//- import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.siphalor.capsaicin.api.food.FoodContext;
+import de.siphalor.capsaicin.api.food.FoodEvents;
+import de.siphalor.capsaicin.api.food.FoodModifications;
+import de.siphalor.capsaicin.api.food.PlayerFoodModifier;
 import de.siphalor.spiceoffabric.config.SOFConfig;
+import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.polymer.SOFPolymer;
 import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
+import de.siphalor.spiceoffabric.resource_conditions.SOFResourceConditions;
 import de.siphalor.spiceoffabric.server.SOFCommands;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import de.siphalor.tweed4.Tweed;
-import de.siphalor.tweed4.config.ConfigEnvironment;
-import de.siphalor.tweed4.config.ConfigLoader;
-import de.siphalor.tweed4.config.TweedRegistry;
+import de.siphalor.tweed5.attributesextension.api.serde.filter.AttributesReadWriteFilterExtension;
+import de.siphalor.tweed5.coat.bridge.api.TweedCoatBridgeExtension;
+import de.siphalor.tweed5.core.api.container.ConfigContainer;
+import de.siphalor.tweed5.fabric.helper.api.FabricConfigCommentLoader;
+import de.siphalor.tweed5.fabric.helper.api.FabricConfigContainerHelper;
+import de.siphalor.tweed5.serde.hjson.HjsonCommentType;
+import de.siphalor.tweed5.serde.hjson.HjsonSerde;
+import de.siphalor.tweed5.serde.hjson.HjsonWriter;
+import de.siphalor.tweed5.weaver.pojo.api.TweedPojoWeaver;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+//- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+//- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+//- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+//- import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.Filterable;
+import net.minecraft.server.network.FilteredText;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+//- import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.WrittenBookContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +75,8 @@ import java.util.UUID;
 public class SpiceOfFabric implements ModInitializer {
 
 	public static final String MOD_ID = "spiceoffabric";
+	public static final String MOD_NAME = "Spice of Fabric";
+
 	public static final String NBT_FOOD_HISTORY_ID = "spiceOfFabric_history";
 	public static final String NBT_VERSION_ID = "spiceOfFabric_version";
 	public static final int NBT_VERSION = 1;
@@ -57,26 +85,29 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SpiceOfFabric.class);
-	private static final FoodComponent EMPTY_FOOD_COMPONENT = new FoodComponent.Builder().build();
+	private static final FoodProperties EMPTY_FOOD_COMPONENT = new FoodProperties.Builder().build();
+
+	public static FabricConfigContainerHelper<SOFConfig> configContainerHelper;
+	public static SOFConfig globalConfig;
+	public static SOFConfig config;
 
 	public static Item[] foodContainerItems;
 
 	@Override
 	public void onInitialize() {
 		initConfig();
-
-		SOFCommonNetworking.init();
+		loadGlobalConfig();
 
 		SOFCommands.register();
 
-		initResourceConditions();
+		SOFResourceConditions.init();
 
 		initRecipes();
 
 		initFoodEvents();
 
-		if (SOFConfig.items.usePolymer) {
-			if (!FabricLoader.getInstance().isModLoaded("polymer")) {
+		if (config.items.usePolymer) {
+			if (!FabricLoader.getInstance().isModLoaded("polymer-bundled")) {
 				LOGGER.error("Polymer is not installed, but Polymer usage is enabled in the Spice of Fabric config!");
 				System.exit(1);
 			}
@@ -89,100 +120,125 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	private static void initConfig() {
-		Tweed.runEntryPoints();
-		FabricLoader loader = FabricLoader.getInstance();
-		ConfigLoader.initialReload(
-				TweedRegistry.getConfigFile(MOD_ID),
-				loader.getEnvironmentType() == EnvType.SERVER ? ConfigEnvironment.SERVER : ConfigEnvironment.UNIVERSAL
+		TweedPojoWeaver<SOFConfig> weaver = TweedPojoWeaver.forClass(SOFConfig.class);
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			weaver.withExtension(TweedCoatBridgeExtension.class);
+		}
+
+		ConfigContainer<SOFConfig> configContainer = weaver.weave();
+		FabricConfigCommentLoader.builder()
+				.configContainer(configContainer)
+				.modId(MOD_ID)
+				.prefix(MOD_ID + ".config")
+				.suffix(".description")
+				.build()
+				.loadCommentsFromLanguageFile("en_us");
+		AttributesReadWriteFilterExtension filterExtension = configContainer
+				.extension(AttributesReadWriteFilterExtension.class)
+				.orElseThrow(IllegalStateException::new);
+		filterExtension.markAttributeForFiltering(SOFTweedAttributes.SCOPE);
+		filterExtension.markAttributeForFiltering(SOFTweedAttributes.SYNCED);
+
+		configContainer.initialize();
+		configContainerHelper = FabricConfigContainerHelper.create(
+				configContainer,
+				new HjsonSerde(
+						new HjsonWriter.Options()
+								.multilineCommentType(HjsonCommentType.HASH)
+				),
+				MOD_ID
 		);
 	}
 
-	private static void initResourceConditions() {
-		ResourceConditions.register(new Identifier(MOD_ID, "registry_populated"), optionsJson -> {
-			Identifier id = new Identifier(JsonHelper.getString(optionsJson, "registry"));
-			Registry<?> registry = Registries.REGISTRIES.get(id);
-			if (registry == null) {
-				throw new JsonSyntaxException(id + " is not a valid registry!");
-			}
-			for (JsonElement elementJson : JsonHelper.getArray(optionsJson, "ids")) {
-				Identifier elementId = new Identifier(JsonHelper.asString(elementJson, "id"));
-				if (!registry.containsId(elementId)) {
-					return false;
-				}
-			}
-			return true;
-		});
+	private static void loadGlobalConfig() {
+		globalConfig = configContainerHelper.loadAndUpdateInConfigDirectory();
+		config = globalConfig;
 	}
 
 	private static void initRecipes() {
-		Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(MOD_ID, "food_journal"), new FoodJournalRecipeSerializer());
+		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, createId("food_journal"), new FoodJournalRecipeSerializer());
 	}
 
 	private static void initNativeFoodContainerItems() {
 		List<Item> foodContainerItems = new ArrayList<>(4);
-		if (SOFConfig.items.enablePaperBag) {
+		if (config.items.enablePaperBag) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "paper_bag"),
-					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 5, ScreenHandlerType.HOPPER)
+					BuiltInRegistries.ITEM, createId("paper_bag"),
+					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 5, MenuType.HOPPER)
 			));
 		}
-		if (SOFConfig.items.enableLunchBox) {
+		if (config.items.enableLunchBox) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "lunch_box"),
-					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 9, ScreenHandlerType.GENERIC_3X3)
+					BuiltInRegistries.ITEM, createId("lunch_box"),
+					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 9, MenuType.GENERIC_3x3)
 			));
 		}
-		if (SOFConfig.items.enablePicnicBasket) {
+		if (config.items.enablePicnicBasket) {
 			foodContainerItems.add(Registry.register(
-					Registries.ITEM, new Identifier(MOD_ID, "picnic_basket"),
-					new FoodContainerItem(new Item.Settings().maxCount(1).food(EMPTY_FOOD_COMPONENT), 9, ScreenHandlerType.GENERIC_3X3)
+					BuiltInRegistries.ITEM, createId("picnic_basket"),
+					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 9, MenuType.GENERIC_3x3)
 			));
 		}
 		SpiceOfFabric.foodContainerItems = foodContainerItems.toArray(new Item[0]);
 	}
 
 	private static void initItemGroups() {
-		// ITEM GROUPS
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
-			entries.add(createFoodJournalStack());
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
+			entries.accept(createFoodJournalStack());
 			for (Item item : foodContainerItems) {
-				entries.add(item);
+				entries.accept(item);
 			}
 		});
 	}
 
 	private static void initFoodEvents() {
 		FoodEvents.EATEN.on(SpiceOfFabric::onFoodEaten);
-		FoodModifications.EATING_TIME_MODIFIERS.register((PlayerFoodModifier<Integer>) SpiceOfFabric::modifyEatingTime, new Identifier(MOD_ID, "config_expression"));
-		FoodModifications.PROPERTIES_MODIFIERS.register(SpiceOfFabric::modifyFoodProperties, new Identifier(MOD_ID, "config_expression"));
+		//# if MC_VERSION_NUMBER >= 12006
+		FoodModifications.EATING_TIME_SECONDS_MODIFIERS
+				.register((PlayerFoodModifier<Float>) SpiceOfFabric::modifyEatingTime, createId("config_expression"));
+		//# else
+		//- FoodModifications.EATING_TIME_MODIFIERS
+		//- 		.register((PlayerFoodModifier<Integer>) SpiceOfFabric::modifyEatingTime, createId("config_expression"));
+		//# end
+		FoodModifications.PROPERTIES_MODIFIERS.register(SpiceOfFabric::modifyFoodProperties, createId("config_expression"));
 	}
 
 
 	private static void onFoodEaten(FoodEvents.Eaten event) {
 		FoodContext context = event.context();
-		if (context.user() instanceof ServerPlayerEntity player) {
+		if (context.user() instanceof ServerPlayer player) {
 			FoodHistory foodHistory = FoodHistory.get(player);
 			ItemStack foodStack = FoodUtils.getFoodStack(context);
 			foodHistory.addFood(foodStack, player);
-			if (SOFConfig.carrot.enable && (player.getMaxHealth() < SOFConfig.carrot.maxHealth || SOFConfig.carrot.maxHealth == -1)) {
+			SOFConfig.Carrot carrotConfig = SpiceOfFabric.config.carrot;
+			if (carrotConfig.enable && (player.getMaxHealth() < carrotConfig.maxHealth || carrotConfig.maxHealth == -1)) {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
 		}
 	}
 
-	private static Integer modifyEatingTime(Integer eatingTime, FoodContext context, PlayerEntity player) {
+	//# if MC_VERSION_NUMBER >= 12006
+	private static Float modifyEatingTime(Float eatingTime, FoodContext context, Player player) {
+	//# else
+	//- private static Integer modifyEatingTime(Integer eatingTime, FoodContext context, Player player) {
+	//# end
 		FoodHistory foodHistory = FoodHistory.get(player);
 		if (foodHistory == null) {
 			return eatingTime;
 		}
 
-		SOFConfig.setConsumeDurationValues(foodHistory.getTimesRecentlyEaten(FoodUtils.getFoodStack(context)), context.originalFoodHunger(), context.originalFoodSaturationModifier(), eatingTime);
-		return (int) SOFConfig.consumeDurationExpression.evaluate();
+		config.food.prepareConsumeDurationExpression(
+				foodHistory.getTimesRecentlyEaten(FoodUtils.getFoodStack(context)),
+				context.originalFoodHunger(),
+				context.originalFoodSaturationModifier(),
+				eatingTime
+		);
+		return config.food.evaluateConsumeDurationExpression();
 	}
 
-	private static FoodProperties modifyFoodProperties(FoodProperties foodProperties, FoodContext context) {
+	private static de.siphalor.capsaicin.api.food.FoodProperties modifyFoodProperties(de.siphalor.capsaicin.api.food.FoodProperties foodProperties, FoodContext context) {
 		int timesEaten;
-		if (context.user() instanceof PlayerEntity player) {
+		if (context.user() instanceof Player player) {
 			FoodHistory foodHistory = FoodHistory.get(player);
 			if (foodHistory != null) {
 				timesEaten = foodHistory.getTimesRecentlyEaten(FoodUtils.getFoodStack(context));
@@ -193,41 +249,50 @@ public class SpiceOfFabric implements ModInitializer {
 			timesEaten = 0;
 		}
 
-		SOFConfig.setHungerExpressionValues(timesEaten, foodProperties.getHunger(), foodProperties.getSaturationModifier(), 0);
-		foodProperties.setHunger(SOFConfig.getHungerValue());
-		foodProperties.setSaturationModifier(SOFConfig.getSaturationValue());
+		config.food.prepareHungerExpressions(
+				timesEaten,
+				foodProperties.getHunger(),
+				foodProperties.getSaturationModifier(),
+				0
+		);
+		foodProperties.setHunger(config.food.evaluateHungerExpression());
+		foodProperties.setSaturationModifier(config.food.evaluateSaturationExpression());
 		return foodProperties;
 	}
 
-	public static boolean hasClientMod(ServerPlayerEntity player) {
+	public static boolean hasClientMod(ServerPlayer player) {
 		return SOFCommonNetworking.hasClientMod(player);
 	}
 
-	public static EntityAttributeModifier createHealthModifier(double amount) {
-		return new EntityAttributeModifier(
+	public static AttributeModifier createHealthModifier(double amount) {
+		return new AttributeModifier(
 				PLAYER_HEALTH_MODIFIER_UUID,
 				MOD_ID,
 				amount,
-				EntityAttributeModifier.Operation.ADDITION
+				//# if MC_VERSION_NUMBER >= 12006
+				AttributeModifier.Operation.ADD_VALUE
+				//# else
+				//- AttributeModifier.Operation.ADDITION
+				//# end
 		);
 	}
 
-	public static void updateMaxHealth(ServerPlayerEntity player, boolean sync, boolean announce) {
-		EntityAttributeInstance maxHealthAttr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+	public static void updateMaxHealth(ServerPlayer player, boolean sync, boolean announce) {
+		AttributeInstance maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
 		double oldValue = maxHealthAttr.getValue();
 		maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
 
-		if (SOFConfig.carrot.enable) {
-			FoodHistory foodHistory = ((IHungerManager) player.getHungerManager()).spiceOfFabric_getFoodHistory();
-			maxHealthAttr.addPersistentModifier(createHealthModifier(foodHistory.getCarrotHealthOffset(player)));
+		if (config.carrot.enable) {
+			FoodHistory foodHistory = ((IHungerManager) player.getFoodData()).spiceOfFabric_getFoodHistory();
+			maxHealthAttr.addPermanentModifier(createHealthModifier(foodHistory.getCarrotHealthOffset(player)));
 		}
 
 		if (sync) {
-			player.networkHandler.sendPacket(new EntityAttributesS2CPacket(player.getId(), Collections.singleton(maxHealthAttr)));
-			player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
+			player.connection.send(new ClientboundUpdateAttributesPacket(player.getId(), Collections.singleton(maxHealthAttr)));
+			player.connection.send(new ClientboundSetHealthPacket(player.getHealth(), player.getFoodData().getFoodLevel(), player.getFoodData().getSaturationLevel()));
 		}
 		if (announce && maxHealthAttr.getValue() > oldValue) {
-			player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1F, 1F);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1F, 1F);
 		}
 	}
 
@@ -235,17 +300,40 @@ public class SpiceOfFabric implements ModInitializer {
 		if (stack == null) {
 			return false;
 		}
-		NbtCompound nbt = stack.getNbt();
-		return nbt != null && nbt.contains(FOOD_JOURNAL_FLAG, 1) && nbt.getBoolean(FOOD_JOURNAL_FLAG);
+		//# if MC_VERSION_NUMBER >= 12006
+		CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+		return customData != null && customData.contains(SpiceOfFabric.FOOD_JOURNAL_FLAG);
+		//# else
+		//- CompoundTag nbt = stack.getTag();
+		//- return nbt != null && nbt.contains(FOOD_JOURNAL_FLAG, 1) && nbt.getBoolean(FOOD_JOURNAL_FLAG);
+		//# end
 	}
 
 	public static ItemStack createFoodJournalStack() {
 		ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-		NbtCompound compound = stack.getOrCreateNbt();
-		compound.putString("title", "");
-		compound.putString("author", "Me");
-		compound.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
-		stack.getOrCreateSubNbt("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
+		//# if MC_VERSION_NUMBER >= 12006
+		stack.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(
+				Filterable.from(FilteredText.fullyFiltered("")),
+				"Me",
+				0,
+				List.of(),
+				true
+		));
+		stack.set(DataComponents.ITEM_NAME, Component.literal("Diet Journal").withStyle(ChatFormatting.BOLD));
+		stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag ->
+				tag.putBoolean(FOOD_JOURNAL_FLAG, true)
+		));
+		//# else
+		//- CompoundTag compound = stack.getOrCreateTag();
+		//- compound.putString("title", "");
+		//- compound.putString("author", "Me");
+		//- compound.putBoolean(SpiceOfFabric.FOOD_JOURNAL_FLAG, true);
+		//- stack.getOrCreateTagElement("display").putString("Name", "{\"translate\":\"Diet Journal\",\"bold\":true}");
+		//# end
 		return stack;
+	}
+
+	public static ResourceLocation createId(String path) {
+		return new ResourceLocation(MOD_ID, path);
 	}
 }

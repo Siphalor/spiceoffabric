@@ -1,32 +1,57 @@
 package de.siphalor.spiceoffabric.container;
 
-import de.siphalor.spiceoffabric.item.FoodContainerItem;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+//- import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Player;
+//- import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemContainerContents;
 
-public class ItemStackInventory implements Inventory {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class ItemStackInventory implements Container {
 	private final ItemStack containerStack;
 	private final String nbtKey;
 	private final int size;
-	private final DefaultedList<ItemStack> stacks;
+	private final NonNullList<ItemStack> stacks;
 
-	public ItemStackInventory(ItemStack containerStack, String nbtKey, int size) {
-		this.nbtKey = nbtKey;
-		this.size = size;
-		this.containerStack = containerStack;
-		stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
-		Inventories.readNbt(containerStack.getOrCreateSubNbt(nbtKey), stacks);
+	public static ItemStackInventory fromStack(
+			ItemStack containerStack,
+			String nbtKey,
+			int size
+			//# if MC_VERSION_NUMBER >= 12006
+			, HolderLookup.Provider levelRegistry
+			//# end
+	) {
+		NonNullList<ItemStack> stacks = NonNullList.withSize(size, ItemStack.EMPTY);
+		//# if MC_VERSION_NUMBER >= 12006
+		CustomData customData = containerStack.get(DataComponents.CUSTOM_DATA);
+		if (customData != null && customData.contains(nbtKey)) {
+			ContainerHelper.loadAllItems(customData.getUnsafe().getCompound(nbtKey), stacks, levelRegistry);
+		} else {
+			ItemContainerContents containerContents = containerStack.get(DataComponents.CONTAINER);
+			if (containerContents != null) {
+				containerContents.copyInto(stacks);
+			}
+		}
+		//# else
+		//- ContainerHelper.loadAllItems(containerStack.getOrCreateTagElement(nbtKey), stacks);
+		//# end
+		return new ItemStackInventory(containerStack, nbtKey, size, stacks);
 	}
 
-	public DefaultedList<ItemStack> getContainedStacks() {
+	public NonNullList<ItemStack> getContainedStacks() {
 		return stacks;
 	}
 
 	@Override
-	public int size() {
+	public int getContainerSize() {
 		return size;
 	}
 
@@ -41,48 +66,60 @@ public class ItemStackInventory implements Inventory {
 	}
 
 	@Override
-	public ItemStack getStack(int slot) {
+	public ItemStack getItem(int slot) {
 		return stacks.get(slot);
 	}
 
 	@Override
-	public ItemStack removeStack(int slot, int amount) {
+	public ItemStack removeItem(int slot, int amount) {
 		ItemStack split = stacks.get(slot).split(amount);
-		markDirty();
+		setChanged();
 		return split;
 	}
 
 	@Override
-	public ItemStack removeStack(int slot) {
+	public ItemStack removeItemNoUpdate(int slot) {
 		ItemStack stack = stacks.get(slot);
 		stacks.set(slot, ItemStack.EMPTY);
-		markDirty();
+		setChanged();
 		return stack;
 	}
 
 	@Override
-	public boolean isValid(int slot, ItemStack stack) {
-		return stack.isFood() && !(stack.getItem() instanceof FoodContainerItem);
+	public boolean canPlaceItem(int slot, ItemStack stack) {
+		//# if MC_VERSION_NUMBER >= 12006
+		return stack.has(DataComponents.FOOD);
+		//# else
+		//- return stack.isEdible() && !(stack.getItem() instanceof FoodContainerItem);
+		//# end
 	}
 
 	@Override
-	public void setStack(int slot, ItemStack stack) {
+	public void setItem(int slot, ItemStack stack) {
 		stacks.set(slot, stack);
-		markDirty();
+		setChanged();
 	}
 
 	@Override
-	public void markDirty() {
-		Inventories.writeNbt(containerStack.getOrCreateSubNbt(nbtKey), stacks);
+	public void setChanged() {
+		//# if MC_VERSION_NUMBER >= 12006
+		CustomData customData = containerStack.get(DataComponents.CUSTOM_DATA);
+		if (customData != null && customData.contains(nbtKey)) {
+			customData.update(tag -> tag.remove(nbtKey));
+		}
+		containerStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(stacks));
+		//# else
+		//- ContainerHelper.saveAllItems(containerStack.getOrCreateTagElement(nbtKey), stacks);
+		//# end
 	}
 
 	@Override
-	public boolean canPlayerUse(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
 	@Override
-	public void clear() {
+	public void clearContent() {
 		stacks.clear();
 	}
 }

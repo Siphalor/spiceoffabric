@@ -24,8 +24,11 @@
 		"client": [
 			"de.siphalor.spiceoffabric.client.SOFClient"
 		],
-		"tweed4:config": [
-			"de.siphalor.spiceoffabric.config.SOFConfig"
+		"server": [
+			"de.siphalor.spiceoffabric.server.SOFDedicatedServer"
+		],
+		"modmenu": [
+			"de.siphalor.spiceoffabric.client.SOFModMenuEntryPoint"
 		]
 	},
 	"mixins": [

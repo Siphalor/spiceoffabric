@@ -5,28 +5,30 @@ import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import de.siphalor.spiceoffabric.util.IHungerManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-public class FoodJournalScreenHandler extends ScreenHandler {
+public class FoodJournalScreenHandler extends AbstractContainerMenu {
 	private static final String PAGE_INDICATOR_TEXT_KEY = "book.pageIndicator";
 	private static final Item PAGE_INDICATOR_ITEM = Items.STICK;
 	private static final ItemStack PREV_STACK;
@@ -34,20 +36,27 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 	static {
 		PREV_STACK = new ItemStack(Items.FEATHER);
-		PREV_STACK.setCustomName(Text.translatable("createWorld.customize.custom.prev").styled(style -> style.withItalic(false)));
 		NEXT_STACK = new ItemStack(Items.FLINT);
-		NEXT_STACK.setCustomName(Text.translatable("createWorld.customize.custom.next").styled(style -> style.withItalic(false)));
+		Component prevName = Component.translatable("createWorld.customize.custom.prev").withStyle(style -> style.withItalic(false));
+		Component nextName = Component.translatable("createWorld.customize.custom.next").withStyle(style -> style.withItalic(false));
+		//# if MC_VERSION_NUMBER >= 12006
+		PREV_STACK.set(DataComponents.ITEM_NAME, prevName);
+		NEXT_STACK.set(DataComponents.ITEM_NAME, nextName);
+		//# else
+		//- PREV_STACK.setHoverName(prevName);
+		//- NEXT_STACK.setHoverName(nextName);
+		//# end
 	}
 
 	private static final int JOURNAL_SLOT_COUNT = 9 * 5;
 
-	private final ServerPlayerEntity player;
+	private final ServerPlayer player;
 	private final boolean clientHasMod;
 	private final FoodJournalView currentView;
 	private final PaginatedReadOnlyInventory foodJournalInventory;
-	private final Inventory infoInventory;
+	private final Container infoInventory;
 
-	public FoodJournalScreenHandler(@Nullable ScreenHandlerType<?> type, int syncId, FoodJournalView currentView, ServerPlayerEntity player, FoodHistory foodHistory) {
+	public FoodJournalScreenHandler(@Nullable MenuType<?> type, int syncId, FoodJournalView currentView, ServerPlayer player, FoodHistory foodHistory) {
 		super(type, syncId);
 		this.currentView = currentView;
 		this.player = player;
@@ -58,7 +67,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 			addSlot(new ReadOnlySlot(foodJournalInventory, i, 0, 0));
 		}
 
-		this.infoInventory = new SimpleInventory(
+		this.infoInventory = new SimpleContainer(
 				ItemStack.EMPTY,
 				ItemStack.EMPTY,
 				ItemStack.EMPTY,
@@ -79,7 +88,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 		addSlot(new ClickableSlot(infoInventory, 7, 0, 0, getViewCallback(FoodJournalView.CARROT)));
 		addSlot(new ClickableSlot(infoInventory, 8, 0, 0, getViewCallback(FoodJournalView.CARROT_UNEATEN)));
 
-		PlayerInventory playerInventory = player.getInventory();
+		Inventory playerInventory = player.getInventory();
 		for (int i = 9; i < 36; i++) {
 			addSlot(new Slot(playerInventory, i, 0, 0));
 		}
@@ -100,26 +109,42 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 			var stacks = foodHistory.getUniqueFoodsEaten().stream()
 					.map(FoodHistoryEntry::getStack)
 					.sorted(Comparator.comparingInt(stack -> {
-						FoodComponent foodComponent = stack.getItem().getFoodComponent();
+						//# if MC_VERSION_NUMBER >= 12006
+						FoodProperties foodComponent = stack.get(DataComponents.FOOD);
+						//# else
+						//- FoodProperties foodComponent = stack.getItem().getFoodProperties();
+						//# end
 						if (foodComponent == null) {
 							return 0;
 						}
-						return foodComponent.getHunger();
+						//# if MC_VERSION_NUMBER >= 12006
+						return foodComponent.nutrition();
+						//# else
+						//- return foodComponent.getNutrition();
+						//# end
 					}))
 					.toList();
 			return new PaginatedReadOnlyInventory(JOURNAL_SLOT_COUNT, stacks);
 		} else if (view == FoodJournalView.CARROT_UNEATEN) {
 			var eatenItems = foodHistory.getUniqueFoodsEaten().stream()
 					.map(entry -> entry.getStack().getItem()).collect(Collectors.toUnmodifiableSet());
-			var stacks = Registries.ITEM.stream().parallel()
+			var stacks = BuiltInRegistries.ITEM.stream().parallel()
 					.filter(FoodUtils::isFood)
 					.filter(item -> !eatenItems.contains(item))
 					.sorted(Comparator.comparingInt(item -> {
-						FoodComponent foodComponent = item.getFoodComponent();
+						//# if MC_VERSION_NUMBER >= 12006
+						FoodProperties foodComponent = item.components().get(DataComponents.FOOD);
+						//# else
+						//- FoodProperties foodComponent = item.getFoodProperties();
+						//# end
 						if (foodComponent == null) {
 							return 0;
 						}
-						return foodComponent.getHunger();
+						//# if MC_VERSION_NUMBER >= 12006
+						return foodComponent.nutrition();
+						//# else
+						//- return foodComponent.getNutrition();
+						//# end
 					}))
 					.map(ItemStack::new)
 					.toList();
@@ -131,10 +156,17 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 
 	private ItemStack createPageIndicatorStack() {
 		var stack = new ItemStack(PAGE_INDICATOR_ITEM);
-		stack.setCustomName(
-				Text.translatable(PAGE_INDICATOR_TEXT_KEY, foodJournalInventory.getPage() + 1, foodJournalInventory.getPageCount())
-						.styled(style -> style.withItalic(false))
-		);
+		MutableComponent name = Component.translatable(
+						PAGE_INDICATOR_TEXT_KEY,
+						foodJournalInventory.getPage() + 1,
+						foodJournalInventory.getPageCount()
+				)
+				.withStyle(style -> style.withItalic(false));
+		//# if MC_VERSION_NUMBER >= 12006
+		stack.set(DataComponents.ITEM_NAME, name);
+		//# else
+		//- stack.setHoverName(name);
+		//# end
 		return stack;
 	}
 
@@ -142,12 +174,16 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 		if (this.currentView == view || !view.isAvailable()) {
 			return ItemStack.EMPTY;
 		}
-		return new ItemStack(itemRepresentation)
-				.setCustomName(
-						clientHasMod
-								? view.getTranslatableName()
-								: Text.literal(view.getLiteralName()).styled(style -> style.withItalic(false))
-				);
+		ItemStack stack = new ItemStack(itemRepresentation);
+		Component name = clientHasMod
+				? view.getTranslatableName()
+				: Component.literal(view.getLiteralName()).withStyle(style -> style.withItalic(false));
+		//# if MC_VERSION_NUMBER >= 12006
+		stack.set(DataComponents.ITEM_NAME, name);
+		//# else
+		//- stack.setHoverName(name);
+		//# end
+		return stack;
 	}
 
 	private Runnable getViewCallback(FoodJournalView view) {
@@ -155,7 +191,7 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 			return () -> {
 			};
 		}
-		return () -> player.openHandledScreen(new Factory(player, view));
+		return () -> player.openMenu(new Factory(player, view));
 	}
 
 	private void previousPage() {
@@ -163,8 +199,8 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 		if (page > 0) {
 			page--;
 			foodJournalInventory.setPage(page);
-			infoInventory.setStack(4, createPageIndicatorStack());
-			syncState();
+			infoInventory.setItem(4, createPageIndicatorStack());
+			sendAllDataToRemote();
 		}
 	}
 
@@ -173,42 +209,42 @@ public class FoodJournalScreenHandler extends ScreenHandler {
 		if (page < foodJournalInventory.getPageCount() - 1) {
 			page++;
 			foodJournalInventory.setPage(page);
-			infoInventory.setStack(4, createPageIndicatorStack());
-			syncState();
+			infoInventory.setItem(4, createPageIndicatorStack());
+			sendAllDataToRemote();
 		}
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int slot) {
+	public ItemStack quickMoveStack(Player player, int slot) {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
-	public static class Factory implements NamedScreenHandlerFactory {
-		private final ServerPlayerEntity player;
+	public static class Factory implements MenuProvider {
+		private final ServerPlayer player;
 		private final FoodJournalView view;
 
-		public Factory(ServerPlayerEntity player, FoodJournalView view) {
+		public Factory(ServerPlayer player, FoodJournalView view) {
 			this.player = player;
 			this.view = view;
 		}
 
 		@Override
-		public Text getDisplayName() {
+		public Component getDisplayName() {
 			if (SpiceOfFabric.hasClientMod(player)) {
 				return view.getTranslatableName();
 			}
-			return Text.literal(view.getLiteralName());
+			return Component.literal(view.getLiteralName());
 		}
 
 		@Nullable
 		@Override
-		public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-			return new FoodJournalScreenHandler(ScreenHandlerType.GENERIC_9X6, syncId, view, this.player, ((IHungerManager) player.getHungerManager()).spiceOfFabric_getFoodHistory());
+		public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
+			return new FoodJournalScreenHandler(MenuType.GENERIC_9x6, syncId, view, this.player, ((IHungerManager) player.getFoodData()).spiceOfFabric_getFoodHistory());
 		}
 	}
 }

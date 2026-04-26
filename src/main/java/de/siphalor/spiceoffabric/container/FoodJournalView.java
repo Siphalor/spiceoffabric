@@ -1,10 +1,11 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import de.siphalor.spiceoffabric.config.SOFConfig;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
+
+//- import de.siphalor.spiceoffabric.config.SOFConfig;
 
 public enum FoodJournalView {
 	HISTORY("Least to most recently eaten"),
@@ -12,7 +13,7 @@ public enum FoodJournalView {
 	CARROT_UNEATEN("Unique foods that have not been eaten yet")
 	;
 
-	private final Text translatableName;
+	private final Component translatableName;
 	private final String literalName;
 
 	public static FoodJournalView getDefault() {
@@ -26,12 +27,12 @@ public enum FoodJournalView {
 	}
 
 	FoodJournalView(String literalName) {
-		this.translatableName = Text.translatable(SpiceOfFabric.MOD_ID + ".journal.screen.view." + name().toLowerCase(Locale.ROOT))
-				.styled(style -> style.withItalic(false));
+		this.translatableName = Component.translatable(SpiceOfFabric.MOD_ID + ".journal.screen.view." + name().toLowerCase(Locale.ROOT))
+				.withStyle(style -> style.withItalic(false));
 		this.literalName = literalName;
 	}
 
-	public Text getTranslatableName() {
+	public Component getTranslatableName() {
 		return translatableName;
 	}
 
@@ -41,9 +42,9 @@ public enum FoodJournalView {
 
 	public boolean isAvailable() {
 		return switch (this) {
-			case HISTORY -> SOFConfig.food.historyLength > 0;
-			case CARROT -> SOFConfig.carrot.enable;
-			case CARROT_UNEATEN -> SOFConfig.carrot.enable && SOFConfig.carrot.uneatenInJournal;
+			case HISTORY -> SpiceOfFabric.config.food.historyLength > 0;
+			case CARROT -> SpiceOfFabric.config.carrot.enable;
+			case CARROT_UNEATEN -> SpiceOfFabric.config.carrot.enable && SpiceOfFabric.config.carrot.uneatenInJournal;
 		};
 	}
 }

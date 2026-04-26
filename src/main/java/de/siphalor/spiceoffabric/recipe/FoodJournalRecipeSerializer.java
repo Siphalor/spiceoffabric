@@ -2,40 +2,65 @@ package de.siphalor.spiceoffabric.recipe;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
-import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.core.NonNullList;
+//- import net.minecraft.network.FriendlyByteBuf;
+//- import net.minecraft.util.ExtraCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 public class FoodJournalRecipeSerializer implements RecipeSerializer<ShapelessRecipe> {
-	private static final Codec<ShapelessRecipe> CODEC = RecordCodecBuilder.create((instance) ->
+	//# if MC_VERSION_NUMBER >= 12006
+	private static final MapCodec<ShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) ->
+	//# else
+	//- private static final Codec<ShapelessRecipe> CODEC = RecordCodecBuilder.create((instance) ->
+	//# end
 			instance.group(
-					Codecs.createStrictOptionalFieldCodec(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
-					CraftingRecipeCategory.CODEC.fieldOf("category").orElse(CraftingRecipeCategory.MISC).forGetter(ShapelessRecipe::getCategory),
+					//# if MC_VERSION_NUMBER >= 12006
+					Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
+					//# else
+					//- ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+					//# end
+					CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
 					RecordCodecBuilder.point(SpiceOfFabric.createFoodJournalStack()),
-					Ingredient.DISALLOW_EMPTY_CODEC.listOf().fieldOf("ingredients")
-							.flatXmap(ingredients -> DataResult.success(DefaultedList.copyOf(Ingredient.EMPTY, ingredients.toArray(Ingredient[]::new))), DataResult::success)
+					Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
+							.flatXmap(ingredients -> DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredients.toArray(Ingredient[]::new))), DataResult::success)
 							.forGetter(ShapelessRecipe::getIngredients)
 			).apply(instance, ShapelessRecipe::new)
 	);
 
+	//# if MC_VERSION_NUMBER >= 12006
+	private static final StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> STREAM_CODEC = StreamCodec.unit(null);
+
 	@Override
-	public Codec<ShapelessRecipe> codec() {
+	public MapCodec<ShapelessRecipe> codec() {
 		return CODEC;
 	}
 
 	@Override
-	public ShapelessRecipe read(PacketByteBuf buf) {
-		return null;
+	public StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> streamCodec() {
+		return STREAM_CODEC;
 	}
+	//# else
+	//- @Override
+	//- public Codec<ShapelessRecipe> codec() {
+	//- 	return CODEC;
+	//- }
 
-	@Override
-	public void write(PacketByteBuf buf, ShapelessRecipe recipe) {
+	//- @Override
+	//- public ShapelessRecipe fromNetwork(FriendlyByteBuf buf) {
+	//- 	return null;
+	//- }
 
-	}
+	//- @Override
+	//- public void toNetwork(FriendlyByteBuf buffer, ShapelessRecipe recipe) {
+
+	//- }
+	//# end
 }

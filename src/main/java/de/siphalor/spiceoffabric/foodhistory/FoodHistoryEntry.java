@@ -1,82 +1,58 @@
 package de.siphalor.spiceoffabric.foodhistory;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class FoodHistoryEntry {
+	private final int itemId;
 
-	private int itemId;
-	private NbtCompound data;
-
-	public FoodHistoryEntry() {
-		itemId = 0;
-		data = new NbtCompound();
+	public static FoodHistoryEntry fromItemStack(ItemStack stack) {
+		int itemId = BuiltInRegistries.ITEM.getId(stack.getItem());
+		return new FoodHistoryEntry(itemId);
 	}
 
-	public void write(PacketByteBuf buffer) {
-		buffer.writeVarInt(itemId);
+	public static FoodHistoryEntry read(FriendlyByteBuf buffer) {
+		int itemId = buffer.readVarInt();
+		return new FoodHistoryEntry(itemId);
 	}
 
-	public MutableText getStackName() {
-		return Text.translatable(getStack().getTranslationKey());
-	}
-
-	public ItemStack getStack() {
-		ItemStack stack = new ItemStack(Registries.ITEM.get(itemId));
-		stack.setNbt(data);
-		return stack;
-	}
-
-	public String getItemStackSerialization() {
-		return "{id:\"" + Registries.ITEM.getId(Registries.ITEM.get(itemId)) + "\",tag:" + data.asString() + ",Count:1}";
-	}
-
-	public static FoodHistoryEntry from(PacketByteBuf buffer) {
-		FoodHistoryEntry entry = new FoodHistoryEntry();
-		entry.itemId = buffer.readVarInt();
-		return entry;
-	}
-
-	public NbtCompound write(NbtCompound compoundTag) {
-		compoundTag.putString("item", Registries.ITEM.getId(Registries.ITEM.get(itemId)).toString());
-		compoundTag.put("data", data);
-		return compoundTag;
-	}
-
-	public FoodHistoryEntry read(NbtCompound compoundTag) {
-		Optional<Item> item = Registries.ITEM.getOrEmpty(Identifier.tryParse(compoundTag.getString("item")));
+	public static FoodHistoryEntry read(CompoundTag compoundTag) {
+		Optional<Item> item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(compoundTag.getString("item")));
 		if (item.isEmpty()) {
 			return null;
 		}
-		itemId = Registries.ITEM.getRawId(item.get());
-		data = compoundTag.getCompound("data");
-		return this;
+		int itemId = BuiltInRegistries.ITEM.getId(item.get());
+		return new FoodHistoryEntry(itemId);
 	}
 
-	public static FoodHistoryEntry fromItemStack(ItemStack stack) {
-		FoodHistoryEntry entry = new FoodHistoryEntry();
-		entry.itemId = Registries.ITEM.getRawId(stack.getItem());
-		return entry;
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeVarInt(itemId);
 	}
 
-	@Override
-	public boolean equals(Object other) {
-		if (other instanceof FoodHistoryEntry otherEntry) {
-			return otherEntry.itemId == itemId && otherEntry.data.equals(data);
-		}
-		return super.equals(other);
+	public CompoundTag write(CompoundTag compoundTag) {
+		compoundTag.putString("item", BuiltInRegistries.ITEM.getKey(BuiltInRegistries.ITEM.byId(itemId)).toString());
+		return compoundTag;
 	}
 
-	@Override
-	public int hashCode() {
-		return Integer.valueOf(itemId).hashCode();
+	public MutableComponent getStackName() {
+		return Component.translatable(getStack().getDescriptionId());
+	}
+
+	public ItemStack getStack() {
+		return new ItemStack(BuiltInRegistries.ITEM.byId(itemId));
 	}
 }

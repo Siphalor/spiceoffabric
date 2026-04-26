@@ -1,15 +1,12 @@
 package de.siphalor.spiceoffabric.mixin.client;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.s2c.play.CommonPlayerSpawnInfo;
-import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,10 +14,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public class MixinClientPlayNetworkHandler {
-	@Inject(method = "onPlayerRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setId(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-	public void onRespawned(PlayerRespawnS2CPacket packet, CallbackInfo ci, CommonPlayerSpawnInfo commonPlayerSpawnInfo, RegistryKey<DimensionType> dimensionKey, RegistryEntry<DimensionType> dimensionEntry, ClientPlayerEntity oldPlayer, ClientPlayerEntity newPlayer) {
-		((IHungerManager) newPlayer.getHungerManager()).spiceOfFabric_setFoodHistory(((IHungerManager) oldPlayer.getHungerManager()).spiceOfFabric_getFoodHistory());
+	@Inject(method = "handleRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;setId(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+	public void onRespawned(
+			ClientboundRespawnPacket packet,
+			CallbackInfo ci,
+			@Local(ordinal = 0)
+			LocalPlayer oldPlayer,
+			@Local(ordinal = 1)
+			LocalPlayer newPlayer
+	) {
+		((IHungerManager) newPlayer.getFoodData())
+				.spiceOfFabric_setFoodHistory(((IHungerManager) oldPlayer.getFoodData()).spiceOfFabric_getFoodHistory());
 	}
 }

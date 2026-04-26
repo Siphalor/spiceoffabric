@@ -1,21 +1,21 @@
 package de.siphalor.spiceoffabric.util;
 
+import de.siphalor.capsaicin.api.food.CamoFoodItem;
 import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CakeBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,21 +23,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+//- import net.minecraft.nbt.CompoundTag;
+//- import net.minecraft.nbt.ListTag;
+//- import net.minecraft.nbt.StringTag;
+
 public class FoodUtils {
 	private static final String LAST_EATEN_BASE_TRANSLATION_KEY = SpiceOfFabric.MOD_ID + ".item.tooltip.last_eaten";
-	private static final Text NEVER_EATEN_TOOLTIP = Text.translatable(SpiceOfFabric.MOD_ID + ".item.tooltip.never_eaten");
+	private static final Component NEVER_EATEN_TOOLTIP = Component.translatable(SpiceOfFabric.MOD_ID + ".item.tooltip.never_eaten");
 
 	private FoodUtils() {
 	}
 
 	public static boolean isFood(ItemStack stack) {
 		Item item = stack.getItem();
-		if (item instanceof FoodContainerItem) {
+		if (item instanceof CamoFoodItem) {
 			return false;
 		}
-		if (stack.isFood()) {
+		//# if MC_VERSION_NUMBER >= 12006
+		if (stack.has(DataComponents.FOOD)) {
 			return true;
 		}
+		//# else
+		//- if (stack.isEdible()) {
+		//- 	return true;
+		//- }
+		//# end
 		if (item instanceof BlockItem blockItem) {
 			return blockItem.getBlock() instanceof CakeBlock;
 		}
@@ -48,9 +58,15 @@ public class FoodUtils {
 		if (item instanceof FoodContainerItem) {
 			return false;
 		}
-		if (item.isFood()) {
+		//# if MC_VERSION_NUMBER >= 12006
+		if (item.components().has(DataComponents.FOOD)) {
 			return true;
 		}
+		//# else
+		//- if (item.isEdible()) {
+		//- 	return true;
+		//- }
+		//# end
 		if (item instanceof BlockItem blockItem) {
 			return blockItem.getBlock() instanceof CakeBlock;
 		}
@@ -72,7 +88,7 @@ public class FoodUtils {
 		return null;
 	}
 
-	public static void appendServerTooltips(PlayerEntity player, ItemStack stack) {
+	public static void appendServerTooltips(Player player, ItemStack stack) {
 		if (!isFood(stack)) {
 			return;
 		}
@@ -81,27 +97,36 @@ public class FoodUtils {
 			return;
 		}
 
-		var additions = new ArrayList<Text>();
+		var additions = new ArrayList<Component>();
 		appendCarrotTooltip(additions, stack, foodHistory);
 		if (additions.isEmpty()) {
 			return;
 		}
 
-		NbtCompound displayNbt = stack.getOrCreateSubNbt(ItemStack.DISPLAY_KEY);
-		NbtList loreNbt;
-		if (displayNbt.contains(ItemStack.LORE_KEY, 9)) {
-			loreNbt = displayNbt.getList(ItemStack.LORE_KEY, 8);
-		} else {
-			loreNbt = new NbtList();
-			displayNbt.put(ItemStack.LORE_KEY, loreNbt);
-		}
+		//# if MC_VERSION_NUMBER >= 12006
+		stack.update(DataComponents.LORE, ItemLore.EMPTY, itemLore -> {
+			for (Component addition : additions) {
+				itemLore = itemLore.withLineAdded(addition);
+			}
+			return itemLore;
+		});
+		//# else
+		//- CompoundTag displayNbt = stack.getOrCreateTagElement(ItemStack.TAG_DISPLAY);
+		//- ListTag loreNbt;
+		//- if (displayNbt.contains(ItemStack.TAG_LORE, 9)) {
+		//- 	loreNbt = displayNbt.getList(ItemStack.TAG_LORE, 8);
+		//- } else {
+		//- 	loreNbt = new ListTag();
+		//- 	displayNbt.put(ItemStack.TAG_LORE, loreNbt);
+		//- }
 
-		for (Text addition : additions) {
-			loreNbt.add(NbtString.of(Text.Serialization.toJsonString(addition)));
-		}
+		//- for (Component addition : additions) {
+		//- 	loreNbt.add(StringTag.valueOf(Component.Serializer.toJson(addition)));
+		//- }
+		//# end
 	}
 
-	public static List<Text> getClientTooltipAdditions(PlayerEntity player, ItemStack stack) {
+	public static List<Component> getClientTooltipAdditions(Player player, ItemStack stack) {
 		if (!isFood(stack)) {
 			return Collections.emptyList();
 		}
@@ -110,21 +135,23 @@ public class FoodUtils {
 			return Collections.emptyList();
 		}
 
-		var additions = new ArrayList<Text>();
+		var additions = new ArrayList<Component>();
 		appendCarrotTooltip(additions, stack, foodHistory);
 		appendLastEatenTooltip(additions, stack, foodHistory);
 
 		return additions;
 	}
 
-	private static void appendCarrotTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (SOFConfig.carrot.enable && !foodHistory.isInUniqueEaten(stack)) {
+	private static void appendCarrotTooltip(List<Component> base, ItemStack stack, FoodHistory foodHistory) {
+		if (SpiceOfFabric.config.carrot.enable && !foodHistory.isInUniqueEaten(stack)) {
 			base.add(NEVER_EATEN_TOOLTIP);
 		}
 	}
 
-	private static void appendLastEatenTooltip(List<Text> base, ItemStack stack, FoodHistory foodHistory) {
-		if (SOFConfig.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.NONE || SOFConfig.food.historyLength <= 0) {
+	private static void appendLastEatenTooltip(List<Component> base, ItemStack stack, FoodHistory foodHistory) {
+		int historyLength = SpiceOfFabric.config.food.historyLength;
+		if (SpiceOfFabric.config.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.NONE
+				|| historyLength <= 0) {
 			return;
 		}
 		int lastEaten = foodHistory.getFoodCountSinceLastEaten(stack);
@@ -132,26 +159,26 @@ public class FoodUtils {
 			return;
 		}
 
-		Text text;
+		Component text;
 		if (lastEaten == 0) {
-			text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.last", lastEaten);
+			text = Component.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.last", lastEaten);
 		} else if (lastEaten == 1) {
-			text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.one", lastEaten);
+			text = Component.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple.one", lastEaten);
 		} else {
-			text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
+			text = Component.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".simple", lastEaten);
 		}
 
-		if (SOFConfig.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.EXTENDED) {
-			int left = SOFConfig.food.historyLength - lastEaten;
+		if (SpiceOfFabric.config.showLastEatenTips == SOFConfig.ItemTipDisplayStyle.EXTENDED) {
+			int left = historyLength - lastEaten;
 			if (left == 1) {
-				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, SOFConfig.food.historyLength - lastEaten);
+				text = Component.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended.one", text, 1);
 			} else {
-				text = Text.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, SOFConfig.food.historyLength - lastEaten);
+				text = Component.translatable(LAST_EATEN_BASE_TRANSLATION_KEY + ".extended", text, historyLength - lastEaten);
 			}
 		}
 
 		for (String line : StringUtils.split(text.getString(), '\n')) {
-			base.add(Text.literal(line).styled(style -> style.withColor(Formatting.GRAY).withItalic(true)));
+			base.add(Component.literal(line).withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(true)));
 		}
 	}
 }

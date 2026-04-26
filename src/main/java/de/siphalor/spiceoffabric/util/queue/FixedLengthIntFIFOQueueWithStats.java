@@ -4,10 +4,12 @@ import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 public class FixedLengthIntFIFOQueueWithStats implements FixedLengthIntFIFOQueue {
 	private final FixedLengthIntFIFOQueue queue;
+	@Getter
 	private final Int2IntMap stats;
 
 	public FixedLengthIntFIFOQueueWithStats(FixedLengthIntFIFOQueue queue) {
@@ -19,10 +21,6 @@ public class FixedLengthIntFIFOQueueWithStats implements FixedLengthIntFIFOQueue
 	private void rebuildStats() {
 		stats.clear();
 		queue.forEach(x -> stats.merge(x, 1, Integer::sum));
-	}
-
-	public Int2IntMap getStats() {
-		return stats;
 	}
 
 	@Override
