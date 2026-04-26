@@ -115,7 +115,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		for (var value : foods) {
 			ItemStack stack = value.value().getFirst();
 			int delta = requiredFood - value.value().getSecond().nutrition();
+			//# if MC_VERSION_NUMBER >= 12100
 			int consumeTime = stack.getUseDuration(entity);
+			//# else
+			//- int consumeTime = stack.getUseDuration();
+			//# end
 			if (delta <= 0) {
 				if (delta > bestDelta || bestDelta > 0 || (delta == bestDelta && consumeTime < bestConsumeTime)) {
 					bestDelta = delta;
@@ -225,7 +229,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		openContainer:
 		if (!world.isClientSide && user instanceof ServerPlayer player) {
 			// Only open the container if the player hasn't used the item for too long
+			//# if MC_VERSION_NUMBER >= 12100
 			int maxUseTime = getUseDuration(stack, user);
+			//# else
+			//- int maxUseTime = getUseDuration(stack);
+			//# end
 			if (maxUseTime - remainingUseTicks > 5) {
 				break openContainer;
 			}
