@@ -162,78 +162,46 @@ publishing {
 	}
 }
 
-// Mod sites
-/*
-static def getChangelog() {
-	return 'git log -1 --format=format:##%x20%s%n%n%b%nRelease%x20by%x20%an --grep Version'.execute().text.trim()
-}
-
-tasks.register('uploadToModSites') {
-	dependsOn build
-	group = "upload"
-}
-
-if (project.hasProperty("curseforgeToken")) {
-	curseforge {
-		apiKey project.curseforgeToken
-		def changes = project.getChangelog()
-		project {
-			id = "318416"
-			releaseType = project.mod_release
-			changelogType = "markdown"
-			changelog = changes
-			addGameVersion('Fabric')
-			for (version in ((String) project.mod_mc_versions).split(";")) {
-				addGameVersion(version)
-			}
-			relations {
-				requiredDependency "fabric-api"
-				optionalDependency "appleskin"
-				optionalDependency "polymer"
-				optionalDependency "roughly-enough-items"
-			}
-			mainArtifact(remapJar) {
-				displayName = "[${project.mod_mc_version_specifier}] ${project.mod_version}"
-			}
-		}
-	}
-	uploadToModSites.finalizedBy(tasks.curseforge)
-}
-
-modrinth {
-	if (project.hasProperty("modrinthToken")) {
-		token = project.modrinthToken
-		uploadToModSites.finalizedBy(tasks.modrinth, tasks.modrinthSyncBody)
+publisher {
+	apiKeys {
+		project.findProperty("modrinth.token")?.let { modrinth(it as String) }
+		project.findProperty("curseforge.token")?.let { curseforge(it as String) }
+		project.findProperty("github.token")?.let { github(it as String) }
 	}
 
-	projectId = "roxihOCb"
-	versionName = "[$project.mod_mc_version_specifier] $project.mod_version"
-	versionType = project.mod_release
-	changelog = project.getChangelog()
-	uploadFile = remapJar
-	gameVersions = project.mod_mc_versions.split(";") as List<String>
-	loaders = ["fabric"]
-	syncBodyFrom = file("README.md").text
+	curseID = "318416"
+	modrinthID = "roxihOCb"
 
-	dependencies {
-		required.project("fabric-api")
-		optional.project("appleskin")
-		optional.project("polymer")
+	artifact.set(tasks.findByName("remapJar") ?: tasks.jar)
+
+	projectVersion = project.version as String
+	versionType = project.property("version.type") as String
+	loaders = listOf("fabric")
+	curseEnvironment = "client"
+
+	gameVersions = smcmtk.mcProps.getting("mc.version.supported").map { it.split(", ") }
+
+	displayName = "[${smcmtk.mcProps.getting("mc.version.title").get()}] $shortVersion"
+	changelog.set(providers.exec {
+		commandLine("git", "log", "-1", "--format=format:##%x20%s%n%n%b", "--grep", "Version")
+	}.standardOutput.asText.map { it.trim() })
+
+	curseDepends {
+		required("fabric-api")
+		optional("polymer")
+		optional("appleskin")
+	}
+	modrinthDepends {
+		required("fabric-api")
+		optional("polymer")
+		optional("appleskin")
+	}
+
+	github {
+		repo("Siphalor/spiceoffabric")
+		tag(shortVersion)
+		displayName(shortVersion)
+		createTag(true)
+		createRelease(true)
 	}
 }
-tasks.modrinth.group = "upload"
-tasks.modrinthSyncBody.group = "upload"
-
-if (project.hasProperty("githubToken")) {
-	githubRelease {
-		token githubToken
-		targetCommitish = minecraft_major_version
-		releaseName = "Version $mod_version for $project.mod_mc_version_specifier"
-		body = project.getChangelog()
-		releaseAssets remapJar.getArchiveFile()
-		prerelease = mod_release != "release"
-		overwrite = true
-	}
-	uploadToModSites.finalizedBy(tasks.githubRelease)
-}
- */
