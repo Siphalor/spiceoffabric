@@ -81,6 +81,7 @@ dependencies {
 	modApi(mcLibs.capsaicin)
 
 	modImplementation(mcLibs.bundles.polymer)
+	modLocalRuntime(mcLibs.polymer.bundled)
 
 	modCompileOnly(mcLibs.modmenu)
 	modRuntimeOnly(mcLibs.modmenu)

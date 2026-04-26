@@ -21,6 +21,7 @@ fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.r
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
 modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu" }
 parchment = { group = "org.parchmentmc.data", name = "parchment-1.21.1", version.ref = "parchment" }
+polymer-bundled = { group = "eu.pb4", name = "polymer-bundled", version.ref = "polymer" }
 polymer-core = { group = "eu.pb4", name = "polymer-core", version.ref = "polymer" }
 polymer-resource-pack = { group = "eu.pb4", name = "polymer-resource-pack", version.ref = "polymer" }
 rei-api = { group = "me.shedaniel", name = "RoughlyEnoughItems-api-fabric", version.ref = "rei" }
