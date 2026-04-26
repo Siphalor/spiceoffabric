@@ -4,7 +4,7 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.config.SOFExpression;
 import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
-import de.siphalor.spiceoffabric.item.FoodContainerItem;
+//- import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.networking.SOFClientNetworking;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -17,11 +17,11 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.core.HolderLookup;
+//- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+//- import net.minecraft.client.renderer.item.ItemProperties;
+//- import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -53,33 +53,37 @@ public class SOFClient implements ClientModInitializer {
 	}
 
 	private static void initRendering() {
-		if (!SpiceOfFabric.config.items.usePolymer && SpiceOfFabric.foodContainerItems != null) {
-			registerModelPredicateProviders();
-		}
+		//# if MC_VERSION_NUMBER < 12104
+		//- if (!SpiceOfFabric.config.items.usePolymer && SpiceOfFabric.foodContainerItems != null) {
+		//- 	registerModelPredicateProviders();
+		//- }
+		//# end
 	}
 
-	private static void registerModelPredicateProviders() {
-		ClampedItemPropertyFunction predicateProvider = (stack, world, entity, seed) ->
-				//# if MC_VERSION_NUMBER >= 12006
-				{
-					HolderLookup.Provider registryAccess;
-					if (world != null) {
-						registryAccess = world.registryAccess();
-					} else if (entity != null) {
-						registryAccess = entity.level().registryAccess();
-					} else {
-						return 0;
-					}
-					return ((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack, registryAccess) ? 0 : 1;
-				};
-				//# else
-				//- ((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
-				//# end
-		ResourceLocation predicateId = SpiceOfFabric.createId("filled");
-		for (Item item : SpiceOfFabric.foodContainerItems) {
-			ItemProperties.register(item, predicateId, predicateProvider);
-		}
-	}
+	//# if MC_VERSION_NUMBER < 12104
+	//- private static void registerModelPredicateProviders() {
+	//- 	ClampedItemPropertyFunction predicateProvider = (stack, world, entity, seed) ->
+	//- 			//# if MC_VERSION_NUMBER >= 12006
+	//- 			{
+	//- 				HolderLookup.Provider registryAccess;
+	//- 				if (world != null) {
+	//- 					registryAccess = world.registryAccess();
+	//- 				} else if (entity != null) {
+	//- 					registryAccess = entity.level().registryAccess();
+	//- 				} else {
+	//- 					return 0;
+	//- 				}
+	//- 				return ((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack, registryAccess) ? 0 : 1;
+	//- 			};
+	//- 			//# else
+	//- 			((FoodContainerItem) stack.getItem()).isInventoryEmpty(stack) ? 0 : 1;
+	//- 			//# end
+	//- 	ResourceLocation predicateId = SpiceOfFabric.createId("filled");
+	//- 	for (Item item : SpiceOfFabric.foodContainerItems) {
+	//- 		ItemProperties.register(item, predicateId, predicateProvider);
+	//- 	}
+	//- }
+	//# end
 
 	public static Screen createConfigScreen() {
 		TweedCoatBridgeExtension coatBridge = SpiceOfFabric.configContainerHelper.configContainer()
@@ -102,7 +106,7 @@ public class SOFClient implements ClientModInitializer {
 				.currentValue(SpiceOfFabric.globalConfig)
 				.defaultValue(defaultValue)
 				.title(Component.translatable(SpiceOfFabric.MOD_ID + ".config"))
-				.translationKeyPrefix(SpiceOfFabric.MOD_ID + "mousewheelie.config")
+				.translationKeyPrefix(SpiceOfFabric.MOD_ID + ".config")
 				.saveHandler(value -> {
 					SpiceOfFabric.configContainerHelper.writeConfigInConfigDirectory(value);
 
