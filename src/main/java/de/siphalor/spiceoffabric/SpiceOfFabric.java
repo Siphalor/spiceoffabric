@@ -8,14 +8,14 @@ package de.siphalor.spiceoffabric;
 import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.capsaicin.api.food.FoodEvents;
 import de.siphalor.capsaicin.api.food.FoodModifications;
-import de.siphalor.capsaicin.api.food.PlayerFoodModifier;
+//- import de.siphalor.capsaicin.api.food.PlayerFoodModifier;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.polymer.SOFPolymer;
-import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
+//- import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
 import de.siphalor.spiceoffabric.resource_conditions.SOFResourceConditions;
 import de.siphalor.spiceoffabric.server.SOFCommands;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -41,9 +41,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 //- import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.Filterable;
@@ -71,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class SpiceOfFabric implements ModInitializer {
 
@@ -159,30 +162,49 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	private static void initRecipes() {
-		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, createId("food_journal"), new FoodJournalRecipeSerializer());
+		//# if MC_VERSION_NUMBER < 12100
+		//- Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, createId("food_journal"), new FoodJournalRecipeSerializer());
+		//# end
 	}
 
 	private static void initNativeFoodContainerItems() {
 		List<Item> foodContainerItems = new ArrayList<>(4);
 		if (config.items.enablePaperBag) {
-			foodContainerItems.add(Registry.register(
-					BuiltInRegistries.ITEM, createId("paper_bag"),
-					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 5, MenuType.HOPPER)
+			foodContainerItems.add(registerItem(
+					"paper_bag",
+					props -> new FoodContainerItem(props, 5, MenuType.HOPPER),
+					new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT)
 			));
 		}
 		if (config.items.enableLunchBox) {
-			foodContainerItems.add(Registry.register(
-					BuiltInRegistries.ITEM, createId("lunch_box"),
-					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 9, MenuType.GENERIC_3x3)
+			foodContainerItems.add(registerItem(
+					"lunch_box",
+					props -> new FoodContainerItem(props, 9, MenuType.GENERIC_3x3),
+					new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT)
 			));
 		}
 		if (config.items.enablePicnicBasket) {
-			foodContainerItems.add(Registry.register(
-					BuiltInRegistries.ITEM, createId("picnic_basket"),
-					new FoodContainerItem(new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT), 9, MenuType.GENERIC_3x3)
+			foodContainerItems.add(registerItem(
+					"picnic_basket",
+					props -> new FoodContainerItem(props, 9, MenuType.GENERIC_3x3),
+					new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT)
 			));
 		}
 		SpiceOfFabric.foodContainerItems = foodContainerItems.toArray(new Item[0]);
+	}
+
+	public static <T extends Item> T registerItem(
+			String name,
+			Function<Item.Properties, T> itemFactory,
+			Item.Properties properties
+	) {
+		//# if MC_VERSION_NUMBER >= 12102
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, createId(name));
+		T item = itemFactory.apply(properties.setId(key));
+		return Registry.register(BuiltInRegistries.ITEM, key, item);
+		//# else
+		//- return Registry.register(BuiltInRegistries.ITEM, createId(name), itemFactory.apply(properties));
+		//# end
 	}
 
 	private static void initItemGroups() {
@@ -196,9 +218,19 @@ public class SpiceOfFabric implements ModInitializer {
 
 	private static void initFoodEvents() {
 		FoodEvents.EATEN.on(SpiceOfFabric::onFoodEaten);
-		//# if MC_VERSION_NUMBER >= 12006
-		FoodModifications.EATING_TIME_SECONDS_MODIFIERS
-				.register((PlayerFoodModifier<Float>) SpiceOfFabric::modifyEatingTime, createId("config_expression"));
+		//# if MC_VERSION_NUMBER >= 12102
+		FoodModifications.CONSUMABLE_MODIFIERS
+						.register((consumableProperties, foodContext) -> {
+							if (foodContext.user() instanceof Player player) {
+								consumableProperties.setConsumeSeconds(modifyEatingTime(
+										consumableProperties.getConsumeSeconds(), foodContext, player
+								));
+							}
+							return consumableProperties;
+						}, createId("config_expression"));
+		//# elif MC_VERSION_NUMBER >= 12006
+		//- FoodModifications.EATING_TIME_SECONDS_MODIFIERS
+		//- 		.register((PlayerFoodModifier<Float>) SpiceOfFabric::modifyEatingTime, createId("config_expression"));
 		//# else
 		//- FoodModifications.EATING_TIME_MODIFIERS
 		//- 		.register((PlayerFoodModifier<Integer>) SpiceOfFabric::modifyEatingTime, createId("config_expression"));

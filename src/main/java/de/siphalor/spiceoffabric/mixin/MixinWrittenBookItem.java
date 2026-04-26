@@ -5,7 +5,8 @@ import de.siphalor.spiceoffabric.container.FoodJournalScreenHandler;
 import de.siphalor.spiceoffabric.container.FoodJournalView;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+//- import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.WrittenBookItem;
@@ -18,7 +19,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(WrittenBookItem.class)
 public class MixinWrittenBookItem {
 	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
-	public void onUsed(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+	public void onUsed(
+			Level world,
+			Player user,
+			InteractionHand hand,
+			//# if MC_VERSION_NUMBER >= 12102
+			CallbackInfoReturnable<InteractionResult> cir
+			//# else
+			//- CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir
+			//# end
+	) {
 		ItemStack stack = user.getItemInHand(hand);
 		if (!world.isClientSide && SpiceOfFabric.isFoodJournal(stack)) {
 			FoodJournalView defaultView = FoodJournalView.getDefault();
@@ -26,7 +36,11 @@ public class MixinWrittenBookItem {
 				return;
 			}
 			user.openMenu(new FoodJournalScreenHandler.Factory((ServerPlayer) user, defaultView));
-			cir.setReturnValue(InteractionResultHolder.success(stack));
+			//# if MC_VERSION_NUMBER >= 12102
+			cir.setReturnValue(InteractionResult.SUCCESS);
+			//# else
+			//- cir.setReturnValue(InteractionResultHolder.success(stack));
+			//# end
 		}
 	}
 }

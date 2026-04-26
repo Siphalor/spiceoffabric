@@ -6,8 +6,6 @@ import lombok.ToString;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,10 +44,6 @@ public class FoodHistoryEntry {
 	public CompoundTag write(CompoundTag compoundTag) {
 		compoundTag.putString("item", BuiltInRegistries.ITEM.getKey(BuiltInRegistries.ITEM.byId(itemId)).toString());
 		return compoundTag;
-	}
-
-	public MutableComponent getStackName() {
-		return Component.translatable(getStack().getDescriptionId());
 	}
 
 	public ItemStack getStack() {

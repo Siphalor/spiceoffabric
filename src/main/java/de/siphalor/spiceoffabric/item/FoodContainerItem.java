@@ -17,7 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+//- import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -199,7 +200,12 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 	//# end
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+	//# if MC_VERSION_NUMBER >= 12102
+	public InteractionResult
+	//# else
+	//- public InteractionResultHolder<ItemStack>
+	//# end
+	use(Level world, Player user, InteractionHand hand) {
 		ItemStack stackInHand = user.getItemInHand(hand);
 		ItemStack nextFoodItem = getNextFoodStack(stackInHand, user);
 		if (nextFoodItem.isEmpty()) {
@@ -209,23 +215,43 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				updateLastEatTime(player, currentTime);
 
 				openScreen(stackInHand, user, hand == InteractionHand.MAIN_HAND ? user.getInventory().selected : Inventory.SLOT_OFFHAND);
-				return InteractionResultHolder.success(stackInHand);
+				//# if MC_VERSION_NUMBER >= 12102
+				return InteractionResult.SUCCESS;
+				//# else
+				//- return InteractionResultHolder.success(stackInHand);
+				//# end
 			}
 		} else {
 			FoodProperties foodComponent = nextFoodItem.get(DataComponents.FOOD);
 			if (foodComponent != null) {
 				if (user.canEat(foodComponent.canAlwaysEat())) {
 					user.startUsingItem(hand);
-					return InteractionResultHolder.consume(stackInHand);
+					//# if MC_VERSION_NUMBER >= 12102
+					return InteractionResult.CONSUME;
+					//# else
+					//- return InteractionResultHolder.consume(stackInHand);
+					//# end
 				}
-				return InteractionResultHolder.fail(stackInHand);
+				//# if MC_VERSION_NUMBER >= 12102
+				return InteractionResult.FAIL;
+				//# else
+				//- return InteractionResultHolder.fail(stackInHand);
+				//# end
 			}
 		}
-		return InteractionResultHolder.pass(stackInHand);
+		//# if MC_VERSION_NUMBER >= 12102
+		return InteractionResult.PASS;
+		//# else
+		//- return InteractionResultHolder.pass(stackInHand);
+		//# end
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+	//# if MC_VERSION_NUMBER >= 12102
+	public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+	//# else
+	//- public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+	//# end
 		openContainer:
 		if (!world.isClientSide && user instanceof ServerPlayer player) {
 			// Only open the container if the player hasn't used the item for too long
@@ -249,11 +275,19 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			for (int i = 0; i < inv.getContainerSize(); i++) {
 				if (inv.getItem(i) == stack) {
 					openScreen(stack, player, i);
-					return;
+					//# if MC_VERSION_NUMBER >= 12102
+					return true;
+					//# else
+					//- return;
+					//# end
 				}
 			}
 		}
-		super.releaseUsing(stack, world, user, remainingUseTicks);
+		//# if MC_VERSION_NUMBER >= 12102
+		return super.releaseUsing(stack, world, user, remainingUseTicks);
+		//# else
+		//- super.releaseUsing(stack, world, user, remainingUseTicks);
+		//# end
 	}
 
 	public boolean checkLastEatTime(ServerPlayer user, long currentTime) {

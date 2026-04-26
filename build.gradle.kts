@@ -1,4 +1,5 @@
 import de.siphalor.jcyo.gradle.JcyoTask
+import de.siphalor.minecraft_modding_toolkit.gradle.project_plugin.filter.JsonMergeFilterReader
 
 plugins {
 	java
@@ -61,9 +62,17 @@ smcmtk {
 sourceSets {
 	main {
 		resources {
-			srcDirs("src/main/recipes/${smcmtk.mcProps.getting("recipes.version").get()}")
+			val dataVersion = smcmtk.mcProps.getting("data.version").get().toInt()
+			srcDirs(
+				resolveDataDir(dataVersion, "src/main/recipes"),
+				resolveDataDir(dataVersion, "src/main/advancements"),
+			)
 		}
 	}
+}
+
+fun resolveDataDir(version: Int, base: String): String {
+	return base + "/" + file(base).list()?.map { it.toInt() }?.filter { it <= version }?.max()
 }
 
 dependencies {
@@ -109,9 +118,17 @@ configurations.configureEach {
 
 tasks.processResources {
 	inputs.property("version", version)
+	inputs.property("mixins.extra.common", smcmtk.mcProps.getting("mixins.extra.common").orElse(""))
 
 	filesMatching("fabric.mod.json") {
-		expand("version" to version)
+		filter<JsonMergeFilterReader>(mapOf("merge" to mapOf(
+			"version" to version
+		)))
+	}
+	filesMatching("spiceoffabric.mixins.json") {
+		filter<JsonMergeFilterReader>(mapOf("merge" to mapOf(
+			"mixins" to smcmtk.mcProps.getting("mixins.extra.common").map { it.split(", ") }.getOrElse(listOf())
+		)))
 	}
 }
 

@@ -9,12 +9,13 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.minecraft.core.HolderLookup;
+//- import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 //- import net.minecraft.util.GsonHelper;
-import org.jetbrains.annotations.Nullable;
+//- import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -66,7 +67,11 @@ public class SOFResourceConditions {
 		}
 
 		@Override
-		public boolean test(HolderLookup.@Nullable Provider registryLookup) {
+		//# if MC_VERSION_NUMBER >= 12102
+		public boolean test(RegistryOps.RegistryInfoLookup registryLookup) {
+		//# else
+		//- public boolean test(HolderLookup.@Nullable Provider registryLookup) {
+		//# end
 			for (ResourceLocation id : ids) {
 				if (!registry.containsKey(id)) {
 					return false;

@@ -5,8 +5,7 @@
 	"mixins": [
 		"MixinHungerManager",
 		"MixinServerPlayerEntity",
-		"MixinWrittenBookItem",
-		"compat.fabric_registry_sync_v0.MixinRegistrySyncManager"
+		"MixinWrittenBookItem"
 	],
 	"client": [
 		"client.MixinClientPlayNetworkHandler"
