@@ -87,8 +87,10 @@ public class ConfigSyncS2CPacket
 	private final SOFConfig config;
 	private PatchInfo patchInfo;
 
+	//# if MC_VERSION_NUMBER >= 12006
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;
 	}
+	//# end
 }

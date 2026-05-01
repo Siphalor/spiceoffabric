@@ -132,7 +132,7 @@ tasks.processResources {
 	}
 	filesMatching("spiceoffabric.mixins.json") {
 		filter<JsonMergeFilterReader>(mapOf("merge" to mapOf(
-			"mixins" to smcmtk.mcProps.getting("mixins.extra.common").map { it.split(", ") }.getOrElse(listOf())
+			"mixins" to smcmtk.mcProps.getting("mixins.extra.common").map { it.split(",") }.getOrElse(listOf())
 		)))
 	}
 }

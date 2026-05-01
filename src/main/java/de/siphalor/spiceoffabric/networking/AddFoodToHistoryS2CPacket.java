@@ -42,8 +42,10 @@ public class AddFoodToHistoryS2CPacket
 
 	private final FoodHistoryEntry entry;
 
+	//# if MC_VERSION_NUMBER >= 12006
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;
 	}
+	//# end
 }

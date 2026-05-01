@@ -120,7 +120,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		int bestConsumeTime = Integer.MAX_VALUE;
 		for (var value : foods) {
 			ItemStack stack = value.value().getFirst();
+			//# if MC_VERSION_NUMBER >= 12006
 			int delta = requiredFood - value.value().getSecond().nutrition();
+			//# else
+			//- int delta = requiredFood - value.value().getSecond().getNutrition();
+			//# end
 			//# if MC_VERSION_NUMBER >= 12100
 			int consumeTime = stack.getUseDuration(entity);
 			//# else
@@ -168,7 +172,7 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		//# end
 		ItemUtils.onContainerDestroyed(
 				entity,
-				//# if MC_VERSION_NUMBER >= 260100
+				//# if MC_VERSION_NUMBER >= 260100 || MC_VERSION_NUMBER < 12006
 				inventory.getContainedStacks().stream()
 				//# else
 				//- inventory.getContainedStacks().stream().toList()
@@ -207,7 +211,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 	//- @Override
 	//- public void appendHoverText(
 	//- 		ItemStack stack,
+	//- 		//# if MC_VERSION_NUMBER >= 12006
 	//- 		TooltipContext context,
+	//- 		//# else
+	//- 		Level level,
+	//- 		//# end
 	//- 		List<Component> tooltip,
 	//- 		TooltipFlag tooltipFlag
 	//- ) {
@@ -270,7 +278,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				//# end
 			}
 		} else {
+			//# if MC_VERSION_NUMBER >= 12005
 			FoodProperties foodComponent = nextFoodItem.get(DataComponents.FOOD);
+			//# else
+			//- FoodProperties foodComponent = nextFoodItem.getItem().getFoodProperties();
+			//# end
 			if (foodComponent != null) {
 				if (user.canEat(foodComponent.canAlwaysEat())) {
 					user.startUsingItem(hand);

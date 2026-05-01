@@ -89,8 +89,10 @@ public class SyncFoodHistoryS2CPacket
 	private final FixedLengthIntFIFOQueueWithStats recentlyEaten;
 	private final Set<FoodHistoryEntry> uniqueFoodsEaten;
 
+	//# if MC_VERSION_NUMBER >= 12006
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;
 	}
+	//# end
 }

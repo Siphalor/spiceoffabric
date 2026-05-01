@@ -30,11 +30,10 @@ public class ClearFoodHistoryS2CPacket
 	public static final Type<ClearFoodHistoryS2CPacket> TYPE = new CustomPacketPayload.Type<>(PAYLOAD_ID);
 	public static final StreamCodec<FriendlyByteBuf, ClearFoodHistoryS2CPacket> STREAM_CODEC =
 			StreamCodec.unit(INSTANCE);
-	//# end
-
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;
 	}
+	//# end
 }

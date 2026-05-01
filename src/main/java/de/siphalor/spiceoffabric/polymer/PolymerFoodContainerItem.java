@@ -87,7 +87,9 @@ public class PolymerFoodContainerItem extends FoodContainerItem implements Polym
 		//# end
 	//# else
 	//- public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayer player) {
+		//- //# if MC_VERSION_NUMBER >= 12006
 		//- var registryAccess = player == null ? null : player.registryAccess();
+		//- //# end
 	//# end
 		//# if MC_VERSION_NUMBER >= 12006
 		return registryAccess != null && isInventoryEmpty(itemStack, registryAccess)
