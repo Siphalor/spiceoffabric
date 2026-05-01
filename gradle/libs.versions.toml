@@ -2,7 +2,7 @@
 autoService = "1.1.1"
 exp4j = "0.4.8"
 fabric-loader = "0.19.2"
-jcyo = "0.6.1"
+jcyo = "0.6.3"
 jspecify = "1.0.0"
 junit = "5.12.0"
 lombok = "1.18.38"
