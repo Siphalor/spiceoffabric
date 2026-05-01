@@ -6,6 +6,7 @@ import de.siphalor.capsaicin.api.food.CamoFoodItem;
 import de.siphalor.capsaicin.api.food.DynamicFoodPropertiesAccess;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.container.FoodContainerScreenHandler;
+import de.siphalor.spiceoffabric.container.FoodContainerTooltip;
 import de.siphalor.spiceoffabric.container.ItemStackInventory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
@@ -28,24 +29,28 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.TooltipFlag;
+//- import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 //- import net.minecraft.world.entity.Entity;
 
 public class FoodContainerItem extends Item implements CamoFoodItem {
 	private static final String INVENTORY_NBT_KEY = "inventory";
 	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false);
-	private static final Component LORE_EMPTY = Component.translatable(SpiceOfFabric.MOD_ID + ".food_container.lore.empty").setStyle(LORE_STYLE);
-	private static final String LORE_GENERAL_KEY = SpiceOfFabric.MOD_ID + ".food_container.lore.general";
+	public static final Component LORE_EMPTY = Component.translatable(SpiceOfFabric.MOD_ID + ".food_container.lore.empty").setStyle(LORE_STYLE);
+	public static final String LORE_GENERAL_KEY = SpiceOfFabric.MOD_ID + ".food_container.lore.general";
 	private static final IndexedValue<ItemStack> NO_STACK = new IndexedValue<>(-1, ItemStack.EMPTY);
 
 	private final MenuType<?> screenHandlerType;
@@ -164,33 +169,53 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		ItemUtils.onContainerDestroyed(entity, inventory.getContainedStacks().stream().toList());
 	}
 
+	//# if MC_VERSION_NUMBER >= 12106
 	@Override
-	public void appendHoverText(
-			ItemStack stack,
-			TooltipContext context,
-			List<Component> tooltip,
-			TooltipFlag tooltipFlag
-	) {
-		//# if MC_VERSION_NUMBER >= 12006
-		ItemStackInventory inventory = getInventory(stack, context.registries());
-		//# else
-		//- ItemStackInventory inventory = getInventory(stack);
-		//# end
-		if (inventory.isEmpty()) {
-			tooltip.add(LORE_EMPTY);
-		} else {
-			int count = 0;
-			int filled = 0;
-			for (int i = 0; i < inventory.getContainerSize(); i++) {
-				ItemStack invStack = inventory.getItem(i);
-				if (!invStack.isEmpty()) {
-					count += invStack.getCount();
-					filled++;
-				}
-			}
-			tooltip.add(Component.translatable(LORE_GENERAL_KEY, filled, size, count).setStyle(LORE_STYLE));
+	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+		TooltipDisplay tooltipDisplay = stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT);
+		if (!tooltipDisplay.shows(DataComponents.CONTAINER)) {
+			return Optional.empty();
 		}
+		var containerContents = stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+		int count = 0;
+		int filled = 0;
+		for (ItemStack containedStack : containerContents.nonEmptyItems()) {
+			if (!containedStack.isEmpty()) {
+				count += containedStack.getCount();
+				filled++;
+			}
+		}
+		return Optional.of(new FoodContainerTooltip(size, filled, count));
 	}
+	//# else
+	//- @Override
+	//- public void appendHoverText(
+	//- 		ItemStack stack,
+	//- 		TooltipContext context,
+	//- 		List<Component> tooltip,
+	//- 		TooltipFlag tooltipFlag
+	//- ) {
+	//- 	//# if MC_VERSION_NUMBER >= 12006
+	//- 	ItemStackInventory inventory = getInventory(stack, context.registries());
+	//- 	//# else
+	//- 	ItemStackInventory inventory = getInventory(stack);
+	//- 	//# end
+	//- 	if (inventory.isEmpty()) {
+	//- 		tooltip.add(LORE_EMPTY);
+	//- 	} else {
+	//- 		int count = 0;
+	//- 		int filled = 0;
+	//- 		for (int i = 0; i < inventory.getContainerSize(); i++) {
+	//- 			ItemStack invStack = inventory.getItem(i);
+	//- 			if (!invStack.isEmpty()) {
+	//- 				count += invStack.getCount();
+	//- 				filled++;
+	//- 			}
+	//- 		}
+	//- 		tooltip.add(Component.translatable(LORE_GENERAL_KEY, filled, size, count).setStyle(LORE_STYLE));
+	//- 	}
+	//- }
+	//# end
 
 	//# if MC_VERSION_NUMBER < 12006
 	//- @Override
@@ -214,7 +239,14 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 			if (user instanceof ServerPlayer player && checkLastEatTime(player, currentTime)) {
 				updateLastEatTime(player, currentTime);
 
-				openScreen(stackInHand, user, hand == InteractionHand.MAIN_HAND ? user.getInventory().selected : Inventory.SLOT_OFFHAND);
+				int slot = hand == InteractionHand.MAIN_HAND
+						//# if MC_VERSION_NUMBER >= 12106
+						? user.getInventory().getSelectedSlot()
+						//# else
+					//-     ? user.getInventory().selected
+						//# end
+						: Inventory.SLOT_OFFHAND;
+				openScreen(stackInHand, user, slot);
 				//# if MC_VERSION_NUMBER >= 12102
 				return InteractionResult.SUCCESS;
 				//# else

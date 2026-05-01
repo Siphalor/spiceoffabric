@@ -2,6 +2,7 @@ package de.siphalor.spiceoffabric.mixin;
 
 import com.mojang.authlib.GameProfile;
 //- import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
@@ -9,14 +10,15 @@ import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+//- import net.minecraft.core.BlockPos;
+//- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,8 +38,15 @@ public abstract class MixinServerPlayerEntity extends Player implements IServerP
 	@Unique
 	protected long lastContainerEatTime;
 
-	protected MixinServerPlayerEntity(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
-		super(world, pos, yaw, gameProfile);
+	protected MixinServerPlayerEntity(
+			Level world,
+			//# if MC_VERSION_NUMBER < 12106
+			//- BlockPos pos,
+			//- float yaw,
+			//# end
+			GameProfile gameProfile
+	) {
+		super(world, /*# if MC_VERSION_NUMBER < 12106 *//*- pos, yaw, *//*# end */ gameProfile);
 	}
 
 	@Override
@@ -108,13 +117,24 @@ public abstract class MixinServerPlayerEntity extends Player implements IServerP
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-	public void afterReadCustomDataFromNbt(CompoundTag nbt, CallbackInfo ci) {
+	public void afterReadCustomDataFromNbt(
+			//# if MC_VERSION_NUMBER >= 12106
+			ValueInput valueInput,
+			//# else
+			//- CompoundTag nbt,
+			//# end
+			CallbackInfo ci
+	) {
 		// Update the max health. This overwrites the base definition in the constructor
 		// and older data that has been read from the player nbt.
 		SpiceOfFabric.updateMaxHealth((ServerPlayer) (Object) this, false, false);
 
-		if (nbt.contains("Health", 99)) {
-			this.setHealth(nbt.getFloat("Health"));
-		}
+		//# if MC_VERSION_NUMBER >= 12106
+		valueInput.read("Health", Codec.FLOAT).ifPresent(this::setHealth);
+		//# else
+		//- if (nbt.contains("Health", 99)) {
+		//- 	this.setHealth(nbt.getFloat("Health"));
+		//- }
+		//# end
 	}
 }

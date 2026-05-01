@@ -4,11 +4,13 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
+//- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.Optional;
 
@@ -28,23 +30,38 @@ public class FoodHistoryEntry {
 		return new FoodHistoryEntry(itemId);
 	}
 
-	public static FoodHistoryEntry read(CompoundTag compoundTag) {
-		Optional<Item> item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(compoundTag.getString("item")));
+	//# if MC_VERSION_NUMBER >= 12106
+	public static Optional<FoodHistoryEntry> read(ValueInput valueInput) {
+		Optional<Item> item = valueInput.getString("item")
+				.flatMap(id -> ResourceLocation.read(id).result())
+				.flatMap(BuiltInRegistries.ITEM::getOptional);
+	//# else
+	//- public static FoodHistoryEntry read(CompoundTag compoundTag) {
+	//- 	Optional<Item> item = BuiltInRegistries.ITEM.getOptional(
+	//- 			ResourceLocation.tryParse(compoundTag.getString("item"))
+	//- 	);
+	//# end
 		if (item.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
 		int itemId = BuiltInRegistries.ITEM.getId(item.get());
-		return new FoodHistoryEntry(itemId);
+		return Optional.of(new FoodHistoryEntry(itemId));
 	}
 
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeVarInt(itemId);
 	}
 
-	public CompoundTag write(CompoundTag compoundTag) {
-		compoundTag.putString("item", BuiltInRegistries.ITEM.getKey(BuiltInRegistries.ITEM.byId(itemId)).toString());
-		return compoundTag;
+	//# if MC_VERSION_NUMBER >= 12106
+	public void write(ValueOutput valueOutput) {
+		valueOutput.putString("item", BuiltInRegistries.ITEM.getKey(BuiltInRegistries.ITEM.byId(itemId)).toString());
 	}
+	//# else
+	//- public CompoundTag write(CompoundTag compoundTag) {
+	//- 	compoundTag.putString("item", BuiltInRegistries.ITEM.getKey(BuiltInRegistries.ITEM.byId(itemId)).toString());
+	//- 	return compoundTag;
+	//- }
+	//# end
 
 	public ItemStack getStack() {
 		return new ItemStack(BuiltInRegistries.ITEM.byId(itemId));

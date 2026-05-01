@@ -2,6 +2,7 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.serialization.Codec;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
@@ -13,8 +14,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import lombok.Getter;
-import net.minecraft.nbt.*;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -22,10 +21,15 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+//- import net.minecraft.network.FriendlyByteBuf;
 
 public class FoodHistory {
 
@@ -85,84 +89,109 @@ public class FoodHistory {
 	 	uniqueFoodsEaten = packet.getUniqueFoodsEaten();
 	}
 
-	public void read(FriendlyByteBuf buffer) {
-		dictionary.clear();
-		recentlyEaten.clear();
-		recentlyEaten.setLength(SpiceOfFabric.config.food.historyLength);
-
-		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
-			dictionary.put(buffer.readVarInt(), FoodHistoryEntry.read(buffer));
-		}
-		for (int l = buffer.readVarInt(), i = 0; i < l; i++) {
-			// Using forceEnqueue here to make sure we're not running out of space and throwing an exception
-			// just because of a small desync of the history length ;)
-			recentlyEaten.forceEnqueue(buffer.readVarInt());
-		}
-
-		uniqueFoodsEaten.clear();
-
-		if (buffer.readBoolean()) {
-			final int length = buffer.readVarInt();
-			for (int i = 0; i < length; i++) {
-				uniqueFoodsEaten.add(FoodHistoryEntry.read(buffer));
-			}
-		}
-	}
-
-	public CompoundTag write(CompoundTag compoundTag) {
+	//# if MC_VERSION_NUMBER >= 12106
+	public void write(ValueOutput valueOutput) {
+	//# else
+	//- public CompoundTag write(CompoundTag compoundTag) {
+	//# end
 		defragmentDictionary();
-		ListTag list = new ListTag();
-		for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
-			list.add(entry.getKey(), entry.getValue().write(new CompoundTag()));
-		}
-		compoundTag.put(DICTIONARY_NBT_KEY, list);
-		ListTag historyList = new ListTag();
-		for (Integer id : recentlyEaten) {
-			historyList.add(IntTag.valueOf(id));
-		}
-		compoundTag.put(RECENT_HISTORY_NBT_KEY, historyList);
-		ListTag carrotHistoryList = new ListTag();
-		for (FoodHistoryEntry entry : uniqueFoodsEaten) {
-			carrotHistoryList.add(entry.write(new CompoundTag()));
-		}
-		compoundTag.put(CARROT_HISTORY_NBT_KEY, carrotHistoryList);
-		return compoundTag;
+
+		//# if MC_VERSION_NUMBER >= 12106
+		ValueOutput.ValueOutputList list = valueOutput.childrenList(DICTIONARY_NBT_KEY);
+		dictionary.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey))
+				.forEach(entry -> entry.getValue().write(list.addChild()));
+		//# else
+		//- ListTag list = new ListTag();
+		//- for (Map.Entry<Integer, FoodHistoryEntry> entry : dictionary.entrySet()) {
+		//- 	list.add(entry.getKey(), entry.getValue().write(new CompoundTag()));
+		//- }
+		//- compoundTag.put(DICTIONARY_NBT_KEY, list);
+		//# end
+
+		//# if MC_VERSION_NUMBER >= 12106
+		ValueOutput.TypedOutputList<Integer> historyList = valueOutput.list(RECENT_HISTORY_NBT_KEY, Codec.INT);
+		recentlyEaten.forEach(historyList::add);
+		//# else
+		//- ListTag historyList = new ListTag();
+		//- for (Integer id : recentlyEaten) {
+		//- 	historyList.add(IntTag.valueOf(id));
+		//- }
+		//- compoundTag.put(RECENT_HISTORY_NBT_KEY, historyList);
+		//# end
+
+		//# if MC_VERSION_NUMBER >= 12106
+		ValueOutput.ValueOutputList carrotHistoryList = valueOutput.childrenList(CARROT_HISTORY_NBT_KEY);
+		uniqueFoodsEaten.forEach(entry -> entry.write(carrotHistoryList.addChild()));
+		//# else
+		//- ListTag carrotHistoryList = new ListTag();
+		//- for (FoodHistoryEntry entry : uniqueFoodsEaten) {
+		//- 	carrotHistoryList.add(entry.write(new CompoundTag()));
+		//- }
+		//- compoundTag.put(CARROT_HISTORY_NBT_KEY, carrotHistoryList);
+		//- return compoundTag;
+		//# end
 	}
 
-	public static FoodHistory read(CompoundTag compoundTag) {
+	//# if MC_VERSION_NUMBER >= 12106
+	public static FoodHistory read(ValueInput valueInput) {
+	//# else
+	//- public static FoodHistory read(CompoundTag compoundTag) {
+	//# end
 		FoodHistory foodHistory = new FoodHistory();
-		if (compoundTag.contains(DICTIONARY_NBT_KEY, 9)) {
-			ListTag nbtDictionary = compoundTag.getList(DICTIONARY_NBT_KEY, 10);
-			for (int i = 0; i < nbtDictionary.size(); i++) {
-				FoodHistoryEntry entry = FoodHistoryEntry.read((CompoundTag) nbtDictionary.get(i));
-				if (entry != null) {
-					foodHistory.dictionary.put(i, entry);
-				}
-			}
+		//# if MC_VERSION_NUMBER >= 12106
+		int i = 0;
+		for (ValueInput entryInput : valueInput.childrenListOrEmpty(DICTIONARY_NBT_KEY)) {
+			int finalI = i;
+			FoodHistoryEntry.read(entryInput).ifPresent(entry ->
+					foodHistory.dictionary.put(finalI, entry)
+			);
+			i++;
 		}
+		//# else
+		//- if (compoundTag.contains(DICTIONARY_NBT_KEY, 9)) {
+		//- 	ListTag nbtDictionary = compoundTag.getList(DICTIONARY_NBT_KEY, 10);
+		//- 	for (int i = 0; i < nbtDictionary.size(); i++) {
+		//- 		FoodHistoryEntry.read((CompoundTag) nbtDictionary.get(i)).ifPresent(entry ->
+		//- 			foodHistory.dictionary.put(i, entry)
+		//- 		);
+		//- 	}
+		//- }
+		//# end
 		foodHistory.nextId = foodHistory.dictionary.size();
 
-		Tag recentHistoryTag = compoundTag.get(RECENT_HISTORY_NBT_KEY);
-		if (recentHistoryTag instanceof CollectionTag<?>) {
-			for (Tag tag : (CollectionTag<?>) recentHistoryTag) {
-				// Using forceEnqueue here to make sure we're not running out of space and throwing an exception.
-				// The history length might have changed (decreased) since the last time the player logged in.
-				foodHistory.recentlyEaten.forceEnqueue(((IntTag) tag).getAsInt());
-			}
-		}
+		//# if MC_VERSION_NUMBER >= 12106
+		// Using forceEnqueue here to make sure we're not running out of space and throwing an exception.
+		// The history length might have changed (decreased) since the last time the player logged in.
+		valueInput.listOrEmpty(RECENT_HISTORY_NBT_KEY, Codec.INT).forEach(foodHistory.recentlyEaten::enqueue);
+		//# else
+		//- Tag recentHistoryTag = compoundTag.get(RECENT_HISTORY_NBT_KEY);
+		//- if (recentHistoryTag instanceof CollectionTag<?>) {
+		//- 	for (Tag tag : (CollectionTag<?>) recentHistoryTag) {
+		//- 		// Using forceEnqueue here to make sure we're not running out of space and throwing an exception.
+		//- 		// The history length might have changed (decreased) since the last time the player logged in.
+		//- 		foodHistory.recentlyEaten.forceEnqueue(((IntTag) tag).getAsInt());
+		//- 	}
+		//- }
+		//# end
 
-		if (compoundTag.contains(CARROT_HISTORY_NBT_KEY, 9)) {
-			ListTag nbtCarrotHistory = compoundTag.getList(CARROT_HISTORY_NBT_KEY, 10);
-			for (Tag tag : nbtCarrotHistory) {
-				if (!(tag instanceof CompoundTag carrotEntry)) {
-					continue;
-				}
-				FoodHistoryEntry entry = FoodHistoryEntry.read(carrotEntry);
-				if (entry != null) {
-					foodHistory.uniqueFoodsEaten.add(entry);
-				}
-			}
-		}
+		//# if MC_VERSION_NUMBER >= 12106
+		valueInput.childrenListOrEmpty(CARROT_HISTORY_NBT_KEY).forEach(entryInput ->
+			FoodHistoryEntry.read(entryInput).ifPresent(foodHistory.uniqueFoodsEaten::add)
+		);
+		//# else
+		//- if (compoundTag.contains(CARROT_HISTORY_NBT_KEY, 9)) {
+		//- 	ListTag nbtCarrotHistory = compoundTag.getList(CARROT_HISTORY_NBT_KEY, 10);
+		//- 	for (Tag tag : nbtCarrotHistory) {
+		//- 		if (!(tag instanceof CompoundTag carrotEntry)) {
+		//- 			continue;
+		//- 		}
+		//- 		FoodHistoryEntry entry = FoodHistoryEntry.read(carrotEntry);
+		//- 		if (entry != null) {
+		//- 			foodHistory.uniqueFoodsEaten.add(entry);
+		//- 		}
+		//- 	}
+		//- }
+		//# end
 
 		return foodHistory;
 	}

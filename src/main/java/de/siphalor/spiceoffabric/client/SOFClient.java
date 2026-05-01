@@ -4,7 +4,8 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.config.SOFExpression;
 import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
-//- import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import de.siphalor.spiceoffabric.container.FoodContainerTooltip;
+import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.networking.SOFClientNetworking;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.FoodUtils;
@@ -15,23 +16,26 @@ import de.siphalor.tweed5.coat.bridge.api.TweedCoatMappers;
 import de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-//- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-//- import net.minecraft.client.renderer.item.ItemProperties;
-//- import net.minecraft.core.HolderLookup;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
 import net.minecraft.network.chat.Component;
-//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-//- import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension.presetValue;
+
+//- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+//- import net.minecraft.client.renderer.item.ItemProperties;
+//- import net.minecraft.core.HolderLookup;
+//- import net.minecraft.resources.ResourceLocation;
+//- import org.jspecify.annotations.Nullable;
 
 public class SOFClient implements ClientModInitializer {
 
@@ -40,9 +44,29 @@ public class SOFClient implements ClientModInitializer {
 		SOFCommonNetworking.init();
 		SOFClientNetworking.init();
 
-		ItemTooltipCallback.EVENT.register(SOFClient::itemTooltipCallback);
-
+		initTooltips();
 		initRendering();
+	}
+
+	private static void initTooltips() {
+		ItemTooltipCallback.EVENT.register(SOFClient::itemTooltipCallback);
+		//# if MC_VERSION_NUMBER >= 12106
+		TooltipComponentCallback.EVENT.register(data -> {
+			if (!(data instanceof FoodContainerTooltip(int maxSlots, int filledSlots, int itemCount))) {
+				return null;
+			}
+			if (filledSlots == 0) {
+				return new ClientTextTooltip(FoodContainerItem.LORE_EMPTY.getVisualOrderText());
+			} else {
+				return new ClientTextTooltip(Component.translatable(
+						FoodContainerItem.LORE_GENERAL_KEY,
+						filledSlots,
+						maxSlots,
+						itemCount
+				).getVisualOrderText());
+			}
+		});
+		//# end
 	}
 
 	//# if MC_VERSION_NUMBER >= 12005

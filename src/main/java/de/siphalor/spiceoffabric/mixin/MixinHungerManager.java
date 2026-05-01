@@ -5,14 +5,16 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
+//- import net.minecraft.nbt.CompoundTag;
+//- import net.minecraft.nbt.IntTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 //- import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,9 +63,21 @@ public abstract class MixinHungerManager implements IHungerManager {
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-	public void onDeserialize(CompoundTag data, CallbackInfo callbackInfo) {
-		if(data.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID, 10)) {
-			foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
+	public void onDeserialize(
+			//# if MC_VERSION_NUMBER >= 12106
+			ValueInput valueInput,
+			//# else
+			//- CompoundTag data,
+			//# end
+			CallbackInfo callbackInfo
+	) {
+		//# if MC_VERSION_NUMBER >= 12106
+		if (valueInput.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID)) {
+			foodHistory = FoodHistory.read(valueInput.childOrEmpty(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
+		//# else
+		//- if (data.contains(SpiceOfFabric.NBT_FOOD_HISTORY_ID, 10)) {
+		//- 	foodHistory = FoodHistory.read(data.getCompound(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
+		//# end
 
 			if (player != null && SpiceOfFabric.config.carrot.enable) {
 				AttributeInstance healthAttribute = player.getAttribute(
@@ -102,8 +116,20 @@ public abstract class MixinHungerManager implements IHungerManager {
 	}
 
 	@Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-	public void onSerialize(CompoundTag data, CallbackInfo callbackInfo) {
-		data.put(SpiceOfFabric.NBT_FOOD_HISTORY_ID, foodHistory.write(new CompoundTag()));
-		data.put(SpiceOfFabric.NBT_VERSION_ID, IntTag.valueOf(SpiceOfFabric.NBT_VERSION));
+	public void onSerialize(
+			//# if MC_VERSION_NUMBER >= 12106
+			ValueOutput valueOutput,
+			//# else
+			//- CompoundTag data,
+			//# end
+			CallbackInfo callbackInfo
+	) {
+		//# if MC_VERSION_NUMBER >= 12106
+		foodHistory.write(valueOutput.child(SpiceOfFabric.NBT_FOOD_HISTORY_ID));
+		valueOutput.putInt(SpiceOfFabric.NBT_VERSION_ID, SpiceOfFabric.NBT_VERSION);
+		//# else
+		//- data.put(SpiceOfFabric.NBT_FOOD_HISTORY_ID, foodHistory.write(new CompoundTag()));
+		//- data.put(SpiceOfFabric.NBT_VERSION_ID, IntTag.valueOf(SpiceOfFabric.NBT_VERSION));
+		//# end
 	}
 }

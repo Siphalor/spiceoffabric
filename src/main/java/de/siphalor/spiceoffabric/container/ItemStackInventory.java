@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +15,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.level.storage.TagValueInput;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemStackInventory implements Container {
@@ -32,8 +37,21 @@ public class ItemStackInventory implements Container {
 		NonNullList<ItemStack> stacks = NonNullList.withSize(size, ItemStack.EMPTY);
 		//# if MC_VERSION_NUMBER >= 12006
 		CustomData customData = containerStack.get(DataComponents.CUSTOM_DATA);
-		if (customData != null && customData.contains(nbtKey)) {
-			ContainerHelper.loadAllItems(customData.getUnsafe().getCompound(nbtKey), stacks, levelRegistry);
+		//# if MC_VERSION_NUMBER >= 12106
+		Optional<CompoundTag> oldCompound = customData.getUnsafe().getCompound(nbtKey);
+		if (oldCompound.isPresent()) {
+			ContainerHelper.loadAllItems(
+					TagValueInput.create(
+							ProblemReporter.DISCARDING,
+							levelRegistry,
+							oldCompound.get()
+					),
+					stacks
+			);
+		//# else
+		//- if (customData != null && customData.contains(nbtKey)) {
+		//- 	ContainerHelper.loadAllItems(customData.getUnsafe().getCompound(nbtKey), stacks, levelRegistry);
+		//# end
 		} else {
 			ItemContainerContents containerContents = containerStack.get(DataComponents.CONTAINER);
 			if (containerContents != null) {
