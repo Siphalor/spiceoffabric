@@ -111,9 +111,9 @@ public class SOFCommands {
 			}
 			if (SpiceOfFabric.hasClientMod(player)) {
 				SOFCommonNetworking.sendClearFoodsPacket(player);
-				player.displayClientMessage(Component.translatable("spiceoffabric.command.clear_history.was_cleared"), false);
+				player.sendSystemMessage(Component.translatable("spiceoffabric.command.clear_history.was_cleared"));
 			} else {
-				player.displayClientMessage(Component.literal("Your food history has been cleared"), false);
+				player.sendSystemMessage(Component.literal("Your food history has been cleared"));
 			}
 		}
 
@@ -134,9 +134,9 @@ public class SOFCommands {
 				SpiceOfFabric.updateMaxHealth(player, true, true);
 			}
 			if (SpiceOfFabric.hasClientMod(player)) {
-				player.displayClientMessage(Component.translatable("spiceoffabric.command.set_base_max_health.target"), false);
+				player.sendSystemMessage(Component.translatable("spiceoffabric.command.set_base_max_health.target"));
 			} else {
-				player.displayClientMessage(Component.literal("Your health has been adjusted"), false);
+				player.sendSystemMessage(Component.literal("Your health has been adjusted"));
 			}
 		}
 

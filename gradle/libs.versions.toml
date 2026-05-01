@@ -1,7 +1,7 @@
 [versions]
 autoService = "1.1.1"
 exp4j = "0.4.8"
-fabric-loader = "0.18.2"
+fabric-loader = "0.19.2"
 jcyo = "0.6.1"
 jspecify = "1.0.0"
 junit = "5.12.0"

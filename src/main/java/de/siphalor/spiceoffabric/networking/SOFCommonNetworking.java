@@ -6,8 +6,10 @@ import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.IHungerManager;
 //- import de.siphalor.tweed5.minecraft.networking.api.SlightlyCompressedByteBufWriter;
 //- import io.netty.buffer.Unpooled;
+//- import net.fabricmc.fabric.api.client.networking.v1.ServerboundPlayChannelEvents;
+import net.fabricmc.fabric.api.networking.v1.ClientboundPlayChannelEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
+//- import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 //- import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,20 +21,30 @@ public class SOFCommonNetworking {
 
 	public static void init() {
 		//# if MC_VERSION_NUMBER >= 12006
-		PayloadTypeRegistry.playS2C().register(ConfigSyncS2CPacket.TYPE, ConfigSyncS2CPacket.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(SyncFoodHistoryS2CPacket.TYPE, SyncFoodHistoryS2CPacket.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(AddFoodToHistoryS2CPacket.TYPE, AddFoodToHistoryS2CPacket.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(ClearFoodHistoryS2CPacket.TYPE, ClearFoodHistoryS2CPacket.STREAM_CODEC);
+		//# if MC_VERSION_NUMBER >= 260100
+		var s2cRegistry = PayloadTypeRegistry.clientboundPlay();
+		//# else
+		//- var s2cRegistry = PayloadTypeRegistry.playS2C();
+		//# end
+		s2cRegistry.register(ConfigSyncS2CPacket.TYPE, ConfigSyncS2CPacket.STREAM_CODEC);
+		s2cRegistry.register(SyncFoodHistoryS2CPacket.TYPE, SyncFoodHistoryS2CPacket.STREAM_CODEC);
+		s2cRegistry.register(AddFoodToHistoryS2CPacket.TYPE, AddFoodToHistoryS2CPacket.STREAM_CODEC);
+		s2cRegistry.register(ClearFoodHistoryS2CPacket.TYPE, ClearFoodHistoryS2CPacket.STREAM_CODEC);
 		//# end
 
-		S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
-			if (channels.contains(SyncFoodHistoryS2CPacket.PAYLOAD_ID)) {
-				syncFoodHistoryUnchecked(handler.player);
-			}
-			if (channels.contains(ConfigSyncS2CPacket.PAYLOAD_ID)) {
-				syncConfigToClientUnchecked(handler.player);
-			}
-		});
+		//# if MC_VERSION_NUMBER >= 260100
+		ClientboundPlayChannelEvents.REGISTER
+		//# else
+		//- S2CPlayChannelEvents.REGISTER
+		//# end
+				.register((handler, sender, server, channels) -> {
+					if (channels.contains(SyncFoodHistoryS2CPacket.PAYLOAD_ID)) {
+						syncFoodHistoryUnchecked(handler.player);
+					}
+					if (channels.contains(ConfigSyncS2CPacket.PAYLOAD_ID)) {
+						syncConfigToClientUnchecked(handler.player);
+					}
+				});
 	}
 
 	public static boolean hasClientMod(ServerPlayer player) {

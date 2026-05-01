@@ -3,20 +3,24 @@ package de.siphalor.spiceoffabric.polymer;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.util.FoodUtils;
+import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 //- import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+//- import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 //- import net.minecraft.core.Registry;
 //- import net.minecraft.core.component.DataComponents;
 //- import net.minecraft.core.registries.BuiltInRegistries;
+//- import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.resources.Identifier;
 //- import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-//- import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class SOFPolymer {
@@ -26,16 +30,29 @@ public class SOFPolymer {
 	}
 
 	public static void init() {
-		//# if MC_VERSION_NUMBER >= 12110
-		PolymerItemUtils.CONTEXT_ITEM_CHECK.register((stack, context) -> FoodUtils.isFood(stack));
+		//# if MC_VERSION_NUMBER >= 260100
+		PolymerItemUtils.CONTEXT_ITEM_CHECK.register((itemInstance, _) -> {
+			if (itemInstance instanceof ItemStack stack) {
+				return FoodUtils.isFood(stack);
+			} else {
+				return FoodUtils.isFood(itemInstance.typeHolder().value());
+			}
+		});
+		//# elif MC_VERSION_NUMBER >= 12110
+		//- PolymerItemUtils.CONTEXT_ITEM_CHECK.register((stack, context) -> FoodUtils.isFood(stack));
 		//# else
 		//- PolymerItemUtils.ITEM_CHECK.register(FoodUtils::isFood);
 		//# end
 
 		//# if MC_VERSION_NUMBER >= 12102
 		PolymerItemUtils.ITEM_MODIFICATION_EVENT.register((original, client, context) -> {
-			if (!SpiceOfFabric.hasClientMod(context.getPlayer())) {
-				FoodUtils.appendServerTooltips(context.getPlayer(), client);
+			//# if MC_VERSION_NUMBER >= 260100
+			ServerPlayer player = PolymerCommonUtils.getPlayer(context);
+			//# else
+			//- ServerPlayer player = context.getPlayer();
+			//# end
+			if (!SpiceOfFabric.hasClientMod(player)) {
+				FoodUtils.appendServerTooltips(player, client);
 			}
 			return client;
 		});
@@ -84,6 +101,11 @@ public class SOFPolymer {
 				//- , emptyModelData.value(), filledModelData.value()
 				//# end
 		), new Item.Properties().stacksTo(1).food(EMPTY_FOOD_COMPONENT));
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> entries.accept(item));
+		//# if MC_VERSION_NUMBER >= 260100
+		CreativeModeTabEvents.modifyOutputEvent
+		//# else
+		//- ItemGroupEvents.modifyEntriesEvent
+		//# end
+				(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> entries.accept(item));
 	}
 }

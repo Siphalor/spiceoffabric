@@ -32,6 +32,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUtils;
 //- import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -166,7 +167,14 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		//# else
 		//- ItemStackInventory inventory = getInventory(entity.getItem());
 		//# end
-		ItemUtils.onContainerDestroyed(entity, inventory.getContainedStacks().stream().toList());
+		ItemUtils.onContainerDestroyed(
+				entity,
+				//# if MC_VERSION_NUMBER >= 260100
+				inventory.getContainedStacks().stream()
+				//# else
+				//- inventory.getContainedStacks().stream().toList()
+				//# end
+		);
 	}
 
 	//# if MC_VERSION_NUMBER >= 12106
@@ -179,12 +187,21 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		var containerContents = stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
 		int count = 0;
 		int filled = 0;
-		for (ItemStack containedStack : containerContents.nonEmptyItems()) {
-			if (!containedStack.isEmpty()) {
-				count += containedStack.getCount();
+		//# if MC_VERSION_NUMBER >= 260100
+		for (ItemStackTemplate containedStack : containerContents.nonEmptyItems()) {
+			if (containedStack.count() > 0) {
+				count += containedStack.count();
 				filled++;
 			}
 		}
+		//# else
+		//- for (ItemStack containedStack : containerContents.nonEmptyItems()) {
+		//- 	if (!containedStack.isEmpty()) {
+		//- 		count += containedStack.getCount();
+		//- 		filled++;
+		//- 	}
+		//- }
+		//# end
 		return Optional.of(new FoodContainerTooltip(size, filled, count));
 	}
 	//# else

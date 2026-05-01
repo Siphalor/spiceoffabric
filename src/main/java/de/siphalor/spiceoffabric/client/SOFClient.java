@@ -16,7 +16,8 @@ import de.siphalor.tweed5.coat.bridge.api.TweedCoatMappers;
 import de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
+//- import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
@@ -51,21 +52,26 @@ public class SOFClient implements ClientModInitializer {
 	private static void initTooltips() {
 		ItemTooltipCallback.EVENT.register(SOFClient::itemTooltipCallback);
 		//# if MC_VERSION_NUMBER >= 12106
-		TooltipComponentCallback.EVENT.register(data -> {
-			if (!(data instanceof FoodContainerTooltip(int maxSlots, int filledSlots, int itemCount))) {
-				return null;
-			}
-			if (filledSlots == 0) {
-				return new ClientTextTooltip(FoodContainerItem.LORE_EMPTY.getVisualOrderText());
-			} else {
-				return new ClientTextTooltip(Component.translatable(
-						FoodContainerItem.LORE_GENERAL_KEY,
-						filledSlots,
-						maxSlots,
-						itemCount
-				).getVisualOrderText());
-			}
-		});
+		//# if MC_VERSION_NUMBER >= 260100
+		ClientTooltipComponentCallback.EVENT
+		//# else
+		//- TooltipComponentCallback.EVENT
+		//# end
+				.register(data -> {
+					if (!(data instanceof FoodContainerTooltip(int maxSlots, int filledSlots, int itemCount))) {
+						return null;
+					}
+					if (filledSlots == 0) {
+						return new ClientTextTooltip(FoodContainerItem.LORE_EMPTY.getVisualOrderText());
+					} else {
+						return new ClientTextTooltip(Component.translatable(
+								FoodContainerItem.LORE_GENERAL_KEY,
+								filledSlots,
+								maxSlots,
+								itemCount
+						).getVisualOrderText());
+					}
+				});
 		//# end
 	}
 

@@ -1,5 +1,6 @@
 import de.siphalor.jcyo.gradle.JcyoTask
 import de.siphalor.minecraft_modding_toolkit.gradle.project_plugin.filter.JsonMergeFilterReader
+import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
 	java
@@ -84,29 +85,31 @@ dependencies {
 	compileOnly(libs.autoService)
 
 	minecraft(mcLibs.minecraft)
-	modImplementation(libs.fabric.loader)
+	"modImplementation"(libs.fabric.loader)
 
 	compileOnly(libs.jspecify)
 
-	modImplementation(mcLibs.fabric.api)
+	"modImplementation"(mcLibs.fabric.api)
 	
 	shadow(libs.exp4j)
 	implementation(libs.exp4j)
 
 	include(mcLibs.bundles.config)
-	modApi(mcLibs.bundles.config)
+	"modApi"(mcLibs.bundles.config)
 
 	include(mcLibs.capsaicin)
-	modApi(mcLibs.capsaicin)
+	"modApi"(mcLibs.capsaicin)
 
-	modImplementation(mcLibs.bundles.polymer)
-	modLocalRuntime(mcLibs.polymer.bundled)
+	"modImplementation"(mcLibs.bundles.polymer)
+	"modLocalRuntime"(mcLibs.polymer.bundled)
 
-	modCompileOnly(mcLibs.modmenu)
-	modRuntimeOnly(mcLibs.modmenu)
-	modCompileOnly(mcLibs.rei.api)
+	"modCompileOnly"(mcLibs.modmenu)
+	"modRuntimeOnly"(mcLibs.modmenu)
+	versionCatalogs.named("mcLibs").findLibrary("rei.api").ifPresent {
+		"modCompileOnly"(it)
+	}
 
-	modLocalRuntime(mcLibs.bundles.compatibilityCheck)
+	"modLocalRuntime"(mcLibs.bundles.compatibilityCheck)
 
 	testImplementation(platform(libs.junit.platform))
 	testImplementation(libs.bundles.junit)
@@ -161,7 +164,8 @@ tasks.shadowJar {
 	relocate("net.objecthunter", "de.siphalor.spiceoffabric.shadow.net.objecthunter")
 }
 
-tasks.remapJar {
+tasks.findByName("remapJar")?.apply {
+	this as RemapJarTask
 	dependsOn(tasks.shadowJar)
 	inputFile = tasks.shadowJar.get().archiveFile
 }

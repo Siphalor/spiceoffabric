@@ -32,7 +32,8 @@ import de.siphalor.tweed5.serde.hjson.HjsonWriter;
 import de.siphalor.tweed5.weaver.pojo.api.TweedPojoWeaver;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+//- import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 //- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 //- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 //- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -209,12 +210,17 @@ public class SpiceOfFabric implements ModInitializer {
 	}
 
 	private static void initItemGroups() {
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
-			entries.accept(createFoodJournalStack());
-			for (Item item : foodContainerItems) {
-				entries.accept(item);
-			}
-		});
+		//# if MC_VERSION_NUMBER >= 260100
+		CreativeModeTabEvents.modifyOutputEvent
+		//# else
+		//- ItemGroupEvents.modifyEntriesEvent
+		//# end
+				(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
+					entries.accept(createFoodJournalStack());
+					for (Item item : foodContainerItems) {
+						entries.accept(item);
+					}
+				});
 	}
 
 	private static void initFoodEvents() {
