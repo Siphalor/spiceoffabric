@@ -1,15 +1,16 @@
 package de.siphalor.spiceoffabric.recipe;
 
+//- import de.siphalor.spiceoffabric.SpiceOfFabric;
+
 //- import com.mojang.serialization.Codec;
 //- import com.mojang.serialization.DataResult;
 //- import com.mojang.serialization.MapCodec;
 //- import com.mojang.serialization.codecs.RecordCodecBuilder;
-//- import de.siphalor.spiceoffabric.SpiceOfFabric;
 //- import net.minecraft.core.NonNullList;
 //- import net.minecraft.network.FriendlyByteBuf;
-//- import net.minecraft.util.ExtraCodecs;
 //- import net.minecraft.network.RegistryFriendlyByteBuf;
 //- import net.minecraft.network.codec.StreamCodec;
+//- import net.minecraft.util.ExtraCodecs;
 //- import net.minecraft.world.item.crafting.CraftingBookCategory;
 //- import net.minecraft.world.item.crafting.Ingredient;
 //- import net.minecraft.world.item.crafting.RecipeSerializer;

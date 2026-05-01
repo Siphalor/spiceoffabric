@@ -2,7 +2,6 @@ package de.siphalor.spiceoffabric.foodhistory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.mojang.serialization.Codec;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
@@ -13,12 +12,19 @@ import de.siphalor.spiceoffabric.util.queue.FixedLengthIntFIFOQueueWithStats;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
+
+import com.mojang.serialization.Codec;
 //- import net.minecraft.nbt.CollectionTag;
 //- import net.minecraft.nbt.CompoundTag;
 //- import net.minecraft.nbt.IntTag;
 //- import net.minecraft.nbt.ListTag;
 //- import net.minecraft.nbt.Tag;
+//- import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -28,13 +34,6 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-//- import net.minecraft.network.FriendlyByteBuf;
 
 public class FoodHistory {
 

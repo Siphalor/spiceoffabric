@@ -1,8 +1,10 @@
 package de.siphalor.spiceoffabric.foodhistory;
 
+import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 //- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,8 +14,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @EqualsAndHashCode

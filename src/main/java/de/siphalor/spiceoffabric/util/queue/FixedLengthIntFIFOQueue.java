@@ -1,7 +1,6 @@
 package de.siphalor.spiceoffabric.util.queue;
 
 import it.unimi.dsi.fastutil.ints.IntIterable;
-
 import java.util.NoSuchElementException;
 
 public interface FixedLengthIntFIFOQueue extends IntIterable {

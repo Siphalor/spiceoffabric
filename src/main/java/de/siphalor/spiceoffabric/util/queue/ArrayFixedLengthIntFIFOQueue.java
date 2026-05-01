@@ -2,10 +2,9 @@ package de.siphalor.spiceoffabric.util.queue;
 
 
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.NoSuchElementException;
 import java.util.function.IntConsumer;
+import org.jetbrains.annotations.NotNull;
 
 public class ArrayFixedLengthIntFIFOQueue implements FixedLengthIntFIFOQueue {
 	protected int[] array;

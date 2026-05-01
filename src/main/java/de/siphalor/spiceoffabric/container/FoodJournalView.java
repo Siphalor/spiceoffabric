@@ -1,11 +1,10 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.SpiceOfFabric;
-import net.minecraft.network.chat.Component;
-
+//- import de.siphalor.spiceoffabric.config.SOFConfig;
 import java.util.Locale;
 
-//- import de.siphalor.spiceoffabric.config.SOFConfig;
+import net.minecraft.network.chat.Component;
 
 public enum FoodJournalView {
 	HISTORY("Least to most recently eaten"),

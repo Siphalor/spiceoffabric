@@ -1,10 +1,10 @@
 package de.siphalor.spiceoffabric.container;
 
+import java.util.List;
+
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.List;
 
 public class PaginatedReadOnlyInventory implements Container {
 	private final List<ItemStack> stacks;

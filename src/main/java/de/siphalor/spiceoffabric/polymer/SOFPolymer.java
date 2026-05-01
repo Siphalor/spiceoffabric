@@ -9,10 +9,11 @@ import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 //- import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+//- import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+
 //- import net.minecraft.core.Registry;
 //- import net.minecraft.core.component.DataComponents;
 //- import net.minecraft.core.registries.BuiltInRegistries;
-//- import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.resources.Identifier;
 //- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

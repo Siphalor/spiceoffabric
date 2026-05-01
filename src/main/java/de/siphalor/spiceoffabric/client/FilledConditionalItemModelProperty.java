@@ -1,5 +1,7 @@
 package de.siphalor.spiceoffabric.client;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
@@ -8,7 +10,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
-import org.jspecify.annotations.Nullable;
 
 //# if MC_VERSION_NUMBER >= 12104
 public record FilledConditionalItemModelProperty() implements ConditionalItemModelProperty {

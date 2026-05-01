@@ -1,23 +1,23 @@
 package de.siphalor.spiceoffabric.polymer;
 
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
-import eu.pb4.polymer.core.api.item.PolymerItem;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-
 //- import eu.pb4.polymer.common.api.PolymerCommonUtils;
+import eu.pb4.polymer.core.api.item.PolymerItem;
 //- import lombok.RequiredArgsConstructor;
-//- import net.minecraft.resources.ResourceLocation;
-//- import net.minecraft.server.level.ServerPlayer;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 //- import org.jetbrains.annotations.Nullable;
 //# if MC_VERSION_NUMBER >= 260100
 //# else
 //- import xyz.nucleoid.packettweaker.PacketContext;
 //# end
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
+//- import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class PolymerFoodContainerItem extends FoodContainerItem implements PolymerItem {
 	private final Item emptyPolymerItem;

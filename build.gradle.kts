@@ -142,6 +142,11 @@ val jcyo = tasks.register<JcyoTask>("jcyo") {
 	variables = smcmtk.mcProps.map {
 		it.filterKeys { key -> key.startsWith("preprocessor.") }.mapKeys { (key, _) -> key.substring("preprocessor.".length) }
 	}
+	importOrder = listOf(
+		"",
+		"com.mojang|net.minecraft",
+		"\\#",
+	)
 }
 
 java {

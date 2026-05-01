@@ -5,6 +5,11 @@ import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.FoodUtils;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -22,11 +27,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 public class FoodJournalScreenHandler extends AbstractContainerMenu {
 	private static final String PAGE_INDICATOR_TEXT_KEY = "book.pageIndicator";

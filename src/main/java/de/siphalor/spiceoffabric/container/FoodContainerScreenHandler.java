@@ -1,6 +1,8 @@
 package de.siphalor.spiceoffabric.container;
 
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -9,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public class FoodContainerScreenHandler extends AbstractContainerMenu {
 	private final FoodContainerItem foodContainerItem;

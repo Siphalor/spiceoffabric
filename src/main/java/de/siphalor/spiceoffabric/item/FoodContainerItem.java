@@ -1,6 +1,5 @@
 package de.siphalor.spiceoffabric.item;
 
-import com.mojang.datafixers.util.Pair;
 import de.siphalor.capsaicin.api.food.CamoFoodContext;
 import de.siphalor.capsaicin.api.food.CamoFoodItem;
 import de.siphalor.capsaicin.api.food.DynamicFoodPropertiesAccess;
@@ -11,6 +10,13 @@ import de.siphalor.spiceoffabric.container.ItemStackInventory;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 import de.siphalor.spiceoffabric.util.IndexedValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -20,6 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 //- import net.minecraft.world.InteractionResultHolder;
+//- import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -38,14 +45,6 @@ import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-//- import net.minecraft.world.entity.Entity;
 
 public class FoodContainerItem extends Item implements CamoFoodItem {
 	private static final String INVENTORY_NBT_KEY = "inventory";

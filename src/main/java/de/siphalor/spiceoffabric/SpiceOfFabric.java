@@ -2,9 +2,6 @@ package de.siphalor.spiceoffabric;
 
 //- import com.google.gson.JsonElement;
 //- import com.google.gson.JsonSyntaxException;
-//- import com.mojang.serialization.Codec;
-//- import com.mojang.serialization.MapCodec;
-//- import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.capsaicin.api.food.FoodEvents;
 import de.siphalor.capsaicin.api.food.FoodModifications;
@@ -30,6 +27,9 @@ import de.siphalor.tweed5.serde.hjson.HjsonCommentType;
 import de.siphalor.tweed5.serde.hjson.HjsonSerde;
 import de.siphalor.tweed5.serde.hjson.HjsonWriter;
 import de.siphalor.tweed5.weaver.pojo.api.TweedPojoWeaver;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -38,12 +38,18 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 //- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 //- import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//- import com.mojang.serialization.Codec;
+//- import com.mojang.serialization.MapCodec;
+//- import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-//- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.Registries;
+//- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
@@ -68,12 +74,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.WrittenBookContent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Function;
 
 public class SpiceOfFabric implements ModInitializer {
 

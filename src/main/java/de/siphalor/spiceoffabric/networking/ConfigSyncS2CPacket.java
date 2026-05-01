@@ -13,18 +13,18 @@ import de.siphalor.tweed5.patchwork.api.Patchwork;
 import de.siphalor.tweed5.serde.extension.api.ReadWriteExtension;
 import de.siphalor.tweed5.serde.extension.api.TweedEntryReadException;
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 //- import net.minecraft.resources.ResourceLocation;
-import org.jspecify.annotations.NonNull;
-
-import java.util.Arrays;
 
 import static de.siphalor.tweed5.serde.extension.api.ReadWriteExtension.write;
 

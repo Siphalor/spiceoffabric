@@ -14,29 +14,28 @@ import de.siphalor.tweed5.coat.bridge.api.ConfigScreenCreateParams;
 import de.siphalor.tweed5.coat.bridge.api.TweedCoatBridgeExtension;
 import de.siphalor.tweed5.coat.bridge.api.TweedCoatMappers;
 import de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension;
+import java.util.List;
+import java.util.stream.Stream;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
 //- import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+//- import org.jspecify.annotations.Nullable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
+//- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+//- import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
+//- import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import static de.siphalor.tweed5.defaultextensions.presets.api.PresetsExtension.presetValue;
-
-//- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-//- import net.minecraft.client.renderer.item.ItemProperties;
-//- import net.minecraft.core.HolderLookup;
-//- import net.minecraft.resources.ResourceLocation;
-//- import org.jspecify.annotations.Nullable;
 
 public class SOFClient implements ClientModInitializer {
 

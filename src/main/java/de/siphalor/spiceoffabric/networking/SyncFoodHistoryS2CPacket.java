@@ -6,18 +6,18 @@ import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistoryEntry;
 import de.siphalor.spiceoffabric.util.queue.ArrayFixedLengthIntFIFOQueue;
 import de.siphalor.spiceoffabric.util.queue.FixedLengthIntFIFOQueueWithStats;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 //- import net.minecraft.resources.ResourceLocation;
-import org.jspecify.annotations.NonNull;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Getter

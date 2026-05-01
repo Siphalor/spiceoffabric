@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.util;
 
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
+
 import net.minecraft.server.level.ServerPlayer;
 
 public interface IHungerManager {

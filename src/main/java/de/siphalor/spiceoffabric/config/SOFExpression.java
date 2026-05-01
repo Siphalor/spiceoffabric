@@ -13,6 +13,9 @@ import de.siphalor.tweed5.serde.extension.api.read.result.TweedReadResult;
 import de.siphalor.tweed5.serde.extension.api.readwrite.TweedEntryReaderWriter;
 import de.siphalor.tweed5.serde_api.api.*;
 import de.siphalor.tweed5.weaver.pojoext.validation.api.validators.WeavableConfigEntryValidator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import net.objecthunter.exp4j.Expression;
@@ -20,10 +23,6 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @NullMarked
 @Value

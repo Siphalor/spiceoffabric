@@ -1,14 +1,18 @@
 package de.siphalor.spiceoffabric.server;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 //- import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.container.FoodJournalScreenHandler;
 import de.siphalor.spiceoffabric.container.FoodJournalView;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.util.IHungerManager;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Predicate;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -17,9 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Predicate;
 
 public class SOFCommands {
 	private static final String AMOUNT_ARGUMENT = "amount";

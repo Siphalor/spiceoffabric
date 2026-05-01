@@ -2,13 +2,16 @@ package de.siphalor.spiceoffabric.resource_conditions;
 
 //- import com.google.gson.JsonElement;
 //- import com.google.gson.JsonSyntaxException;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
+import java.util.List;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+//- import org.jetbrains.annotations.Nullable;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 //- import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,9 +19,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 //- import net.minecraft.resources.ResourceLocation;
 //- import net.minecraft.util.GsonHelper;
-//- import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class SOFResourceConditions {
 	//# if MC_VERSION_NUMBER >= 12111
