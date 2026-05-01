@@ -37,8 +37,16 @@ public class FoodJournalScreenHandler extends AbstractContainerMenu {
 	static {
 		PREV_STACK = new ItemStack(Items.FEATHER);
 		NEXT_STACK = new ItemStack(Items.FLINT);
-		Component prevName = Component.translatable("createWorld.customize.custom.prev").withStyle(style -> style.withItalic(false));
-		Component nextName = Component.translatable("createWorld.customize.custom.next").withStyle(style -> style.withItalic(false));
+		//# if MC_VERSION_NUMBER >= 12106
+		Component prevName = Component.translatable("book.page_button.previous").withStyle(style -> style.withItalic(false));
+		Component nextName = Component.translatable("book.page_button.next").withStyle(style -> style.withItalic(false));
+		//# elif MC_VERSION_NUMBER >= 12102
+		//- Component prevName = Component.translatable("spectatorMenu.previous_page").withStyle(style -> style.withItalic(false));
+		//- Component nextName = Component.translatable("spectatorMenu.next_page").withStyle(style -> style.withItalic(false));
+		//# else
+		//- Component prevName = Component.translatable("createWorld.customize.custom.prev").withStyle(style -> style.withItalic(false));
+		//- Component nextName = Component.translatable("createWorld.customize.custom.next").withStyle(style -> style.withItalic(false));
+		//# end
 		//# if MC_VERSION_NUMBER >= 12006
 		PREV_STACK.set(DataComponents.ITEM_NAME, prevName);
 		NEXT_STACK.set(DataComponents.ITEM_NAME, nextName);
