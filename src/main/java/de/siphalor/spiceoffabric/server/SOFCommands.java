@@ -14,14 +14,23 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Predicate;
 
 public class SOFCommands {
 	private static final String AMOUNT_ARGUMENT = "amount";
 	private static final String TARGETS_ARGUMENT = "targets";
+
+	private static final Predicate<CommandSourceStack> IS_ALLOWED_TO_MUTATE =
+	//# if MC_VERSION_NUMBER >= 12111
+			source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+	//# else
+	//- 		source -> source.hasPermission(2);
+	//# end
 
 	private SOFCommands() {}
 
@@ -32,7 +41,7 @@ public class SOFCommands {
 						.executes(context -> openJournal(context.getSource())));
 			}
 			commandDispatcher.register(Commands.literal(SpiceOfFabric.MOD_ID + ":clear_history")
-					.requires(source -> source.hasPermission(2))
+					.requires(IS_ALLOWED_TO_MUTATE)
 					.executes(context ->
 							clearHistory(
 									context.getSource(),
@@ -49,7 +58,7 @@ public class SOFCommands {
 					)
 			);
 			commandDispatcher.register(Commands.literal(SpiceOfFabric.MOD_ID + ":set_base_max_health")
-					.requires(source -> source.hasPermission(2))
+					.requires(IS_ALLOWED_TO_MUTATE)
 					.then(
 							Commands.argument(TARGETS_ARGUMENT, EntityArgument.players())
 									.then(
@@ -75,7 +84,7 @@ public class SOFCommands {
 					)
 			);
 			commandDispatcher.register(Commands.literal(SpiceOfFabric.MOD_ID + ":update_max_health")
-					.requires(source -> source.hasPermission(2))
+					.requires(IS_ALLOWED_TO_MUTATE)
 					.executes(context ->
 							updateMaxHealth(context.getSource(), Collections.singleton(context.getSource().getPlayer()))
 					).then(

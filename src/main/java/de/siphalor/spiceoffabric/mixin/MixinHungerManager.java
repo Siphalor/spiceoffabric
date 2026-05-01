@@ -7,7 +7,8 @@ import de.siphalor.spiceoffabric.util.IHungerManager;
 import de.siphalor.spiceoffabric.util.IServerPlayerEntity;
 //- import net.minecraft.nbt.CompoundTag;
 //- import net.minecraft.nbt.IntTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 //- import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -88,9 +89,13 @@ public abstract class MixinHungerManager implements IHungerManager {
 					return;
 				}
 				//# if MC_VERSION_NUMBER >= 12100
-				if (healthAttribute.removeModifier(ResourceLocation.withDefaultNamespace(
-						SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID.toString()
-				))) {
+				if (healthAttribute.removeModifier(
+						//# if MC_VERSION_NUMBER >= 12111
+						Identifier.withDefaultNamespace(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID.toString())
+						//# else
+						//- ResourceLocation.withDefaultNamespace(SpiceOfFabric.PLAYER_HEALTH_MODIFIER_UUID.toString())
+						//# end
+				)) {
 					SpiceOfFabric.updateMaxHealth(player, false, false);
 				}
 				//# else

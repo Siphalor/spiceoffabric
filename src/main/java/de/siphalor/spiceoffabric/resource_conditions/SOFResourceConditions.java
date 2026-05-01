@@ -12,15 +12,21 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 //- import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+//- import net.minecraft.resources.ResourceLocation;
 //- import net.minecraft.util.GsonHelper;
 //- import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class SOFResourceConditions {
-	public static final ResourceLocation REGISTRY_POPULATED_ID = SpiceOfFabric.createId("registry_populated");
+	//# if MC_VERSION_NUMBER >= 12111
+	public static final Identifier REGISTRY_POPULATED_ID =
+	//# else
+	//- public static final ResourceLocation REGISTRY_POPULATED_ID =
+	//# end
+			SpiceOfFabric.createId("registry_populated");
 
 	public static void init() {
 		//# if MC_VERSION_NUMBER >= 12006
@@ -46,7 +52,11 @@ public class SOFResourceConditions {
 	//# if MC_VERSION_NUMBER >= 12006
 	private record RegistryPopulated(
 			Registry<?> registry,
-			List<ResourceLocation> ids
+			//# if MC_VERSION_NUMBER >= 12111
+			List<Identifier> ids
+			//# else
+			//- List<ResourceLocation> ids
+			//# end
 	) implements ResourceCondition {
 		@SuppressWarnings("unchecked")
 		public static MapCodec<RegistryPopulated> MAP_CODEC = RecordCodecBuilder.mapCodec(
@@ -54,7 +64,12 @@ public class SOFResourceConditions {
 						((Codec<Registry<?>>) BuiltInRegistries.REGISTRY.byNameCodec())
 								.fieldOf("registry")
 								.forGetter(RegistryPopulated::registry),
-						Codec.list(ResourceLocation.CODEC).fieldOf("ids").forGetter(RegistryPopulated::ids)
+						//# if MC_VERSION_NUMBER >= 12111
+						Codec.list(Identifier.CODEC)
+						//# else
+						//- Codec.list(ResourceLocation.CODEC)
+						//# end
+								.fieldOf("ids").forGetter(RegistryPopulated::ids)
 				).apply(instance, RegistryPopulated::new)
 		);
 
@@ -72,7 +87,11 @@ public class SOFResourceConditions {
 		//# else
 		//- public boolean test(HolderLookup.@Nullable Provider registryLookup) {
 		//# end
-			for (ResourceLocation id : ids) {
+			//# if MC_VERSION_NUMBER >= 12111
+			for (Identifier id : ids) {
+			//# else
+			//- for (ResourceLocation id : ids) {
+			//# end
 				if (!registry.containsKey(id)) {
 					return false;
 				}

@@ -20,7 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
@@ -36,7 +37,12 @@ public class ConfigSyncS2CPacket
 	implements CustomPacketPayload
 	//# end
 {
-	public static final ResourceLocation PAYLOAD_ID = SpiceOfFabric.createId("config_sync");
+	//# if MC_VERSION_NUMBER >= 12111
+	public static final Identifier PAYLOAD_ID =
+	//# else
+	//- public static final ResourceLocation PAYLOAD_ID =
+	//# end
+			SpiceOfFabric.createId("config_sync");
 	//# if MC_VERSION_NUMBER >= 12006
 	public static final Type<ConfigSyncS2CPacket> TYPE = new Type<>(PAYLOAD_ID);
 	public static final StreamCodec<ByteBuf, ConfigSyncS2CPacket> STREAM_CODEC =

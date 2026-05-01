@@ -6,7 +6,8 @@ import lombok.ToString;
 import net.minecraft.core.registries.BuiltInRegistries;
 //- import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
@@ -33,7 +34,11 @@ public class FoodHistoryEntry {
 	//# if MC_VERSION_NUMBER >= 12106
 	public static Optional<FoodHistoryEntry> read(ValueInput valueInput) {
 		Optional<Item> item = valueInput.getString("item")
-				.flatMap(id -> ResourceLocation.read(id).result())
+				//# if MC_VERSION_NUMBER >= 12111
+				.flatMap(id -> Identifier.read(id).result())
+				//# else
+				//- .flatMap(id -> ResourceLocation.read(id).result())
+				//# end
 				.flatMap(BuiltInRegistries.ITEM::getOptional);
 	//# else
 	//- public static FoodHistoryEntry read(CompoundTag compoundTag) {

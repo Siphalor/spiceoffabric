@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.NonNull;
 
 @RequiredArgsConstructor
@@ -17,7 +18,12 @@ public class AddFoodToHistoryS2CPacket
 	implements CustomPacketPayload
 	//# end
 {
-	public static final ResourceLocation PAYLOAD_ID = SpiceOfFabric.createId("add_food_to_history");
+	//# if MC_VERSION_NUMBER >= 12111
+	public static final Identifier PAYLOAD_ID =
+	//# else
+	//- public static final ResourceLocation PAYLOAD_ID =
+	//# end
+			SpiceOfFabric.createId("add_food_to_history");
 	//# if MC_VERSION_NUMBER >= 12006
 	public static final Type<AddFoodToHistoryS2CPacket> TYPE = new CustomPacketPayload.Type<>(PAYLOAD_ID);
 	public static final StreamCodec<FriendlyByteBuf, AddFoodToHistoryS2CPacket> STREAM_CODEC =

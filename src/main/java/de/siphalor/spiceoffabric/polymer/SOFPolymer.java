@@ -10,7 +10,8 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 //- import net.minecraft.core.Registry;
 //- import net.minecraft.core.component.DataComponents;
 //- import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -62,7 +63,11 @@ public class SOFPolymer {
 	}
 
 	public static void registerFoodContainer(String idPath, Item emptyItem, Item filledItem, int slots, MenuType<?> screenHandlerType) {
-		ResourceLocation id = SpiceOfFabric.createId(idPath);
+		//# if MC_VERSION_NUMBER >= 12111
+		Identifier id = SpiceOfFabric.createId(idPath);
+		//# else
+		//- ResourceLocation id = SpiceOfFabric.createId(idPath);
+		//# end
 		//# if MC_VERSION_NUMBER < 12102
 		//- PolymerModelData emptyModelData = PolymerResourcePackUtils.requestModel(emptyItem, SpiceOfFabric.createId("item/" + id.getPath() + "_empty"));
 		//- PolymerModelData filledModelData = PolymerResourcePackUtils.requestModel(filledItem, SpiceOfFabric.createId("item/" + id.getPath() + "_filled"));

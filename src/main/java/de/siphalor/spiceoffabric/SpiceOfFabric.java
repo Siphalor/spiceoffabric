@@ -46,8 +46,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+//- import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.server.network.FilteredText;
@@ -83,8 +84,10 @@ public class SpiceOfFabric implements ModInitializer {
 	public static final int NBT_VERSION = 1;
 	public static final String FOOD_JOURNAL_FLAG = MOD_ID + ":food_journal";
 
-	//# if MC_VERSION_NUMBER >= 12100
-	public static final ResourceLocation PLAYER_HEALTH_MODIFIER_ID = createId("main");
+	//# if MC_VERSION_NUMBER >= 12111
+	public static final Identifier PLAYER_HEALTH_MODIFIER_ID = createId("main");
+	//# elif MC_VERSION_NUMBER >= 12100
+	//- public static final ResourceLocation PLAYER_HEALTH_MODIFIER_ID = createId("main");
 	//# end
 	public static final UUID PLAYER_HEALTH_MODIFIER_UUID = UUID.nameUUIDFromBytes(MOD_ID.getBytes(StandardCharsets.UTF_8));
 
@@ -380,11 +383,17 @@ public class SpiceOfFabric implements ModInitializer {
 		return stack;
 	}
 
-	public static ResourceLocation createId(String path) {
-		//# if MC_VERSION_NUMBER >= 12100
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
-		//# else
-		//- return new ResourceLocation(MOD_ID, path);
-		//# end
+	//# if MC_VERSION_NUMBER >= 12111
+	public static Identifier createId(String path) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
+	//# else
+	//- public static ResourceLocation createId(String path) {
+	//- 	//# if MC_VERSION_NUMBER >= 12100
+	//- 	return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+	//- 	//# else
+	//- 	return new ResourceLocation(MOD_ID, path);
+	//- 	//# end
+	//- }
+	//# end
 }
