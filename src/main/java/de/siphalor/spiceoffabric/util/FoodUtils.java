@@ -5,7 +5,7 @@ import de.siphalor.capsaicin.api.food.FoodContext;
 import de.siphalor.spiceoffabric.SpiceOfFabric;
 import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
-import de.siphalor.spiceoffabric.item.FoodContainerItem;
+//- import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -40,7 +39,11 @@ public class FoodUtils {
 		}
 		//# if MC_VERSION_NUMBER >= 12006
 		if (stack.has(DataComponents.FOOD)) {
-			return true;
+			//# if MC_VERSION_NUMBER >= 12102
+			return stack.has(DataComponents.CONSUMABLE);
+			//# else
+			//- return true;
+			//# end
 		}
 		//# else
 		//- if (stack.isEdible()) {
@@ -54,7 +57,7 @@ public class FoodUtils {
 	}
 
 	public static boolean isFood(Item item) {
-		if (item instanceof FoodContainerItem) {
+		if (item instanceof CamoFoodItem) {
 			return false;
 		}
 		//# if MC_VERSION_NUMBER >= 12006
@@ -91,44 +94,6 @@ public class FoodUtils {
 		return null;
 	}
 
-	public static void appendServerTooltips(Player player, ItemStack stack) {
-		if (!isFood(stack)) {
-			return;
-		}
-		FoodHistory foodHistory = FoodHistory.get(player);
-		if (foodHistory == null) {
-			return;
-		}
-
-		var additions = new ArrayList<Component>();
-		appendCarrotTooltip(additions, stack, foodHistory);
-		if (additions.isEmpty()) {
-			return;
-		}
-
-		//# if MC_VERSION_NUMBER >= 12006
-		stack.update(DataComponents.LORE, ItemLore.EMPTY, itemLore -> {
-			for (Component addition : additions) {
-				itemLore = itemLore.withLineAdded(addition);
-			}
-			return itemLore;
-		});
-		//# else
-		//- CompoundTag displayNbt = stack.getOrCreateTagElement(ItemStack.TAG_DISPLAY);
-		//- ListTag loreNbt;
-		//- if (displayNbt.contains(ItemStack.TAG_LORE, 9)) {
-		//- 	loreNbt = displayNbt.getList(ItemStack.TAG_LORE, 8);
-		//- } else {
-		//- 	loreNbt = new ListTag();
-		//- 	displayNbt.put(ItemStack.TAG_LORE, loreNbt);
-		//- }
-
-		//- for (Component addition : additions) {
-		//- 	loreNbt.add(StringTag.valueOf(Component.Serializer.toJson(addition)));
-		//- }
-		//# end
-	}
-
 	public static List<Component> getClientTooltipAdditions(Player player, ItemStack stack) {
 		if (!isFood(stack)) {
 			return Collections.emptyList();
@@ -145,7 +110,7 @@ public class FoodUtils {
 		return additions;
 	}
 
-	private static void appendCarrotTooltip(List<Component> base, ItemStack stack, FoodHistory foodHistory) {
+	public static void appendCarrotTooltip(List<Component> base, ItemStack stack, FoodHistory foodHistory) {
 		if (SpiceOfFabric.config.carrot.enable && !foodHistory.isInUniqueEaten(stack)) {
 			base.add(NEVER_EATEN_TOOLTIP);
 		}
