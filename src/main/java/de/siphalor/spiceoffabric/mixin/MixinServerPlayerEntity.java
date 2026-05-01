@@ -73,7 +73,15 @@ public abstract class MixinServerPlayerEntity extends Player implements IServerP
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void onConstruct(MinecraftServer server, ServerLevel world, GameProfile profile, ClientInformation clientOptions, CallbackInfo ci) {
+	public void onConstruct(
+			MinecraftServer server,
+			ServerLevel world,
+			GameProfile profile,
+			//# if MC_VERSION_NUMBER >= 12002
+			ClientInformation clientOptions,
+			//# end
+			CallbackInfo ci
+	) {
 		((IHungerManager) foodData).spiceOfFabric_setPlayer((ServerPlayer) (Object) this);
 
 		// Set the max health and health for new players

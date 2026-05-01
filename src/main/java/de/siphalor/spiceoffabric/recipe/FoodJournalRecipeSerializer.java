@@ -1,5 +1,7 @@
 package de.siphalor.spiceoffabric.recipe;
 
+//- import com.google.gson.JsonElement;
+//- import com.google.gson.JsonObject;
 //- import de.siphalor.spiceoffabric.SpiceOfFabric;
 
 //- import com.mojang.serialization.Codec;
@@ -10,7 +12,10 @@ package de.siphalor.spiceoffabric.recipe;
 //- import net.minecraft.network.FriendlyByteBuf;
 //- import net.minecraft.network.RegistryFriendlyByteBuf;
 //- import net.minecraft.network.codec.StreamCodec;
+//- import net.minecraft.resources.ResourceLocation;
 //- import net.minecraft.util.ExtraCodecs;
+//- import net.minecraft.util.GsonHelper;
+//- import net.minecraft.world.item.ItemStack;
 //- import net.minecraft.world.item.crafting.CraftingBookCategory;
 //- import net.minecraft.world.item.crafting.Ingredient;
 //- import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -18,6 +23,7 @@ package de.siphalor.spiceoffabric.recipe;
 
 //# if MC_VERSION_NUMBER < 12100
 //- public class FoodJournalRecipeSerializer implements RecipeSerializer<ShapelessRecipe> {
+//- 	//# if MC_VERSION_NUMBER >= 12002
 //- 	//# if MC_VERSION_NUMBER >= 12006
 //- 	private static final MapCodec<ShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) ->
 //- 	//# else
@@ -36,6 +42,7 @@ package de.siphalor.spiceoffabric.recipe;
 //- 							.forGetter(ShapelessRecipe::getIngredients)
 //- 			).apply(instance, ShapelessRecipe::new)
 //- 	);
+//- 	//# end
 
 //- 	//# if MC_VERSION_NUMBER >= 12006
 //- 	private static final StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> STREAM_CODEC = StreamCodec.unit(null);
@@ -49,7 +56,7 @@ package de.siphalor.spiceoffabric.recipe;
 //- 	public StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> streamCodec() {
 //- 		return STREAM_CODEC;
 //- 	}
-//- 	//# else
+//- 	//# elif MC_VERSION_NUMBER >= 12002
 //- 	@Override
 //- 	public Codec<ShapelessRecipe> codec() {
 //- 		return CODEC;
@@ -57,6 +64,26 @@ package de.siphalor.spiceoffabric.recipe;
 
 //- 	@Override
 //- 	public ShapelessRecipe fromNetwork(FriendlyByteBuf buf) {
+//- 		return null;
+//- 	}
+
+//- 	@Override
+//- 	public void toNetwork(FriendlyByteBuf buffer, ShapelessRecipe recipe) {
+
+//- 	}
+//- 	//# else
+//- 	@Override
+//- 	public ShapelessRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+//- 		NonNullList<Ingredient> ingredients = NonNullList.create();
+//- 		for (JsonElement ingredientJson : GsonHelper.getAsJsonArray(json, "ingredients")) {
+//- 			ingredients.add(Ingredient.fromJson(ingredientJson));
+//- 		}
+//- 		ItemStack foodJournal = SpiceOfFabric.createFoodJournalStack();
+//- 		return new ShapelessRecipe(recipeId, "", CraftingBookCategory.MISC, foodJournal, ingredients);
+//- 	}
+
+//- 	@Override
+//- 	public ShapelessRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
 //- 		return null;
 //- 	}
 
