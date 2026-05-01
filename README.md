@@ -71,8 +71,6 @@ Contribute or improve translations [here](https://weblate.siphalor.de/engage/spi
 **This mod requires [Fabric API](https://modrinth.com/mod/fabric-api) to be installed separately.**  
 If you want to use Food containers 
 
-Contains Tweed API. Tweed redistributes [hjson-java](https://github.com/hjson/hjson-java) which is under the [MIT License](https://github.com/hjson/hjson-java/blob/master/LICENSE) currently copyrighted by Christian Zangl. This mod uses the [fork](https://github.com/PersonTheCat/hjson-java) made by [PersonTheCat](https://github.com/PersonTheCat).
-
 This mod redistributes [exp4j](https://www.objecthunter.net/exp4j/) under the [Apache License 2.0](https://github.com/fasseg/exp4j/blob/master/LICENSE).
 
 ## License
