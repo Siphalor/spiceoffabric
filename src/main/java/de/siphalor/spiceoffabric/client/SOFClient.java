@@ -27,7 +27,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 //- import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 //- import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
+//- import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
 //- import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 //- import net.minecraft.resources.ResourceLocation;
@@ -83,11 +83,12 @@ public class SOFClient implements ClientModInitializer {
 	}
 
 	private static void initRendering() {
-		//# if MC_VERSION_NUMBER >= 12104
-		ConditionalItemModelProperties.ID_MAPPER.put(
-				SpiceOfFabric.createId("filled"),
-				FilledConditionalItemModelProperty.CODEC
-		);
+		//# if MC_VERSION_NUMBER >= 12106
+		//# elif MC_VERSION_NUMBER >= 12104
+		//- ConditionalItemModelProperties.ID_MAPPER.put(
+				//- SpiceOfFabric.createId("filled"),
+				//- FilledConditionalItemModelProperty.CODEC
+		//- );
 		//# else
 		//- if (!SpiceOfFabric.config.items.usePolymer && SpiceOfFabric.foodContainerItems != null) {
 		//- 	registerModelPredicateProviders();

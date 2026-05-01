@@ -4,12 +4,12 @@ import de.siphalor.spiceoffabric.item.FoodContainerItem;
 //- import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 //- import lombok.RequiredArgsConstructor;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
-//- import org.jetbrains.annotations.Nullable;
 //# if MC_VERSION_NUMBER >= 260100
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 //# else
 //- import xyz.nucleoid.packettweaker.PacketContext;
 //# end
+//- import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;

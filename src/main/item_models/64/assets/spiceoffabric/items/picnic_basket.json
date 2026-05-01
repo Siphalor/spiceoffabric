@@ -1,0 +1,22 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "minecraft:component",
+		"predicate": "minecraft:container",
+		"value": {
+			"items": {
+				"size": {
+					"min": 1
+				}
+			}
+		},
+		"on_true": {
+			"type": "minecraft:model",
+			"model": "spiceoffabric:item/picnic_basket_filled"
+		},
+		"on_false": {
+			"type": "minecraft:model",
+			"model": "spiceoffabric:item/picnic_basket_empty"
+		}
+	}
+}
