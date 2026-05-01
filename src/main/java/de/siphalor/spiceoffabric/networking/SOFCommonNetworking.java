@@ -27,10 +27,10 @@ public class SOFCommonNetworking {
 
 		S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
 			if (channels.contains(SyncFoodHistoryS2CPacket.PAYLOAD_ID)) {
-				syncFoodHistory(handler.player);
+				syncFoodHistoryUnchecked(handler.player);
 			}
 			if (channels.contains(ConfigSyncS2CPacket.PAYLOAD_ID)) {
-				syncConfigToClient(handler.player);
+				syncConfigToClientUnchecked(handler.player);
 			}
 		});
 	}
@@ -42,11 +42,7 @@ public class SOFCommonNetworking {
 		return ServerPlayNetworking.canSend(player, SyncFoodHistoryS2CPacket.PAYLOAD_ID);
 	}
 
-	public static void syncConfigToClient(ServerPlayer player) {
-		if (!ServerPlayNetworking.canSend(player, ConfigSyncS2CPacket.PAYLOAD_ID)) {
-			return;
-		}
-
+	private static void syncConfigToClientUnchecked(ServerPlayer player) {
 		ConfigSyncS2CPacket packet = new ConfigSyncS2CPacket(SpiceOfFabric.config);
 		//# if MC_VERSION_NUMBER >= 12006
 		ServerPlayNetworking.send(player, packet);
@@ -62,6 +58,10 @@ public class SOFCommonNetworking {
 			return;
 		}
 
+		syncFoodHistoryUnchecked(player);
+	}
+
+	private static void syncFoodHistoryUnchecked(ServerPlayer player) {
 		FoodHistory foodHistory = ((IHungerManager) player.getFoodData()).spiceOfFabric_getFoodHistory();
 
 		SyncFoodHistoryS2CPacket packet = foodHistory.toPacket();

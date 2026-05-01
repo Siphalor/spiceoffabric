@@ -13,6 +13,7 @@ import de.siphalor.spiceoffabric.config.SOFConfig;
 import de.siphalor.spiceoffabric.config.SOFTweedAttributes;
 import de.siphalor.spiceoffabric.foodhistory.FoodHistory;
 import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import de.siphalor.spiceoffabric.mixin.CustomDataAccessor;
 import de.siphalor.spiceoffabric.networking.SOFCommonNetworking;
 import de.siphalor.spiceoffabric.polymer.SOFPolymer;
 //- import de.siphalor.spiceoffabric.recipe.FoodJournalRecipeSerializer;
@@ -69,10 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class SpiceOfFabric implements ModInitializer {
@@ -343,9 +341,15 @@ public class SpiceOfFabric implements ModInitializer {
 		if (stack == null) {
 			return false;
 		}
-		//# if MC_VERSION_NUMBER >= 12006
+		//# if MC_VERSION_NUMBER >= 12110
 		CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-		return customData != null && customData.contains(SpiceOfFabric.FOOD_JOURNAL_FLAG);
+		return Optional.ofNullable((CustomDataAccessor)(Object) customData)
+				.map(CustomDataAccessor::getTag)
+				.map(tag -> tag.contains(SpiceOfFabric.FOOD_JOURNAL_FLAG))
+				.orElse(false);
+		//# elif MC_VERSION_NUMBER >= 12006
+		//- CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+		//- return customData != null && customData.contains(SpiceOfFabric.FOOD_JOURNAL_FLAG);
 		//# else
 		//- CompoundTag nbt = stack.getTag();
 		//- return nbt != null && nbt.contains(FOOD_JOURNAL_FLAG, 1) && nbt.getBoolean(FOOD_JOURNAL_FLAG);

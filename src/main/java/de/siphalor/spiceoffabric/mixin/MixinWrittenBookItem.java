@@ -30,7 +30,11 @@ public class MixinWrittenBookItem {
 			//# end
 	) {
 		ItemStack stack = user.getItemInHand(hand);
-		if (!world.isClientSide && SpiceOfFabric.isFoodJournal(stack)) {
+		//# if MC_VERSION_NUMBER >= 12110
+		if (!world.isClientSide() && SpiceOfFabric.isFoodJournal(stack)) {
+		//# else
+		//- if (!world.isClientSide && SpiceOfFabric.isFoodJournal(stack)) {
+		//# end
 			FoodJournalView defaultView = FoodJournalView.getDefault();
 			if (defaultView == null) {
 				return;

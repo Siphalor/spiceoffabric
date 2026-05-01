@@ -285,7 +285,11 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 	//- public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
 	//# end
 		openContainer:
-		if (!world.isClientSide && user instanceof ServerPlayer player) {
+		//# if MC_VERSION_NUMBER >= 12110
+		if (!world.isClientSide() && user instanceof ServerPlayer player) {
+		//# else
+		//- if (!world.isClientSide && user instanceof ServerPlayer player) {
+		//# end
 			// Only open the container if the player hasn't used the item for too long
 			//# if MC_VERSION_NUMBER >= 12100
 			int maxUseTime = getUseDuration(stack, user);

@@ -1,6 +1,7 @@
 package de.siphalor.spiceoffabric.container;
 
 //- import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import de.siphalor.spiceoffabric.mixin.CustomDataAccessor;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.HolderLookup;
@@ -38,7 +39,9 @@ public class ItemStackInventory implements Container {
 		//# if MC_VERSION_NUMBER >= 12006
 		CustomData customData = containerStack.get(DataComponents.CUSTOM_DATA);
 		//# if MC_VERSION_NUMBER >= 12106
-		Optional<CompoundTag> oldCompound = customData.getUnsafe().getCompound(nbtKey);
+		Optional<CompoundTag> oldCompound = Optional.ofNullable((CustomDataAccessor)(Object) customData)
+				.map(CustomDataAccessor::getTag)
+				.flatMap(tag -> tag.getCompound(nbtKey));
 		if (oldCompound.isPresent()) {
 			ContainerHelper.loadAllItems(
 					TagValueInput.create(
@@ -122,7 +125,11 @@ public class ItemStackInventory implements Container {
 	public void setChanged() {
 		//# if MC_VERSION_NUMBER >= 12006
 		CustomData customData = containerStack.get(DataComponents.CUSTOM_DATA);
-		if (customData != null && customData.contains(nbtKey)) {
+		//# if MC_VERSION_NUMBER >= 12110
+		if (customData != null && ((CustomDataAccessor)(Object) customData).getTag().contains(nbtKey)) {
+		//# else
+		//- if (customData != null && customData.contains(nbtKey)) {
+		//# end
 			customData.update(tag -> tag.remove(nbtKey));
 		}
 		containerStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(stacks));

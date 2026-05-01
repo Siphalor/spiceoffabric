@@ -25,7 +25,11 @@ public class SOFPolymer {
 	}
 
 	public static void init() {
-		PolymerItemUtils.ITEM_CHECK.register(FoodUtils::isFood);
+		//# if MC_VERSION_NUMBER >= 12110
+		PolymerItemUtils.CONTEXT_ITEM_CHECK.register((stack, context) -> FoodUtils.isFood(stack));
+		//# else
+		//- PolymerItemUtils.ITEM_CHECK.register(FoodUtils::isFood);
+		//# end
 
 		//# if MC_VERSION_NUMBER >= 12102
 		PolymerItemUtils.ITEM_MODIFICATION_EVENT.register((original, client, context) -> {

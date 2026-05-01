@@ -9,11 +9,11 @@ import org.jspecify.annotations.NullMarked;
 public class SOFTweedReaderWriterProvider implements TweedReaderWriterProvider {
 	@Override
 	public void provideReaderWriters(ProviderContext context) {
-		context.registerReaderFactory(SOFExpression.ReaderWriter.ITEM_NAME, _ -> SOFExpression.ReaderWriter.ITEM);
-		context.registerWriterFactory(SOFExpression.ReaderWriter.ITEM_NAME, _ -> SOFExpression.ReaderWriter.ITEM);
-		context.registerReaderFactory(SOFExpression.ReaderWriter.AFTER_DEATH_NAME, _ -> SOFExpression.ReaderWriter.AFTER_DEATH);
-		context.registerWriterFactory(SOFExpression.ReaderWriter.AFTER_DEATH_NAME, _ -> SOFExpression.ReaderWriter.AFTER_DEATH);
-		context.registerReaderFactory(SOFExpression.ReaderWriter.HEALTH_FORMULA_NAME, _ -> SOFExpression.ReaderWriter.HEALTH_FORMULA);
-		context.registerWriterFactory(SOFExpression.ReaderWriter.HEALTH_FORMULA_NAME, _ -> SOFExpression.ReaderWriter.HEALTH_FORMULA);
+		context.registerReaderFactory(SOFExpression.ReaderWriter.ITEM_NAME, a -> SOFExpression.ReaderWriter.ITEM);
+		context.registerWriterFactory(SOFExpression.ReaderWriter.ITEM_NAME, a -> SOFExpression.ReaderWriter.ITEM);
+		context.registerReaderFactory(SOFExpression.ReaderWriter.AFTER_DEATH_NAME, a -> SOFExpression.ReaderWriter.AFTER_DEATH);
+		context.registerWriterFactory(SOFExpression.ReaderWriter.AFTER_DEATH_NAME, a -> SOFExpression.ReaderWriter.AFTER_DEATH);
+		context.registerReaderFactory(SOFExpression.ReaderWriter.HEALTH_FORMULA_NAME, a -> SOFExpression.ReaderWriter.HEALTH_FORMULA);
+		context.registerWriterFactory(SOFExpression.ReaderWriter.HEALTH_FORMULA_NAME, a -> SOFExpression.ReaderWriter.HEALTH_FORMULA);
 	}
 }

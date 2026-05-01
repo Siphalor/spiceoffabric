@@ -141,6 +141,11 @@ val jcyo = tasks.register<JcyoTask>("jcyo") {
 	}
 }
 
+java {
+	sourceCompatibility = JavaVersion.toVersion(mcLibs.versions.java.get())
+	targetCompatibility = JavaVersion.toVersion(mcLibs.versions.java.get())
+}
+
 tasks.compileJava {
 	dependsOn(jcyo)
 }
