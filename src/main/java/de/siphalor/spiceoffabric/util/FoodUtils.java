@@ -60,7 +60,11 @@ public class FoodUtils {
 		}
 		//# if MC_VERSION_NUMBER >= 12006
 		if (item.components().has(DataComponents.FOOD)) {
-			return true;
+			//# if MC_VERSION_NUMBER >= 12102
+			return item.components().has(DataComponents.CONSUMABLE);
+			//# else
+			//- return true;
+			//# end
 		}
 		//# else
 		//- if (item.isEdible()) {

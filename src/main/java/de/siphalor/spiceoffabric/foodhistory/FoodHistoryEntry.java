@@ -41,7 +41,7 @@ public class FoodHistoryEntry {
 				//# end
 				.flatMap(BuiltInRegistries.ITEM::getOptional);
 	//# else
-	//- public static FoodHistoryEntry read(CompoundTag compoundTag) {
+	//- public static Optional<FoodHistoryEntry> read(CompoundTag compoundTag) {
 	//- 	Optional<Item> item = BuiltInRegistries.ITEM.getOptional(
 	//- 			ResourceLocation.tryParse(compoundTag.getString("item"))
 	//- 	);

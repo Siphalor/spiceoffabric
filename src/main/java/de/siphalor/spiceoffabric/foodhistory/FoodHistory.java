@@ -151,8 +151,9 @@ public class FoodHistory {
 		//- if (compoundTag.contains(DICTIONARY_NBT_KEY, 9)) {
 		//- 	ListTag nbtDictionary = compoundTag.getList(DICTIONARY_NBT_KEY, 10);
 		//- 	for (int i = 0; i < nbtDictionary.size(); i++) {
+		//- 		int finalI = i;
 		//- 		FoodHistoryEntry.read((CompoundTag) nbtDictionary.get(i)).ifPresent(entry ->
-		//- 			foodHistory.dictionary.put(i, entry)
+		//- 			foodHistory.dictionary.put(finalI, entry)
 		//- 		);
 		//- 	}
 		//- }
@@ -185,10 +186,7 @@ public class FoodHistory {
 		//- 		if (!(tag instanceof CompoundTag carrotEntry)) {
 		//- 			continue;
 		//- 		}
-		//- 		FoodHistoryEntry entry = FoodHistoryEntry.read(carrotEntry);
-		//- 		if (entry != null) {
-		//- 			foodHistory.uniqueFoodsEaten.add(entry);
-		//- 		}
+		//- 		FoodHistoryEntry.read(carrotEntry).ifPresent(foodHistory.uniqueFoodsEaten::add);
 		//- 	}
 		//- }
 		//# end
