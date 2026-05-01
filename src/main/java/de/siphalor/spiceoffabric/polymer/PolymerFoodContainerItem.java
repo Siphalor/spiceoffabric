@@ -23,9 +23,7 @@ import net.minecraft.world.item.ItemStack;
 public class PolymerFoodContainerItem extends FoodContainerItem implements PolymerItem {
 	private final Item emptyPolymerItem;
 	private final Item filledPolymerItem;
-	//# if MC_VERSION_NUMBER >= 12111
-	//# elif MC_VERSION_NUMBER >= 12106
-	//- private final ResourceLocation polymerModel;
+	//# if MC_VERSION_NUMBER >= 12106
 	//# elif MC_VERSION_NUMBER >= 12104
 	//- private final ResourceLocation polymerModel;
 	//- private final CustomModelData emptyCmd;
@@ -44,9 +42,7 @@ public class PolymerFoodContainerItem extends FoodContainerItem implements Polym
 			MenuType<?> screenHandlerType,
 			Item emptyPolymerItem,
 			Item filledPolymerItem
-			//# if MC_VERSION_NUMBER >= 12111
-			//# elif MC_VERSION_NUMBER >= 12106
-			//- , ResourceLocation polymerModel
+			//# if MC_VERSION_NUMBER >= 12106
 			//# elif MC_VERSION_NUMBER >= 12104
 			//- , ResourceLocation polymerModel
 			//- , CustomModelData emptyCmd
