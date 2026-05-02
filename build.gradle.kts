@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import de.siphalor.jcyo.gradle.JcyoTask
 import de.siphalor.minecraft_modding_toolkit.gradle.project_plugin.filter.JsonMergeFilterReader
 import net.fabricmc.loom.task.RemapJarTask
@@ -7,7 +8,7 @@ plugins {
 	`maven-publish`
 	alias(mcLibs.plugins.smcmtk)
 	alias(mcLibs.plugins.fabric.loom)
-	alias(libs.plugins.shadow)
+	alias(libs.plugins.shadow) apply(false)
 	alias(libs.plugins.jcyo)
 	alias(libs.plugins.modPublisher)
 }
@@ -76,6 +77,10 @@ sourceSets {
 
 fun resolveDataDir(version: Int, base: String): String {
 	return base + "/" + file(base).list()?.map { it.toInt() }?.filter { it <= version }?.max()
+}
+
+val shadow = configurations.register("shadow") {
+	isTransitive = false
 }
 
 dependencies {
@@ -159,20 +164,27 @@ tasks.compileJava {
 }
 
 tasks.jar {
-	from("LICENSE")
 	archiveClassifier.set("dev")
-}
-
-tasks.shadowJar {
-	configurations = listOf(project.configurations.shadow.get())
-	archiveClassifier.set("dev")
-	relocate("net.objecthunter", "de.siphalor.spiceoffabric.shadow.net.objecthunter")
 }
 
 tasks.findByName("remapJar")?.apply {
 	this as RemapJarTask
-	dependsOn(tasks.shadowJar)
-	inputFile = tasks.shadowJar.get().archiveFile
+	archiveClassifier = "remapped"
+}
+
+val shadowJar = tasks.register<ShadowJar>("shadowJar") {
+	group = BasePlugin.BUILD_GROUP
+	description = "Assembles a jar archive containing the classes and included dependencies of this project."
+
+	val inputTask = tasks.findByName("remapJar") as RemapJarTask? ?: tasks.jar.get()
+	inputs.file(inputTask.archiveFile)
+	dependsOn(inputTask)
+	from(inputTask.archiveFile.map { zipTree(it) })
+
+	from("LICENSE")
+
+	configurations = listOf(shadow.get())
+	relocate("net.objecthunter", "de.siphalor.spiceoffabric.shadow.net.objecthunter")
 }
 
 tasks.test {
@@ -213,7 +225,7 @@ publisher {
 	curseID = "318416"
 	modrinthID = "roxihOCb"
 
-	artifact.set(tasks.findByName("remapJar") ?: tasks.jar)
+	artifact.set(shadowJar)
 
 	projectVersion = project.version as String
 	versionType = project.property("version.type") as String
