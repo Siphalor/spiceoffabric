@@ -375,7 +375,7 @@ public class SpiceOfFabric implements ModInitializer {
 				List.of(),
 				true
 		));
-		stack.set(DataComponents.ITEM_NAME, Component.literal("Diet Journal").withStyle(ChatFormatting.BOLD));
+		stack.set(DataComponents.ITEM_NAME, Component.translatable("Diet Journal").withStyle(ChatFormatting.BOLD));
 		stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag ->
 				tag.putBoolean(FOOD_JOURNAL_FLAG, true)
 		));

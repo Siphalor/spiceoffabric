@@ -14,7 +14,10 @@
 				},
 				"author": "Me"
 			},
-			"minecraft:item_name": "{\"bold\":true,\"translate\":\"Diet Journal\"}",
+			"minecraft:item_name": {
+				"bold": true,
+				"translate": "Diet Journal"
+			},
 			"minecraft:custom_data": {
 				"spiceoffabric:food_journal": true
 			}
