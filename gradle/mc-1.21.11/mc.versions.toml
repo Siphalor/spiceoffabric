@@ -2,7 +2,7 @@
 appleskin = "mc1.21.11-3.0.8"
 capsaicin = "1.4.2"
 clothConfig = "21.11.152"
-coat = "1.1.1"
+coat = "1.1.2"
 fabric-api = "0.141.3+1.21.11"
 java = "21"
 minecraft = "1.21.11"
@@ -10,7 +10,7 @@ modmenu = "17.0.0"
 parchment = "2025.12.20"
 polymer = "0.15.2+1.21.11"
 rei = "21.11.814"
-tweed = "0.8.1"
+tweed = "0.9.0"
 
 [libraries]
 appleskin = { group = "squeek.appleskin", name = "appleskin-fabric", version.ref = "appleskin" }

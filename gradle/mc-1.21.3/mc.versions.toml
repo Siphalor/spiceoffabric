@@ -10,7 +10,7 @@ modmenu = "12.0.1"
 parchment = "2024.12.07"
 polymer = "0.10.2+1.21.3"
 rei = "17.0.807"
-tweed = "0.8.1"
+tweed = "0.9.0"
 
 [libraries]
 appleskin = { group = "squeek.appleskin", name = "appleskin-fabric", version.ref = "appleskin" }
