@@ -90,11 +90,24 @@ public abstract class MixinServerPlayerEntity extends Player implements IServerP
 		setHealth(getMaxHealth());
 	}
 
+	//# if MC_VERSION_NUMBER >= 12102
+	@Inject(method = "restoreFrom", at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/ai/attributes/AttributeMap;assignPermanentModifiers(Lnet/minecraft/world/entity/ai/attributes/AttributeMap;)V"
+	))
+	public void onPlayerExactCopiedBeforePermanentModifiers(ServerPlayer reference, boolean exact, CallbackInfo ci) {
+		// Vanilla throws an exception if a permanent modifier is already present when calling restoreFrom.
+		// We need to set that modifier in the constructor though, because it has to apply to new players as well.
+		SpiceOfFabric.removeMaxHealthModifierNoSync((ServerPlayer) (Object) this);
+	}
+	//# end
+
 	@Inject(method = "restoreFrom", at = @At("RETURN"))
-	public void onPlayerCopied(ServerPlayer reference, boolean exact, CallbackInfo callbackInfo) {
+	public void onPlayerCopied(ServerPlayer reference, boolean exact, CallbackInfo ci) {
+		ServerPlayer self = (ServerPlayer) (Object) this;
 		if (exact) { // Teleporting back from the end
-			((IHungerManager) foodData).spiceOfFabric_setPlayer((ServerPlayer) (Object) this);
-			SpiceOfFabric.updateMaxHealth((ServerPlayer) (Object) this, false, false);
+			((IHungerManager) foodData).spiceOfFabric_setPlayer(self);
+			SpiceOfFabric.updateMaxHealth(self, false, false);
 			setHealth(reference.getHealth());
 		} else { // Respawning
 			SOFConfig.Respawn respawnConfig = SpiceOfFabric.config.respawn;
@@ -119,8 +132,8 @@ public abstract class MixinServerPlayerEntity extends Player implements IServerP
 
 			((IHungerManager) foodData).spiceOfFabric_setFoodHistory(foodHistory);
 
-			SOFCommonNetworking.syncFoodHistory((ServerPlayer) (Object) this);
-			SpiceOfFabric.updateMaxHealth((ServerPlayer) (Object) this, false, false);
+			SOFCommonNetworking.syncFoodHistory(self);
+			SpiceOfFabric.updateMaxHealth(self, false, false);
 			setHealth(getMaxHealth());
 		}
 	}

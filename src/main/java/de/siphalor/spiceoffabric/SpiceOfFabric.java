@@ -346,6 +346,17 @@ public class SpiceOfFabric implements ModInitializer {
 		}
 	}
 
+	public static void removeMaxHealthModifierNoSync(ServerPlayer player) {
+		AttributeInstance maxHealthAttr = player.getAttribute(Attributes.MAX_HEALTH);
+		if (maxHealthAttr != null) {
+			//# if MC_VERSION_NUMBER >= 12100
+			maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_ID);
+			//# else
+			//- maxHealthAttr.removeModifier(PLAYER_HEALTH_MODIFIER_UUID);
+			//# end
+		}
+	}
+
 	public static boolean isFoodJournal(ItemStack stack) {
 		if (stack == null) {
 			return false;
