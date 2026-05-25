@@ -130,7 +130,7 @@ public class ItemStackInventory implements Container {
 		//# else
 		//- if (customData != null && customData.contains(nbtKey)) {
 		//# end
-			customData.update(tag -> tag.remove(nbtKey));
+			containerStack.set(DataComponents.CUSTOM_DATA, customData.update(tag -> tag.remove(nbtKey)));
 		}
 		containerStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(stacks));
 		//# else
