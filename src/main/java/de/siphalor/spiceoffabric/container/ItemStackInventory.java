@@ -1,6 +1,6 @@
 package de.siphalor.spiceoffabric.container;
 
-//- import de.siphalor.spiceoffabric.item.FoodContainerItem;
+import de.siphalor.spiceoffabric.item.FoodContainerItem;
 import de.siphalor.spiceoffabric.mixin.CustomDataAccessor;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -109,7 +109,7 @@ public class ItemStackInventory implements Container {
 	@Override
 	public boolean canPlaceItem(int slot, ItemStack stack) {
 		//# if MC_VERSION_NUMBER >= 12006
-		return stack.has(DataComponents.FOOD);
+		return stack.has(DataComponents.FOOD) && !(stack.getItem() instanceof FoodContainerItem);
 		//# else
 		//- return stack.isEdible() && !(stack.getItem() instanceof FoodContainerItem);
 		//# end
