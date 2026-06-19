@@ -42,6 +42,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUtils;
 //- import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
@@ -278,11 +279,10 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 				//# end
 			}
 		} else {
-			//# if MC_VERSION_NUMBER >= 12005
-			FoodProperties foodComponent = nextFoodItem.get(DataComponents.FOOD);
-			//# else
-			//- FoodProperties foodComponent = nextFoodItem.getItem().getFoodProperties();
-			//# end
+			FoodProperties foodComponent = DynamicFoodPropertiesAccess.create()
+					.withUser(user)
+					.withStack(nextFoodItem)
+					.getModifiedFoodComponent();
 			if (foodComponent != null) {
 				if (user.canEat(foodComponent.canAlwaysEat())) {
 					user.startUsingItem(hand);
@@ -304,6 +304,20 @@ public class FoodContainerItem extends Item implements CamoFoodItem {
 		//# else
 		//- return InteractionResultHolder.pass(stackInHand);
 		//# end
+	}
+
+	@Override
+	public int getUseDuration(ItemStack itemStack, LivingEntity user) {
+		if (user instanceof Player) {
+			Consumable consumable = DynamicFoodPropertiesAccess.create()
+					.withUser(user)
+					.withStack(getNextFoodStack(itemStack, (Player) user))
+					.getModifiedConsumableComponent();
+			if (consumable != null) {
+				return consumable.consumeTicks();
+			}
+		}
+		return (int) (Consumable.DEFAULT_CONSUME_SECONDS * 20);
 	}
 
 	@Override
