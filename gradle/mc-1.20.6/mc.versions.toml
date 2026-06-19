@@ -1,6 +1,6 @@
 [versions]
 appleskin = "mc1.20.5-3.0.5"
-capsaicin = "1.4.2"
+capsaicin = "1.4.3"
 clothConfig = "14.0.139"
 coat = "1.1.1"
 fabric-api = "0.100.8+1.20.6"
